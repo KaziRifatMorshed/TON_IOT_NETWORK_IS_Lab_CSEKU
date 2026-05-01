@@ -15,6 +15,7 @@ Supported attack context includes DoS, DDoS, Backdoor, Injection, Scanning, MITM
 .
 |-- README.md
 |-- requirements.txt
+|-- requirements-notebooks.txt
 |-- config.py
 |-- setup_windows_cmd.bat
 |-- setup_windows_powershell.ps1
@@ -81,6 +82,13 @@ You can also skip activation entirely and use the venv Python directly:
 ```cmd
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m src.train_ml --task binary
+```
+
+Optional notebook support:
+
+```cmd
+.venv\Scripts\python.exe -m pip install -r requirements-notebooks.txt
+.venv\Scripts\python.exe -m ipykernel install --user --name ton-iot-ids --display-name "TON IoT IDS"
 ```
 
 ## Setup on Windows PowerShell
@@ -250,6 +258,16 @@ Make sure your virtual environment is activated and reinstall dependencies:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Windows long path error while installing Jupyter
+
+If setup fails inside `jupyterlab_widgets` or a path under `.venv\share\jupyter\labextensions`, skip notebook dependencies and use the command-line scripts. The default `requirements.txt` no longer installs Jupyter packages.
+
+For notebooks, either enable Windows Long Path support or move the project to a shorter path such as:
+
+```text
+C:\ton-iot
 ```
 
 NumPy / pandas / sklearn binary import errors

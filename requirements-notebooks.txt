@@ -1,0 +1,7 @@
+# Optional notebook dependencies.
+# Install this only if you want to run the notebooks locally.
+# On Windows, very deep project paths may require Long Path support for JupyterLab.
+
+notebook>=7.0
+ipykernel>=6.25
+nbformat>=5.9
