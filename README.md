@@ -16,6 +16,7 @@ Supported attack context includes DoS, DDoS, Backdoor, Injection, Scanning, MITM
 |-- README.md
 |-- requirements.txt
 |-- requirements-notebooks.txt
+|-- requirements-kaggle.txt
 |-- config.py
 |-- setup_windows_cmd.bat
 |-- setup_windows_powershell.ps1
@@ -53,7 +54,7 @@ data/dataset_cleaned.csv
 Optional Kaggle CLI download:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install kaggle
+.\.venv\Scripts\python.exe -m pip install -r requirements-kaggle.txt
 kaggle datasets download -d profulina/ton-iot -p data --unzip
 ```
 
