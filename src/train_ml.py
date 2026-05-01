@@ -36,7 +36,6 @@ def build_models(task: str, selected_models: list[str]) -> dict[str, Any]:
         models["logistic"] = LogisticRegression(
             max_iter=1000,
             class_weight="balanced",
-            n_jobs=-1,
             random_state=RANDOM_STATE,
         )
 

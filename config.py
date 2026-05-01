@@ -6,6 +6,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data"
 DATA_FILE = DATA_DIR / "dataset_cleaned.csv"
 
+LOCAL_CLASS_FILES = {
+    "ddos": PROJECT_ROOT / "DDOS.csv",
+    "dos": PROJECT_ROOT / "DOS.csv",
+    "normal": PROJECT_ROOT / "Normal.csv",
+}
+
 MODELS_DIR = PROJECT_ROOT / "models"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 FIGURES_DIR = OUTPUTS_DIR / "figures"

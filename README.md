@@ -45,11 +45,21 @@ Download the Kaggle dataset from:
 
 https://www.kaggle.com/datasets/profulina/ton-iot/versions/5?select=dataset_cleaned.csv
 
-Place the file here:
+Recommended Kaggle file layout:
 
 ```text
 data/dataset_cleaned.csv
 ```
+
+This project also supports your local split CSV layout. Place these files in the project root:
+
+```text
+DDOS.csv
+DOS.csv
+Normal.csv
+```
+
+If `data/dataset_cleaned.csv` is missing, the loader automatically combines those three files and uses their existing `label` and `type` columns.
 
 Optional Kaggle CLI download:
 

@@ -10,7 +10,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.preprocessing import FunctionTransformer, LabelEncoder, OneHotEncoder, StandardScaler
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -26,6 +26,11 @@ from config import (
     TEST_SIZE,
 )
 from src.data_loader import validate_target_columns
+
+
+def cast_values_to_string(values: Any) -> Any:
+    """Convert categorical matrix values to strings for stable encoding."""
+    return values.astype(str)
 
 
 def infer_columns_to_drop(
@@ -83,6 +88,13 @@ def build_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
     categorical_pipeline = Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="most_frequent")),
+            (
+                "to_string",
+                FunctionTransformer(
+                    cast_values_to_string,
+                    feature_names_out="one-to-one",
+                ),
+            ),
             (
                 "encoder",
                 OneHotEncoder(handle_unknown="ignore", sparse_output=False),
