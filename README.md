@@ -159,6 +159,41 @@ Train SVM on a smaller sample:
 .venv\Scripts\python.exe -m src.train_ml --task binary --models svm --sample-size 20000
 ```
 
+## Run the PDF Random Forest Workflow
+
+The workflow from `Network Classification Workflow.pdf` is implemented as a dedicated
+three-class Random Forest script for `normal`, `dos`, and `ddos` traffic. It removes
+duplicates, converts IP addresses to numeric high/low parts, label-encodes categorical
+columns, removes constant columns, performs an 80/20 stratified split, evaluates with
+precision/recall/F1/support, writes feature importance, and saves the trained model.
+
+Run the full dataset:
+
+```cmd
+.venv\Scripts\python.exe -m src.random_forest_workflow
+```
+
+Run with GridSearchCV hyperparameter tuning:
+
+```cmd
+.venv\Scripts\python.exe -m src.random_forest_workflow --tune
+```
+
+Smoke-test quickly on a smaller sample:
+
+```cmd
+.venv\Scripts\python.exe -m src.random_forest_workflow --sample-size 3000 --n-estimators 20 --n-jobs 1
+```
+
+Workflow outputs:
+
+- `models/rf_network_classifier.joblib`
+- `outputs/reports/rf_workflow_classification_report.txt`
+- `outputs/reports/rf_workflow_summary.json`
+- `outputs/reports/rf_workflow_feature_importance.csv`
+- `outputs/figures/rf_workflow_confusion_matrix.png`
+- `outputs/figures/rf_workflow_feature_importance.png`
+
 ## Train Deep Learning Model
 
 Binary MLP:
