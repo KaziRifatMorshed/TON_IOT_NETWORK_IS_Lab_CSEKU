@@ -1,38 +1,38 @@
-# TON_IoT Network Intrusion Detection
+# TON IoT Network Intrusion Detection
 
-This project is a complete Python ML/DL pipeline for intrusion detection on the TON_IoT Network dataset using `dataset_cleaned.csv`.
+Random Forest based intrusion detection workflow for the TON_IoT network dataset.
 
-TON_IoT is an IoT/IIoT cybersecurity dataset designed for AI-based intrusion detection systems. This project focuses on network traffic classification with two supervised tasks:
+The final workflow classifies network traffic into:
 
-- Binary classification using `label`: normal vs attack
-- Multi-class classification using `type`: attack category
+- `normal`
+- `dos`
+- `ddos`
 
-Supported attack context includes DoS, DDoS, Backdoor, Injection, Scanning, MITM, Ransomware, XSS, and Password attacks.
+It loads `data/dataset.csv`, preprocesses network features, trains a Random Forest classifier, evaluates the model, and writes reports, plots, and the trained model artifact.
 
-## Folder Structure
+## Project Structure
 
 ```text
 .
 |-- README.md
 |-- requirements.txt
-|-- requirements-notebooks.txt
-|-- requirements-kaggle.txt
-|-- config.py
 |-- setup_windows_cmd.bat
-|-- setup_windows_powershell.ps1
+|-- config.py
 |-- data/
-|   `-- dataset_cleaned.csv
+|   |-- .gitkeep
+|   `-- dataset.csv              # local dataset
+|-- Dataset Details/
+|   `-- Ton_IoT Network Dataset.pdf
 |-- src/
-|   |-- __init__.py
 |   |-- data_loader.py
 |   |-- preprocessing.py
-|   |-- train_ml.py
-|   |-- train_dl.py
+|   |-- random_forest_workflow.py # final workflow
+|   |-- train_ml.py              # auxiliary model experiments
+|   |-- train_dl.py              # auxiliary MLP experiments
 |   |-- evaluate.py
 |   `-- utils.py
-|-- notebooks/
-|   |-- 01_exploration.ipynb
-|   `-- 02_training.ipynb
+|-- tests/
+|   `-- test_random_forest_workflow.py
 |-- models/
 `-- outputs/
     |-- figures/
@@ -41,44 +41,29 @@ Supported attack context includes DoS, DDoS, Backdoor, Injection, Scanning, MITM
 
 ## Dataset
 
-Download the Kaggle dataset from:
-
-https://www.kaggle.com/datasets/profulina/ton-iot/versions/5?select=dataset_cleaned.csv
-
-Recommended Kaggle file layout:
+Expected dataset path:
 
 ```text
-data/dataset_cleaned.csv
+data/dataset.csv
 ```
 
-This project also supports your local split CSV layout. Place these files in the project root:
+The CSV must contain the TON_IoT network records and a `type` column with the three classes used by this workflow: `normal`, `dos`, and `ddos`.
 
-```text
-DDOS.csv
-DOS.csv
-Normal.csv
-```
+If `data/dataset.csv` is missing, `src/data_loader.py` can also combine local root-level class files named:
 
-If `data/dataset_cleaned.csv` is missing, the loader automatically combines those three files and uses their existing `label` and `type` columns.
+- `DDOS.csv`
+- `DOS.csv`
+- `Normal.csv`
 
-Optional Kaggle CLI download:
+## Setup
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements-kaggle.txt
-kaggle datasets download -d profulina/ton-iot -p data --unzip
-```
-
-If Kaggle downloads more than one file, make sure `dataset_cleaned.csv` is directly inside the `data/` folder.
-
-## Setup on Windows CMD
-
-Recommended one-command setup:
+Windows CMD:
 
 ```cmd
 setup_windows_cmd.bat
 ```
 
-Manual CMD setup:
+Manual setup:
 
 ```cmd
 python -m venv .venv
@@ -88,277 +73,157 @@ python -m pip install --upgrade "pip<26"
 python -m pip install -r requirements.txt
 ```
 
-You can also skip activation entirely and use the venv Python directly:
-
-```cmd
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-.venv\Scripts\python.exe -m src.train_ml --task binary
-```
-
-Optional notebook support:
-
-```cmd
-.venv\Scripts\python.exe -m pip install -r requirements-notebooks.txt
-.venv\Scripts\python.exe -m ipykernel install --user --name ton-iot-ids --display-name "TON IoT IDS"
-```
-
-## Setup on Windows PowerShell
-
-Recommended one-command setup:
-
-```powershell
-.\setup_windows_powershell.ps1
-```
-
-Manual PowerShell setup:
+PowerShell users can run the same environment Python directly:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m ensurepip --upgrade
-python -m pip install --upgrade "pip<26"
-python -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m ensurepip --upgrade
+.\.venv\Scripts\python.exe -m pip install --upgrade "pip<26"
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-If PowerShell blocks activation, run:
+## Run Final Random Forest Workflow
 
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-.\.venv\Scripts\Activate.ps1
-```
-
-## Train Classical ML Models
-
-Binary classification:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_ml --task binary
-```
-
-Multi-class classification:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_ml --task multiclass
-```
-
-Train selected models only:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_ml --task binary --models logistic,random_forest,xgboost
-```
-
-Try SMOTE for class imbalance:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_ml --task multiclass --use-smote
-```
-
-Train SVM on a smaller sample:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_ml --task binary --models svm --sample-size 20000
-```
-
-## Run the PDF Random Forest Workflow
-
-The workflow from `Network Classification Workflow.pdf` is implemented as a dedicated
-three-class Random Forest script for `normal`, `dos`, and `ddos` traffic. It removes
-duplicates, converts IP addresses to numeric high/low parts, label-encodes categorical
-columns, removes constant columns, performs an 80/20 stratified split, evaluates with
-precision/recall/F1/support, writes feature importance, and saves the trained model.
-
-Run the full dataset:
+Full run:
 
 ```cmd
 .venv\Scripts\python.exe -m src.random_forest_workflow
 ```
 
-Run with GridSearchCV hyperparameter tuning:
-
-```cmd
-.venv\Scripts\python.exe -m src.random_forest_workflow --tune
-```
-
-Smoke-test quickly on a smaller sample:
+Fast smoke test:
 
 ```cmd
 .venv\Scripts\python.exe -m src.random_forest_workflow --sample-size 3000 --n-estimators 20 --n-jobs 1
 ```
 
-Workflow outputs:
+## Workflow Process
 
-- `models/rf_network_classifier.joblib`
-- `outputs/reports/rf_workflow_classification_report.txt`
-- `outputs/reports/rf_workflow_summary.json`
-- `outputs/reports/rf_workflow_feature_importance.csv`
-- `outputs/figures/rf_workflow_confusion_matrix.png`
-- `outputs/figures/rf_workflow_feature_importance.png`
+`src.random_forest_workflow` performs:
 
-## Train Deep Learning Model
+1. Load TON_IoT network data.
+2. Save binary and multiclass distribution plots when target columns exist.
+3. Remove duplicate rows.
+4. Normalize target labels to `normal`, `dos`, and `ddos`.
+5. Drop leakage columns such as `label`.
+6. Convert IP address columns into numeric high/low parts.
+7. Label-encode categorical columns.
+8. Replace missing and infinite values.
+9. Drop constant columns.
+10. Use stratified 80/20 train-test split.
+11. Train Random Forest with the default project parameters.
+12. Evaluate on the held-out test set.
+13. Save model, metrics, plots, feature importance, and run configuration.
 
-Binary MLP:
+## Outputs
+
+Generated files are ignored by git.
+
+Model:
+
+```text
+models/rf_network_classifier.joblib
+```
+
+Reports:
+
+```text
+outputs/reports/rf_workflow_classification_report.txt
+outputs/reports/rf_workflow_summary.json
+outputs/reports/rf_workflow_run_config.json
+outputs/reports/rf_workflow_feature_importance.csv
+```
+
+Figures:
+
+```text
+outputs/figures/rf_workflow_binary_class_distribution.png
+outputs/figures/rf_workflow_multiclass_distribution.png
+outputs/figures/rf_workflow_confusion_matrix.png
+outputs/figures/rf_workflow_feature_importance.png
+outputs/figures/rf_workflow_roc_curves.png
+```
+
+## Metrics
+
+The final report includes:
+
+- accuracy
+- precision macro and weighted
+- recall macro and weighted
+- F1 macro and weighted
+- ROC-AUC one-vs-rest macro and weighted
+- Matthews correlation coefficient
+- per-class precision, recall, F1-score, and support
+
+Use macro F1, recall, ROC-AUC, and MCC alongside accuracy because intrusion datasets can be class-imbalanced.
+
+## Tests
+
+Run unit tests:
 
 ```cmd
+.venv\Scripts\python.exe -m unittest discover -s tests
+```
+
+The tests cover:
+
+- default dataset path
+- removal of the tuning CLI
+- default Random Forest parameters
+- metric generation
+- preprocessing leakage removal
+- distribution counts
+- ROC curve output
+- run configuration structure
+
+## Auxiliary Scripts
+
+These scripts remain available for experiments, but they are not the final workflow:
+
+```cmd
+.venv\Scripts\python.exe -m src.train_ml --task binary
+.venv\Scripts\python.exe -m src.train_ml --task multiclass
 .venv\Scripts\python.exe -m src.train_dl --task binary --epochs 20 --batch-size 512
-```
-
-Multi-class MLP:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_dl --task multiclass --epochs 30 --batch-size 512
-```
-
-Use a custom hidden layer layout:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_dl --task multiclass --hidden-layers 256,128,64
-```
-
-## Evaluate a Saved Model
-
-Classical ML model:
-
-```cmd
 .venv\Scripts\python.exe -m src.evaluate --task binary --model-path models\binary_random_forest.joblib
 ```
-
-Deep learning model:
-
-```cmd
-.venv\Scripts\python.exe -m src.evaluate --task multiclass --model-path models\multiclass_mlp.pt
-```
-
-## Expected Outputs
-
-Training and evaluation create:
-
-- Trained models in `models/`
-- Metrics JSON files in `outputs/reports/`
-- Classification reports in `outputs/reports/`
-- Class distribution plots in `outputs/figures/`
-- Correlation heatmaps in `outputs/figures/`
-- Confusion matrices in `outputs/figures/`
-- Model comparison charts in `outputs/figures/`
-- Feature importance charts for Random Forest and XGBoost when available
-
-## Preprocessing
-
-The pipeline:
-
-- Checks that `dataset_cleaned.csv` exists
-- Strips whitespace from column names
-- Handles missing numeric values with median imputation
-- Handles missing categorical values with most-frequent imputation
-- Drops target-leaking columns not used by the active task
-- Drops common high-cardinality identifier columns such as IPs, UIDs, timestamps, URLs, DNS queries, and host fields
-- Drops very high-cardinality categorical columns by unique-value ratio
-- Encodes categorical features with `OneHotEncoder`
-- Scales numeric features with `StandardScaler`
-- Uses stratified train-test split with `random_state=42`
-
-## Models
-
-Classical ML:
-
-- Logistic Regression
-- Random Forest
-- XGBoost if installed
-- Linear SVM when requested
-
-Deep Learning:
-
-- PyTorch MLP for tabular feature vectors
-
-Class imbalance is handled with balanced class weights for compatible ML models and weighted cross-entropy loss for PyTorch.
-
-## Evaluation Metrics
-
-The project reports:
-
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Macro F1
-- Weighted F1
-- Matthews Correlation Coefficient
-- Confusion Matrix
-- Classification Report
-- ROC-AUC for binary classification when probabilities or decision scores are available
-
-Accuracy alone can be misleading on intrusion detection datasets, so use macro F1, weighted F1, recall, and MCC when comparing models.
 
 ## Troubleshooting
 
 `FileNotFoundError: Dataset not found`
 
-Place the CSV at:
+Place the dataset at:
 
 ```text
-data/dataset_cleaned.csv
+data/dataset.csv
 ```
 
 `ModuleNotFoundError`
 
-Make sure your virtual environment is activated and reinstall dependencies:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-Windows long path error while installing Jupyter
-
-If setup fails inside `jupyterlab_widgets` or a path under `.venv\share\jupyter\labextensions`, skip notebook dependencies and use the command-line scripts. The default `requirements.txt` no longer installs Jupyter packages.
-
-For notebooks, either enable Windows Long Path support or move the project to a shorter path such as:
-
-```text
-C:\ton-iot
-```
-
-NumPy / pandas / sklearn binary import errors
-
-If you see messages about a package compiled against NumPy 1.x while NumPy 2.x is installed, recreate the virtual environment and reinstall this project's pinned requirements:
-
-```powershell
-deactivate
-Remove-Item -Recurse -Force .venv
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade "pip<26"
-python -m pip install -r requirements.txt
-```
-
-If you are using CMD, do not run `Activate.ps1`. Use:
-
-```cmd
-.venv\Scripts\activate.bat
-python -m pip install -r requirements.txt
-```
-
-If `pip install ...` says `Fatal error in launcher`, run pip through Python:
+Reinstall dependencies inside the virtual environment:
 
 ```cmd
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-`xgboost is not installed`
+`Fatal error in launcher`
 
-The training script skips XGBoost automatically if the package is unavailable. Install it with:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install xgboost
-```
-
-Out-of-memory errors
-
-Use a smaller sample while testing:
+Run pip through Python:
 
 ```cmd
-.venv\Scripts\python.exe -m src.train_ml --task binary --sample-size 50000
-.venv\Scripts\python.exe -m src.train_dl --task binary --sample-size 50000
+.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Slow SVM training
+NumPy, pandas, or sklearn binary import errors:
 
-SVM can be slow on large tabular datasets. Use `--sample-size` or prefer Logistic Regression, Random Forest, and XGBoost.
+```cmd
+rmdir /s /q .venv
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade "pip<26"
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Out-of-memory or slow training:
+
+```cmd
+.venv\Scripts\python.exe -m src.random_forest_workflow --sample-size 50000 --n-jobs 1
+```

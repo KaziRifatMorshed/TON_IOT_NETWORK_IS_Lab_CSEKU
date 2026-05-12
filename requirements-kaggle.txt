@@ -1,3 +1,0 @@
-# Optional Kaggle CLI dependency for downloading the dataset.
-
-kaggle>=1.6

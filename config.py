@@ -4,7 +4,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 DATA_DIR = PROJECT_ROOT / "data"
-DATA_FILE = DATA_DIR / "dataset_cleaned.csv"
+DATA_FILE = DATA_DIR / "dataset.csv"
 
 LOCAL_CLASS_FILES = {
     "ddos": PROJECT_ROOT / "DDOS.csv",

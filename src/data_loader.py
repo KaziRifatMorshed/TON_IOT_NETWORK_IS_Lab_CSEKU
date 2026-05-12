@@ -15,7 +15,7 @@ from config import BINARY_TARGET, DATA_FILE, LOCAL_CLASS_FILES, MULTICLASS_TARGE
 def load_dataset(csv_path: Path = DATA_FILE) -> pd.DataFrame:
     """Load the TON_IoT dataset.
 
-    Preferred input is data/dataset_cleaned.csv. If that file is missing,
+    Preferred input is data/dataset.csv. If that file is missing,
     the loader falls back to the local class CSVs: DDOS.csv, DOS.csv,
     and Normal.csv.
     """
@@ -36,7 +36,7 @@ def load_dataset(csv_path: Path = DATA_FILE) -> pd.DataFrame:
     expected_files = "\n".join(str(path) for path in LOCAL_CLASS_FILES.values())
     raise FileNotFoundError(
         f"Dataset not found at {csv_path}.\n\n"
-        "Place dataset_cleaned.csv in the data folder, or place these local "
+        "Place dataset.csv in the data folder, or place these local "
         f"class CSVs in the project root:\n{expected_files}"
     )
 

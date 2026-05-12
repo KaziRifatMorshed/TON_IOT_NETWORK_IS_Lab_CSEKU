@@ -13,9 +13,20 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV, train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import (
+    accuracy_score,
+    auc,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    matthews_corrcoef,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+    roc_curve,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, label_binarize
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -28,6 +39,7 @@ from src.utils import ensure_project_dirs, print_section
 CLASS_ORDER = ["normal", "dos", "ddos"]
 TARGET_COLUMN = "type"
 LEAKAGE_COLUMNS = ["label"]
+BINARY_TARGET_COLUMN = "label"
 IP_COLUMN_NAMES = {
     "src_ip",
     "dst_ip",
@@ -40,17 +52,13 @@ IP_COLUMN_NAMES = {
 }
 
 
-def parse_grid_values(value: str, caster: Any = str) -> list[Any]:
-    values: list[Any] = []
-    for item in value.split(","):
-        item = item.strip()
-        if not item:
-            continue
-        if item.lower() == "none":
-            values.append(None)
-        else:
-            values.append(caster(item))
-    return values
+def parse_bool(value: str) -> bool:
+    normalized = value.strip().lower()
+    if normalized in {"true", "1", "yes"}:
+        return True
+    if normalized in {"false", "0", "no"}:
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
 
 
 def ip_to_integer_parts(value: Any) -> tuple[float, float]:
@@ -100,6 +108,62 @@ def normalize_target(value: Any) -> str:
     if text == "normal":
         return "normal"
     return text
+
+
+def normalize_binary_label(value: Any) -> str:
+    text = str(value).strip().lower()
+    if text in {"0", "normal", "benign"}:
+        return "normal"
+    if text in {"1", "attack", "malicious"}:
+        return "attack"
+    return text
+
+
+def compute_distribution_counts(df: pd.DataFrame) -> dict[str, dict[str, int]]:
+    distributions: dict[str, dict[str, int]] = {}
+
+    if BINARY_TARGET_COLUMN in df.columns:
+        binary_counts = (
+            df[BINARY_TARGET_COLUMN]
+            .map(normalize_binary_label)
+            .value_counts()
+            .sort_index()
+        )
+        distributions["binary"] = {
+            str(label): int(count) for label, count in binary_counts.items()
+        }
+
+    if TARGET_COLUMN in df.columns:
+        multiclass_counts = (
+            df[TARGET_COLUMN]
+            .map(normalize_target)
+            .value_counts()
+            .sort_index()
+        )
+        distributions["multiclass"] = {
+            str(label): int(count) for label, count in multiclass_counts.items()
+        }
+
+    return distributions
+
+
+def save_distribution_plot(
+    counts: dict[str, int],
+    title: str,
+    output_path: Path,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    labels = list(counts)
+    values = list(counts.values())
+
+    plt.figure(figsize=(8, 5))
+    sns.barplot(x=labels, y=values, hue=labels, palette="viridis", legend=False)
+    plt.title(title)
+    plt.xlabel("Class")
+    plt.ylabel("Count")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=160)
+    plt.close()
 
 
 def preprocess_dataset(
@@ -182,36 +246,64 @@ def build_random_forest(args: argparse.Namespace) -> RandomForestClassifier:
         n_estimators=args.n_estimators,
         criterion=args.criterion,
         min_samples_split=args.min_samples_split,
+        min_samples_leaf=args.min_samples_leaf,
         max_depth=args.max_depth,
-        class_weight="balanced",
+        max_features=args.max_features,
+        bootstrap=args.bootstrap,
+        class_weight=args.class_weight,
         n_jobs=args.n_jobs,
         random_state=args.random_state,
     )
 
 
-def tune_random_forest(
-    base_model: RandomForestClassifier,
-    X_train: pd.DataFrame,
-    y_train: np.ndarray,
-    args: argparse.Namespace,
-) -> GridSearchCV:
-    param_grid = {
-        "n_estimators": parse_grid_values(args.tune_n_estimators, int),
-        "criterion": parse_grid_values(args.tune_criterion, str),
-        "min_samples_split": parse_grid_values(args.tune_min_samples_split, int),
-        "max_depth": parse_grid_values(args.tune_max_depth, int),
+def compute_summary_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    y_score: np.ndarray | None,
+) -> dict[str, float | None]:
+    metrics: dict[str, float | None] = {
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "precision_macro": float(
+            precision_score(y_true, y_pred, average="macro", zero_division=0)
+        ),
+        "precision_weighted": float(
+            precision_score(y_true, y_pred, average="weighted", zero_division=0)
+        ),
+        "recall_macro": float(
+            recall_score(y_true, y_pred, average="macro", zero_division=0)
+        ),
+        "recall_weighted": float(
+            recall_score(y_true, y_pred, average="weighted", zero_division=0)
+        ),
+        "f1_macro": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
+        "f1_weighted": float(
+            f1_score(y_true, y_pred, average="weighted", zero_division=0)
+        ),
+        "mcc": float(matthews_corrcoef(y_true, y_pred)),
+        "roc_auc_ovr_macro": None,
+        "roc_auc_ovr_weighted": None,
     }
 
-    search = GridSearchCV(
-        estimator=base_model,
-        param_grid=param_grid,
-        scoring=args.tune_scoring,
-        cv=args.cv,
-        n_jobs=args.n_jobs,
-        verbose=args.verbose,
-    )
-    search.fit(X_train, y_train)
-    return search
+    if y_score is not None:
+        try:
+            metrics["roc_auc_ovr_macro"] = float(
+                roc_auc_score(y_true, y_score, multi_class="ovr", average="macro")
+            )
+            metrics["roc_auc_ovr_weighted"] = float(
+                roc_auc_score(y_true, y_score, multi_class="ovr", average="weighted")
+            )
+        except ValueError:
+            pass
+
+    return metrics
+
+
+def format_summary_metrics(metrics: dict[str, float | None]) -> str:
+    lines = ["Summary metrics:"]
+    for key, value in metrics.items():
+        formatted = "N/A" if value is None else f"{value:.6f}"
+        lines.append(f"{key}: {formatted}")
+    return "\n".join(lines)
 
 
 def save_confusion_matrix(
@@ -272,11 +364,40 @@ def save_feature_importance(
     plt.close()
 
 
+def save_roc_curves(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    output_path: Path,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    classes = list(range(len(CLASS_ORDER)))
+    y_bin = label_binarize(y_true, classes=classes)
+
+    plt.figure(figsize=(8, 6))
+    for i, class_name in enumerate(CLASS_ORDER):
+        fpr, tpr, _ = roc_curve(y_bin[:, i], y_score[:, i])
+        auc_score = auc(fpr, tpr)
+        plt.plot(fpr, tpr, label=f"{class_name} (AUC = {auc_score:.3f})")
+
+    plt.plot([0, 1], [0, 1], "k--", linewidth=0.8)
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Curves — One-vs-Rest per Class")
+    plt.legend(loc="lower right")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=160)
+    plt.close()
+
+
 def make_json_safe(value: Any) -> Any:
+    if isinstance(value, Path):
+        return str(value)
     if isinstance(value, LabelEncoder):
         return value.classes_.tolist()
     if isinstance(value, np.ndarray):
         return value.tolist()
+    if isinstance(value, np.bool_):
+        return bool(value)
     if isinstance(value, np.integer):
         return int(value)
     if isinstance(value, np.floating):
@@ -304,6 +425,19 @@ def run_workflow(args: argparse.Namespace) -> None:
     df = load_network_dataset(args.dataset, args.sample_size, args.random_state)
     print(f"Rows: {len(df):,}")
     print(f"Columns: {len(df.columns):,}")
+    distributions = compute_distribution_counts(df)
+    if "binary" in distributions:
+        save_distribution_plot(
+            distributions["binary"],
+            "Binary Class Distribution",
+            FIGURES_DIR / "rf_workflow_binary_class_distribution.png",
+        )
+    if "multiclass" in distributions:
+        save_distribution_plot(
+            distributions["multiclass"],
+            "Multiclass Distribution: Normal, DoS, DDoS",
+            FIGURES_DIR / "rf_workflow_multiclass_distribution.png",
+        )
 
     print_section("Step 2: Preprocess Data")
     X, y, metadata = preprocess_dataset(df, args.target)
@@ -326,20 +460,11 @@ def run_workflow(args: argparse.Namespace) -> None:
 
     print_section("Step 4: Train Random Forest")
     model = build_random_forest(args)
-    best_params: dict[str, Any] | None = None
-
-    if args.tune:
-        print_section("Step 6: Tune Hyperparameters")
-        search = tune_random_forest(model, X_train, y_train, args)
-        model = search.best_estimator_
-        best_params = search.best_params_
-        print(f"Best score ({args.tune_scoring}): {search.best_score_:.5f}")
-        print(f"Best parameters: {best_params}")
-    else:
-        model.fit(X_train, y_train)
+    model.fit(X_train, y_train)
 
     print_section("Step 5: Evaluate Model")
     y_pred = model.predict(X_test)
+    y_score = model.predict_proba(X_test) if hasattr(model, "predict_proba") else None
     report_dict = classification_report(
         y_test,
         y_pred,
@@ -355,9 +480,11 @@ def run_workflow(args: argparse.Namespace) -> None:
         target_names=CLASS_ORDER,
         zero_division=0,
     )
+    summary_metrics = compute_summary_metrics(y_test, y_pred, y_score)
+    report_text = f"{report_text}\n\n{format_summary_metrics(summary_metrics)}\n"
     print(report_text)
 
-    print_section("Step 7: Find Important Features")
+    print_section("Step 6: Find Important Features")
     save_feature_importance(
         model,
         metadata["feature_columns"],
@@ -370,23 +497,51 @@ def run_workflow(args: argparse.Namespace) -> None:
         f"{REPORTS_DIR / 'rf_workflow_feature_importance.csv'}"
     )
 
+    if y_score is not None:
+        save_roc_curves(
+            y_test,
+            y_score,
+            FIGURES_DIR / "rf_workflow_roc_curves.png",
+        )
+
     report_path = REPORTS_DIR / "rf_workflow_classification_report.txt"
     report_path.write_text(report_text, encoding="utf-8")
+
+    run_config = {
+        "dataset_path": str(args.dataset),
+        "random_state": args.random_state,
+        "test_size": args.test_size,
+        "sample_size": args.sample_size,
+        "class_names": CLASS_ORDER,
+        "target_mapping": metadata["target_mapping"],
+        "feature_count": X.shape[1],
+        "feature_columns": metadata["feature_columns"],
+        "ip_columns": metadata["ip_columns"],
+        "categorical_columns": metadata["categorical_columns"],
+        "constant_columns_removed": metadata["constant_columns"],
+        "dropped_columns": metadata["dropped_columns"],
+        "original_shape": list(metadata["original_shape"]),
+        "processed_shape": list(metadata["processed_shape"]),
+        "duplicate_rows_removed": metadata["duplicate_rows_removed"],
+    }
+
     save_json_report(
         {
+            "run_config": run_config,
             "classification_report": report_dict,
-            "best_params": best_params,
-            "preprocessing": metadata,
+            "summary_metrics": summary_metrics,
+            "class_distributions": distributions,
         },
         REPORTS_DIR / "rf_workflow_summary.json",
     )
+    save_json_report(run_config, REPORTS_DIR / "rf_workflow_run_config.json")
     save_confusion_matrix(
         y_test,
         y_pred,
         FIGURES_DIR / "rf_workflow_confusion_matrix.png",
     )
 
-    print_section("Step 8: Save Trained Model")
+    print_section("Step 7: Save Trained Model")
     model_bundle = {
         "model": model,
         "target_column": args.target,
@@ -398,7 +553,8 @@ def run_workflow(args: argparse.Namespace) -> None:
         "label_encoders": metadata["label_encoders"],
         "constant_columns": metadata["constant_columns"],
         "dropped_columns": metadata["dropped_columns"],
-        "best_params": best_params,
+        "summary_metrics": summary_metrics,
+        "run_config": run_config,
     }
     model_path = MODELS_DIR / "rf_network_classifier.joblib"
     joblib.dump(model_bundle, model_path)
@@ -406,11 +562,11 @@ def run_workflow(args: argparse.Namespace) -> None:
     print(f"Saved report: {report_path}")
 
 
-def main() -> None:
+def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="PDF workflow implementation: classify Normal, DoS, and DDoS network traffic with Random Forest."
+        description="Classify Normal, DoS, and DDoS network traffic with the final Random Forest workflow."
     )
-    parser.add_argument("--dataset", type=Path, default=ROOT / "dataset.csv")
+    parser.add_argument("--dataset", type=Path, default=ROOT / "data" / "dataset.csv")
     parser.add_argument("--target", default=TARGET_COLUMN)
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--random-state", type=int, default=RANDOM_STATE)
@@ -422,23 +578,23 @@ def main() -> None:
         default="gini",
     )
     parser.add_argument("--min-samples-split", type=int, default=2)
+    parser.add_argument("--min-samples-leaf", type=int, default=1)
     parser.add_argument("--max-depth", type=int, default=None)
+    parser.add_argument("--max-features", default="sqrt")
+    parser.add_argument("--bootstrap", type=parse_bool, default=True)
+    parser.add_argument(
+        "--class-weight",
+        choices=["balanced", "balanced_subsample"],
+        default="balanced",
+    )
     parser.add_argument("--n-jobs", type=int, default=-1)
     parser.add_argument("--top-features", type=int, default=25)
-    parser.add_argument(
-        "--tune",
-        action="store_true",
-        help="Run GridSearchCV before final evaluation.",
-    )
-    parser.add_argument("--cv", type=int, default=3)
-    parser.add_argument("--tune-scoring", default="f1_macro")
-    parser.add_argument("--tune-n-estimators", default="100,200")
-    parser.add_argument("--tune-criterion", default="gini,entropy")
-    parser.add_argument("--tune-min-samples-split", default="2,5")
-    parser.add_argument("--tune-max-depth", default="None,20")
-    parser.add_argument("--verbose", type=int, default=1)
-    args = parser.parse_args()
+    return parser
 
+
+def main() -> None:
+    parser = build_arg_parser()
+    args = parser.parse_args()
     run_workflow(args)
 
 
