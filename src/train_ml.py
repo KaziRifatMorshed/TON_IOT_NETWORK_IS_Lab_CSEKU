@@ -29,7 +29,11 @@ from src.preprocessing import fit_transform_features, prepare_train_test_data, t
 from src.utils import ensure_project_dirs, parse_model_list, print_section, save_joblib, save_json
 
 
-def build_models(task: str, selected_models: list[str]) -> dict[str, Any]:
+def build_models(
+    task: str,
+    selected_models: list[str],
+    device: str = "auto",
+) -> dict[str, Any]:
     models: dict[str, Any] = {}
 
     if "logistic" in selected_models:
@@ -60,6 +64,19 @@ def build_models(task: str, selected_models: list[str]) -> dict[str, Any]:
         try:
             from xgboost import XGBClassifier
 
+            xgb_device = "cpu"
+            if device in {"cuda", "auto"}:
+                try:
+                    import torch
+
+                    if torch.cuda.is_available():
+                        xgb_device = "cuda"
+                except ImportError:
+                    pass
+
+            if device == "cuda" and xgb_device != "cuda":
+                print("Warning: CUDA requested for XGBoost, but CUDA is not available. Falling back to CPU.")
+
             xgb_params = {
                 "n_estimators": 300,
                 "max_depth": 6,
@@ -67,9 +84,12 @@ def build_models(task: str, selected_models: list[str]) -> dict[str, Any]:
                 "subsample": 0.9,
                 "colsample_bytree": 0.9,
                 "tree_method": "hist",
+                "device": xgb_device,
                 "random_state": RANDOM_STATE,
                 "eval_metric": "logloss" if task == "binary" else "mlogloss",
             }
+            if xgb_device == "cuda":
+                print("Configured XGBoost with GPU acceleration (device='cuda').")
             models["xgboost"] = XGBClassifier(**xgb_params)
         except ImportError:
             print("xgboost is not installed. Skipping XGBoost.")
@@ -123,7 +143,7 @@ def train_and_evaluate(args: argparse.Namespace) -> None:
         X_train, y_train = maybe_apply_smote(X_train, y_train)
 
     selected_models = parse_model_list(args.models)
-    models = build_models(args.task, selected_models)
+    models = build_models(args.task, selected_models, device=getattr(args, "device", "auto"))
     if not models:
         raise ValueError("No valid models selected.")
 
@@ -196,6 +216,12 @@ def main() -> None:
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--sample-size", type=int, default=None)
     parser.add_argument("--use-smote", action="store_true")
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cuda", "cpu"],
+        default="auto",
+        help="Compute device for supported models like XGBoost (auto, cuda, cpu)",
+    )
     args = parser.parse_args()
 
     train_and_evaluate(args)

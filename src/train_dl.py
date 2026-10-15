@@ -60,12 +60,13 @@ def make_data_loader(
     y: np.ndarray,
     batch_size: int,
     shuffle: bool,
+    pin_memory: bool = False,
 ) -> DataLoader:
     dataset = TensorDataset(
         torch.tensor(X, dtype=torch.float32),
         torch.tensor(y, dtype=torch.long),
     )
-    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=pin_memory)
 
 
 def predict_probabilities(
@@ -146,7 +147,27 @@ def train_dl(args: argparse.Namespace) -> None:
     y_train = prepared["y_train"]
     y_test = prepared["y_test"]
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device_choice = getattr(args, "device", "auto")
+    if device_choice == "cpu":
+        device = torch.device("cpu")
+    elif device_choice == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA was explicitly requested via --device cuda, but CUDA is not available.")
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if device.type == "cuda":
+        gpu_name = torch.cuda.get_device_name(0)
+        gpu_mem = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        cap = torch.cuda.get_device_capability(0)
+        print(f"CUDA acceleration enabled: {gpu_name} ({gpu_mem:.2f} GB VRAM, Compute Capability {cap[0]}.{cap[1]})")
+        # Enable TF32 for Ampere (RTX 3060) and Blackwell (RTX 5070 Ti)
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+    else:
+        print("Using CPU device.")
+
     hidden_layers = parse_hidden_layers(args.hidden_layers)
     model = MLP(
         input_dim=X_train.shape[1],
@@ -168,7 +189,13 @@ def train_dl(args: argparse.Namespace) -> None:
     criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=1e-4)
 
-    train_loader = make_data_loader(X_train, y_train, args.batch_size, shuffle=True)
+    train_loader = make_data_loader(
+        X_train,
+        y_train,
+        args.batch_size,
+        shuffle=True,
+        pin_memory=(device.type == "cuda"),
+    )
 
     print_section("Training MLP")
     for epoch in range(1, args.epochs + 1):
@@ -220,6 +247,12 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--sample-size", type=int, default=None)
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cuda", "cpu"],
+        default="auto",
+        help="Device to use for training (auto, cuda, cpu)",
+    )
     args = parser.parse_args()
 
     train_dl(args)

@@ -1,8 +1,8 @@
 # TON IoT Network Intrusion Detection
 
-Random Forest based intrusion detection workflow for the TON_IoT network dataset.
+Random Forest based intrusion detection workflow for the TON_IoT network dataset, with full GPU acceleration for Deep Learning (PyTorch MLP) and Gradient Boosting (XGBoost CUDA).
 
-The final workflow classifies network traffic into:
+The primary workflow classifies network traffic into:
 
 - `normal`
 - `dos`
@@ -10,13 +10,35 @@ The final workflow classifies network traffic into:
 
 It loads `data/dataset.csv`, preprocesses network features, trains a Random Forest classifier, evaluates the model, and writes reports, plots, and the trained model artifact.
 
+---
+
+## Supported Hardware & Tested Platforms
+
+This repository is optimized and tested for:
+
+1. **Manjaro Linux (Arch-based)**
+   - **GPU**: NVIDIA GeForce RTX 3060 12 GB (Ampere, Compute Capability 8.6)
+   - **Driver / CUDA**: NVIDIA Driver 550+ / 610+ (CUDA 12.x / 13.x)
+   - **Python**: 3.10 – 3.13+
+
+2. **Project Mate PC – Dual Boot (Ubuntu Linux & Windows)**
+   - **GPU**: NVIDIA GeForce RTX 5070 Ti 16 GB (Blackwell, Compute Capability 12.0)
+   - **Driver / CUDA**: NVIDIA Driver >= 570.xx (CUDA >= 12.8 required for Blackwell SM 12.0)
+   - **Ubuntu**: 22.04 / 24.04 LTS
+   - **Windows**: Windows 10 / 11 (CMD & PowerShell)
+
+---
+
 ## Project Structure
 
 ```text
 .
 |-- README.md
 |-- requirements.txt
-|-- setup_windows_cmd.bat
+|-- setup_linux.sh               # Automated setup for Manjaro & Ubuntu
+|-- setup_windows_cmd.bat        # Automated setup for Windows CMD
+|-- setup_windows_powershell.ps1 # Automated setup for Windows PowerShell
+|-- verify_gpu.py                # Hardware & GPU validation tool
 |-- config.py
 |-- data/
 |   |-- .gitkeep
@@ -26,9 +48,9 @@ It loads `data/dataset.csv`, preprocesses network features, trains a Random Fore
 |-- src/
 |   |-- data_loader.py
 |   |-- preprocessing.py
-|   |-- random_forest_workflow.py # final workflow
-|   |-- train_ml.py              # auxiliary model experiments
-|   |-- train_dl.py              # auxiliary MLP experiments
+|   |-- random_forest_workflow.py # primary workflow
+|   |-- train_ml.py              # ML experiments (with XGBoost GPU)
+|   |-- train_dl.py              # PyTorch MLP (with CUDA GPU)
 |   |-- evaluate.py
 |   `-- utils.py
 |-- tests/
@@ -38,6 +60,8 @@ It loads `data/dataset.csv`, preprocesses network features, trains a Random Fore
     |-- figures/
     `-- reports/
 ```
+
+---
 
 ## Dataset
 
@@ -55,175 +79,214 @@ If `data/dataset.csv` is missing, `src/data_loader.py` can also combine local ro
 - `DOS.csv`
 - `Normal.csv`
 
-## Setup
+---
 
-Windows CMD:
+## Installation & Setup
+
+### 1. Linux Setup (Manjaro & Ubuntu)
+
+Make the script executable and run:
+
+```bash
+chmod +x setup_linux.sh
+./setup_linux.sh
+```
+
+#### Manual Linux Setup:
+
+```bash
+# 1. Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 2. Upgrade pip
+pip install --upgrade "pip<26" setuptools wheel
+
+# 3. Install PyTorch with CUDA acceleration
+# For RTX 3060 (Ampere) or RTX 5070 Ti (Blackwell):
+pip install "torch>=2.4.0" --extra-index-url https://download.pytorch.org/whl/cu128
+
+# 4. Install project requirements
+pip install -r requirements.txt
+
+# 5. Verify GPU installation
+python verify_gpu.py
+```
+
+> **Ubuntu / RTX 5070 Ti Driver Note**: Ensure your Ubuntu has NVIDIA driver >= 570 installed (`sudo apt install nvidia-driver-570` or higher). Verify with `nvidia-smi`.
+
+---
+
+### 2. Windows Setup (Dual Boot PC)
+
+#### Option A: Windows CMD
+Run Command Prompt **in the project directory**:
 
 ```cmd
 setup_windows_cmd.bat
 ```
 
-Manual setup:
+#### Option B: Windows PowerShell
+Run PowerShell **in the project directory**:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+.\setup_windows_powershell.ps1
+```
+
+#### Manual Windows Setup:
 
 ```cmd
 python -m venv .venv
 .venv\Scripts\activate.bat
-python -m ensurepip --upgrade
-python -m pip install --upgrade "pip<26"
-python -m pip install -r requirements.txt
+pip install --upgrade "pip<26" setuptools wheel
+pip install "torch>=2.4.0" --extra-index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements.txt
+python verify_gpu.py
 ```
 
-PowerShell users can run the same environment Python directly:
+---
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m ensurepip --upgrade
-.\.venv\Scripts\python.exe -m pip install --upgrade "pip<26"
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+## Hardware & GPU Verification
+
+Run the built-in diagnostic utility to verify Python, NVIDIA drivers, CUDA PyTorch acceleration (including TF32 on Ampere & Blackwell), XGBoost GPU tree building, and multi-threaded CPU support:
+
+On Linux:
+```bash
+.venv/bin/python verify_gpu.py
 ```
 
-## Run Final Random Forest Workflow
+On Windows:
+```cmd
+.venv\Scripts\python.exe verify_gpu.py
+```
+
+Expected output:
+```text
+======================================================================
+  Verification Summary
+======================================================================
+  [SUCCESS] GPU acceleration is fully active and validated for this environment!
+            - Deep Learning (PyTorch MLP): GPU Accelerated
+            - Classical ML (XGBoost): GPU Accelerated (device='cuda')
+            - Random Forest: Multi-threaded CPU (n_jobs=-1)
+```
+
+---
+
+## Running the Workflows
+
+### 1. Primary Random Forest Workflow
 
 Full run:
 
-```cmd
-.venv\Scripts\python.exe -m src.random_forest_workflow
-```
+- Linux:
+  ```bash
+  .venv/bin/python -m src.random_forest_workflow
+  ```
+- Windows:
+  ```cmd
+  .venv\Scripts\python.exe -m src.random_forest_workflow
+  ```
 
-Fast smoke test:
+Fast smoke test (sample size 3,000):
 
-```cmd
-.venv\Scripts\python.exe -m src.random_forest_workflow --sample-size 3000 --n-estimators 20 --n-jobs 1
-```
+- Linux:
+  ```bash
+  .venv/bin/python -m src.random_forest_workflow --sample-size 3000 --n-estimators 20 --n-jobs -1
+  ```
+- Windows:
+  ```cmd
+  .venv\Scripts\python.exe -m src.random_forest_workflow --sample-size 3000 --n-estimators 20 --n-jobs -1
+  ```
 
-## Workflow Process
+---
 
-`src.random_forest_workflow` performs:
+### 2. Deep Learning (PyTorch MLP with GPU Acceleration)
 
-1. Load TON_IoT network data.
-2. Save binary and multiclass distribution plots when target columns exist.
-3. Remove duplicate rows.
-4. Normalize target labels to `normal`, `dos`, and `ddos`.
-5. Drop leakage columns such as `label`.
-6. Convert IP address columns into numeric high/low parts.
-7. Label-encode categorical columns.
-8. Replace missing and infinite values.
-9. Drop constant columns.
-10. Use stratified 80/20 train-test split.
-11. Train Random Forest with the default project parameters.
-12. Evaluate on the held-out test set.
-13. Save model, metrics, plots, feature importance, and run configuration.
+Train deep learning MLP on the RTX 3060 (12GB) or RTX 5070 Ti (16GB):
 
-## Outputs
+- Linux:
+  ```bash
+  .venv/bin/python -m src.train_dl --task binary --device cuda --epochs 20 --batch-size 512
+  .venv/bin/python -m src.train_dl --task multiclass --device cuda --epochs 20 --batch-size 512
+  ```
+- Windows:
+  ```cmd
+  .venv\Scripts\python.exe -m src.train_dl --task binary --device cuda --epochs 20 --batch-size 512
+  .venv\Scripts\python.exe -m src.train_dl --task multiclass --device cuda --epochs 20 --batch-size 512
+  ```
 
-Generated files are ignored by git.
+---
 
-Model:
+### 3. Classical ML Experiments (with XGBoost GPU Acceleration)
 
-```text
-models/rf_network_classifier.joblib
-```
+Train classical ML models (XGBoost on GPU, Random Forest on multi-core CPU):
 
-Reports:
+- Linux:
+  ```bash
+  .venv/bin/python -m src.train_ml --task binary --models xgboost --device cuda
+  .venv/bin/python -m src.train_ml --task multiclass --models xgboost --device cuda
+  ```
+- Windows:
+  ```cmd
+  .venv\Scripts\python.exe -m src.train_ml --task binary --models xgboost --device cuda
+  .venv\Scripts\python.exe -m src.train_ml --task multiclass --models xgboost --device cuda
+  ```
 
-```text
-outputs/reports/rf_workflow_classification_report.txt
-outputs/reports/rf_workflow_summary.json
-outputs/reports/rf_workflow_run_config.json
-outputs/reports/rf_workflow_feature_importance.csv
-```
+---
 
-Figures:
+## Running Unit Tests
 
-```text
-outputs/figures/rf_workflow_binary_class_distribution.png
-outputs/figures/rf_workflow_multiclass_distribution.png
-outputs/figures/rf_workflow_confusion_matrix.png
-outputs/figures/rf_workflow_feature_importance.png
-outputs/figures/rf_workflow_roc_curves.png
-```
+Run the test suite to verify preprocessing, parameter defaults, and metric generation:
 
-## Metrics
+- Linux:
+  ```bash
+  .venv/bin/python -m unittest discover -s tests
+  ```
+- Windows:
+  ```cmd
+  .venv\Scripts\python.exe -m unittest discover -s tests
+  ```
 
-The final report includes:
+---
 
-- accuracy
-- precision macro and weighted
-- recall macro and weighted
-- F1 macro and weighted
-- ROC-AUC one-vs-rest macro and weighted
-- Matthews correlation coefficient
-- per-class precision, recall, F1-score, and support
+## Workflow Outputs
 
-Use macro F1, recall, ROC-AUC, and MCC alongside accuracy because intrusion datasets can be class-imbalanced.
+Generated files are ignored by git:
 
-## Tests
+- **Trained Models**:
+  - `models/rf_network_classifier.joblib`
+  - `models/binary_mlp.pt` / `models/multiclass_mlp.pt`
+  - `models/binary_xgboost.joblib`
+- **Reports**:
+  - `outputs/reports/rf_workflow_classification_report.txt`
+  - `outputs/reports/rf_workflow_summary.json`
+  - `outputs/reports/rf_workflow_run_config.json`
+  - `outputs/reports/rf_workflow_feature_importance.csv`
+- **Figures**:
+  - `outputs/figures/rf_workflow_binary_class_distribution.png`
+  - `outputs/figures/rf_workflow_multiclass_distribution.png`
+  - `outputs/figures/rf_workflow_confusion_matrix.png`
+  - `outputs/figures/rf_workflow_feature_importance.png`
+  - `outputs/figures/rf_workflow_roc_curves.png`
 
-Run unit tests:
+---
 
-```cmd
-.venv\Scripts\python.exe -m unittest discover -s tests
-```
+## Troubleshooting & FAQ
 
-The tests cover:
+### RTX 5070 Ti (Blackwell) compatibility
+- **Symptom**: `CUDA error: no kernel image is available for execution on the device`
+- **Cause**: Older PyTorch wheels (compiled for CUDA 11.x or 12.1/12.4) lack SM 12.0 (Blackwell) machine code.
+- **Fix**: Reinstall PyTorch using CUDA 12.8:
+  ```bash
+  pip install --force-reinstall "torch>=2.4.0" --extra-index-url https://download.pytorch.org/whl/cu128
+  ```
+- **Driver**: Ensure the host NVIDIA driver is >= 570.xx (check with `nvidia-smi`).
 
-- default dataset path
-- removal of the tuning CLI
-- default Random Forest parameters
-- metric generation
-- preprocessing leakage removal
-- distribution counts
-- ROC curve output
-- run configuration structure
+### Manjaro / Wayland Qt Platform Plugin Warning
+- The codebase automatically sets `matplotlib.use("Agg")` to ensure headless rendering without attempting to load Qt/Wayland display plugins.
 
-## Auxiliary Scripts
-
-These scripts remain available for experiments, but they are not the final workflow:
-
-```cmd
-.venv\Scripts\python.exe -m src.train_ml --task binary
-.venv\Scripts\python.exe -m src.train_ml --task multiclass
-.venv\Scripts\python.exe -m src.train_dl --task binary --epochs 20 --batch-size 512
-.venv\Scripts\python.exe -m src.evaluate --task binary --model-path models\binary_random_forest.joblib
-```
-
-## Troubleshooting
-
-`FileNotFoundError: Dataset not found`
-
-Place the dataset at:
-
-```text
-data/dataset.csv
-```
-
-`ModuleNotFoundError`
-
-Reinstall dependencies inside the virtual environment:
-
-```cmd
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-`Fatal error in launcher`
-
-Run pip through Python:
-
-```cmd
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-NumPy, pandas, or sklearn binary import errors:
-
-```cmd
-rmdir /s /q .venv
-python -m venv .venv
-.venv\Scripts\python.exe -m pip install --upgrade "pip<26"
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-Out-of-memory or slow training:
-
-```cmd
-.venv\Scripts\python.exe -m src.random_forest_workflow --sample-size 50000 --n-jobs 1
-```
+### Out of Memory or Slow Training
+- For Random Forest, use `--sample-size 50000` or specify `--n-jobs -1` to utilize all CPU cores.
+- For PyTorch MLP, adjust `--batch-size 1024` or `2048` to take full advantage of 12GB (RTX 3060) or 16GB (RTX 5070 Ti) VRAM.
