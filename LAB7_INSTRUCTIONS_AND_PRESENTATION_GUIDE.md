@@ -14,6 +14,7 @@
 5. [Presentation Script & Speaking Notes](#5-presentation-script--speaking-notes)
 6. [Expected Viva / Defense Questions by Dr. Anupam Kumar Bairagi](#6-expected-viva--defense-questions-by-dr-anupam-kumar-bairagi)
 7. [Commands Cheatsheet](#7-commands-cheatsheet)
+8. [Interactive Presentation Slides & GitHub Pages Deployment](#8-interactive-presentation-slides--github-pages-deployment)
 
 ---
 
@@ -373,3 +374,68 @@ Be prepared to answer these technical questions:
 ```bash
 .venv/bin/python -m unittest discover -s tests
 ```
+
+---
+
+## 8. Interactive Presentation Slides & GitHub Pages Deployment
+
+### 🌐 Live Online Presentation (Any Device / Anywhere)
+Your presentation has been rendered with Manim Slides and compiled into a standalone HTML5 Reveal.js deck hosted via **GitHub Pages**:
+
+🔗 **Live Presentation URL**:  
+👉 **`https://kazirifatmorshed.github.io/TON_IOT_NETWORK_IS_Lab_CSEKU/`**
+
+> [!TIP]
+> - **Zero Server Dependency**: All high-definition video transitions are embedded directly into `docs/index.html` as Base64 Data URIs.
+> - **Controls**:
+>   - Press **`Space`** or **`Right Arrow`** to advance animations and slides.
+>   - Press **`Left Arrow`** to go back.
+>   - Press **`F`** to toggle full-screen mode during the lab defense.
+>   - Press **`Esc`** or **`O`** to open the slide overview grid.
+
+---
+
+### 🖥️ Local Presentation Modes
+
+1. **Standalone Offline Browser (No Installation Required)**:
+   Simply double-click or open `docs/index.html` in Chrome, Firefox, Edge, or Brave:
+   ```bash
+   xdg-open docs/index.html   # On Linux
+   # OR
+   start docs\index.html     # On Windows
+   ```
+
+2. **Interactive Window Presentation (via Conda/Manim)**:
+   ```bash
+   conda activate manim_env
+   ./presentation/render_presentation.sh present
+   ```
+
+3. **Re-rendering or Updating Slides**:
+   ```bash
+   # Quick render & regenerate docs/index.html
+   ./presentation/render_presentation.sh html
+
+   # Full 1080p60 High-Definition render & regenerate docs/index.html
+   ./presentation/render_presentation.sh full-hd
+   ```
+
+---
+
+### ⚙️ Enabling GitHub Pages in Repository Settings
+
+Once you push this repository to GitHub, enable GitHub Pages:
+
+1. Open your repository on GitHub: `https://github.com/KaziRifatMorshed/TON_IOT_NETWORK_IS_Lab_CSEKU`
+2. Navigate to **Settings** > **Pages** (under the "Code and automation" left sidebar).
+3. Under **Build and deployment**:
+   - **Method A (Recommended - Automated via Workflow)**:
+     - Set **Source** to **`GitHub Actions`**.
+     - The included `.github/workflows/pages.yml` will automatically deploy `docs/index.html` on every push to `main`.
+   - **Method B (Direct Branch Deployment)**:
+     - Set **Source** to **`Deploy from a branch`**.
+     - Branch: select **`main`**.
+     - Folder: select **`/docs`**.
+     - Click **Save**.
+4. Within 1–2 minutes, your presentation will be live at:  
+   `https://kazirifatmorshed.github.io/TON_IOT_NETWORK_IS_Lab_CSEKU/`

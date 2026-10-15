@@ -1,14 +1,38 @@
 # TON IoT Network Intrusion Detection
+### Information Security Lab (Lab #7) — Khulna University (CSEKU)
+**Instructor**: Dr. Anupam Kumar Bairagi  
+**Presenters**: Md Siam Ahmed (230202) & Kazi Rifat Morshed (230220)  
 
-Random Forest based intrusion detection workflow for the TON_IoT network dataset, with full GPU acceleration for Deep Learning (PyTorch MLP) and Gradient Boosting (XGBoost CUDA).
+🌐 **[Live Presentation Slides (GitHub Pages)](https://kazirifatmorshed.github.io/TON_IOT_NETWORK_IS_Lab_CSEKU/)** | 📘 **[Comprehensive Lab #7 Guide & Viva Q&A](LAB7_INSTRUCTIONS_AND_PRESENTATION_GUIDE.md)**
+
+---
+
+Random Forest based intrusion detection workflow for the TON_IoT network dataset, with full 100% pure GPU acceleration for Deep Learning (PyTorch MLP), Classical ML (XGBoost CUDA), and ensemble learning.
 
 The primary workflow classifies network traffic into:
 
-- `normal`
-- `dos`
-- `ddos`
+- `normal` (Benign IoT telemetry)
+- `dos` (Denial of Service single-source flood)
+- `ddos` (Distributed Denial of Service botnet flood)
 
-It loads `data/dataset.csv`, preprocesses network features, trains a Random Forest classifier, evaluates the model, and writes reports, plots, and the trained model artifact.
+It loads `data/dataset.csv`, preprocesses network features, eliminates target leakage (`label`), trains classifiers, evaluates performance, and outputs high-resolution figures and reports.
+
+---
+
+## Interactive Presentation (Live & Offline)
+
+- **🌐 Live on GitHub Pages**: [https://kazirifatmorshed.github.io/TON_IOT_NETWORK_IS_Lab_CSEKU/](https://kazirifatmorshed.github.io/TON_IOT_NETWORK_IS_Lab_CSEKU/)
+- **📁 Standalone Offline Presentation**: Open `docs/index.html` directly in any web browser (all animations and transitions are embedded Base64 Data URIs; no internet or backend server required).
+- **Interactive Fullscreen Mode**:
+  ```bash
+  conda activate manim_env
+  ./presentation/render_presentation.sh present
+  ```
+- **Re-render / Export Slides**:
+  ```bash
+  ./presentation/render_presentation.sh html     # Quick export
+  ./presentation/render_presentation.sh full-hd  # 1080p60 Full-HD export
+  ```
 
 ---
 
@@ -34,12 +58,22 @@ This repository is optimized and tested for:
 ```text
 .
 |-- README.md
+|-- LAB7_INSTRUCTIONS_AND_PRESENTATION_GUIDE.md # Complete lab explanation & viva blueprint
 |-- requirements.txt
 |-- setup_linux.sh               # Automated setup for Manjaro & Ubuntu
 |-- setup_windows_cmd.bat        # Automated setup for Windows CMD
 |-- setup_windows_powershell.ps1 # Automated setup for Windows PowerShell
 |-- verify_gpu.py                # Hardware & GPU validation tool
 |-- config.py
+|-- .github/workflows/
+|   `-- pages.yml                # Automatic deployment to GitHub Pages
+|-- docs/
+|   |-- .nojekyll
+|   `-- index.html               # 1.2MB Standalone Reveal.js slide deck
+|-- presentation/
+|   |-- presentation_slides.py   # Manim Slides animated source code
+|   |-- render_presentation.sh   # Render & preview helper script
+|   `-- *.png / *.pdf            # University logos and graphics
 |-- data/
 |   |-- .gitkeep
 |   `-- dataset.csv              # local dataset
@@ -48,7 +82,8 @@ This repository is optimized and tested for:
 |-- src/
 |   |-- data_loader.py
 |   |-- preprocessing.py
-|   |-- random_forest_workflow.py # primary workflow
+|   |-- random_forest_workflow.py # primary workflow (GPU & CPU)
+|   |-- train_gpu.py             # 100% Pure GPU unified pipeline
 |   |-- train_ml.py              # ML experiments (with XGBoost GPU)
 |   |-- train_dl.py              # PyTorch MLP (with CUDA GPU)
 |   |-- evaluate.py

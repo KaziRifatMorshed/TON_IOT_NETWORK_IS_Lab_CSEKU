@@ -32,6 +32,12 @@ Thumbs.db
 .idea/
 data/dataset_cleaned.csv
 
+# Manim cache & slides video artifacts
+presentation/media/
+presentation/slides/
+presentation/ton_iot_presentation.html
+presentation/ton_iot_presentation_assets/
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,pycharm+all,windows,linux,executable,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,pycharm+all,windows,linux,executable,python
