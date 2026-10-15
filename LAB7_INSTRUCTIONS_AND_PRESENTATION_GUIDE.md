@@ -99,14 +99,14 @@ This script executes the complete production workflow:
 10. Trains Random Forest with 200 estimators across all CPU cores (`n_jobs=-1`).
 11. Generates classification report, confusion matrix, ROC curves, and feature importance tables.
 
-### Step 2: Run the 100% Pure GPU Unified Pipeline (Recommended)
-Because both you and your project mate have dedicated NVIDIA GPUs (RTX 3060 12GB & RTX 5070 Ti 16GB), you can run the entire workflow **100% on the GPU with zero CPU involvement**:
+### Step 2: Run the Unified GPU Training Pipeline (Recommended)
+Because both you and your project mate have dedicated NVIDIA GPUs (RTX 3060 12GB & RTX 5070 Ti 16GB), you can run the entire workflow on the GPU with zero CPU involvement:
 
 ```bash
-# Run 100% GPU training on 50,000 samples (takes under 4 seconds total!):
+# Run GPU training on 50,000 samples (takes under 4 seconds total!):
 .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10
 
-# Or run 100% GPU training on the entire 300,000 dataset:
+# Or run GPU training on the entire 300,000 dataset:
 .venv/bin/python -m src.train_gpu --epochs 15
 ```
 
@@ -114,7 +114,7 @@ This script:
 1. Validates your NVIDIA GPU, VRAM, and enables TensorFloat-32 (TF32).
 2. Deploys **GPU Random Forest** (200 parallel trees on CUDA).
 3. Deploys **GPU XGBoost** (histogram-based gradient boosted trees on CUDA).
-4. Deploys **PyTorch Deep MLP** (deep neural network running 100% on CUDA).
+4. Deploys **PyTorch Deep MLP** (deep neural network running on CUDA).
 5. Automatically saves the comparative charts, confusion matrices, and benchmark JSON in `outputs/`.
 
 ---
@@ -123,10 +123,10 @@ This script:
 If you want to run specifically the primary Random Forest workflow on your GPU:
 
 ```bash
-# Pure GPU Random Forest on 50,000 samples:
+# GPU Random Forest on 50,000 samples:
 .venv/bin/python -m src.random_forest_workflow --sample-size 50000 --device cuda
 
-# Pure GPU Random Forest on full 300,000 dataset:
+# GPU Random Forest on full 300,000 dataset:
 .venv/bin/python -m src.random_forest_workflow --device cuda
 ```
 
@@ -136,12 +136,12 @@ If you want to run specifically the primary Random Forest workflow on your GPU:
 
 ### Step 4: Locate Generated Figures & Reports for Your Slides
 All plots and reports are automatically saved in `outputs/`:
-- **Pure GPU Comparison Chart**: `outputs/figures/pure_gpu_comparison.png`
+- **GPU Comparison Chart**: `outputs/figures/pure_gpu_comparison.png`
 - **GPU Confusion Matrix**: `outputs/figures/gpu_rf_confusion_matrix.png`
 - **ROC Curves**: `outputs/figures/rf_workflow_roc_curves.png`
 - **Feature Importance**: `outputs/figures/rf_workflow_feature_importance.png`
 - **Class Distributions**: `outputs/figures/rf_workflow_multiclass_distribution.png`
-- **Pure GPU Benchmark JSON**: `outputs/reports/pure_gpu_benchmark_results.json`
+- **GPU Benchmark JSON**: `outputs/reports/pure_gpu_benchmark_results.json`
 - **Full Text Report**: `outputs/reports/rf_workflow_classification_report.txt`
 
 ---
@@ -217,7 +217,7 @@ Slide 12: Conclusion & Future Scope
 - **Comparative Baseline 2: XGBoost**:
   - Gradient Boosted Decision Trees utilizing GPU histogram binning (`tree_method='hist'`, `device='cuda'`).
 
-#### Slide 7: Experimental Performance & Results Matrix (100% GPU)
+#### Slide 7: Experimental Performance & Results Matrix (GPU Acceleration)
 - **Experimental Setup**: Evaluated on NVIDIA GeForce RTX GPUs with TensorFloat-32 (TF32) Tensor Core acceleration.
 - **Results Table**:
 
@@ -335,14 +335,14 @@ Be prepared to answer these technical questions:
 
 ---
 
-## 7. Commands Cheatsheet (100% Pure GPU)
+## 7. Commands Cheatsheet (GPU-Accelerated)
 
 ### 1. Verify Hardware & GPU Acceleration
 ```bash
 .venv/bin/python verify_gpu.py
 ```
 
-### 2. Run the Unified 100% GPU Training Pipeline (Recommended)
+### 2. Run the Unified GPU Training Pipeline (Recommended)
 ```bash
 # Fast run (50,000 samples - takes ~3 seconds):
 .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10

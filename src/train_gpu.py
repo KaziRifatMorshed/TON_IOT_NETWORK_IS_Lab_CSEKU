@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""100% Pure GPU Training Pipeline for TON_IoT Network Intrusion Detection.
+"""Unified GPU Training Pipeline for TON_IoT Network Intrusion Detection.
 
 Runs entirely on NVIDIA CUDA GPUs (GeForce RTX 3060 12GB & RTX 5070 Ti 16GB).
 Trains and compares:
@@ -79,7 +79,7 @@ class DeepIoTMLP(nn.Module):
 def setup_gpu() -> torch.device:
     if not torch.cuda.is_available():
         raise SystemError(
-            "CRITICAL: No NVIDIA CUDA GPU detected! This script is strictly configured for 100% GPU training."
+            "CRITICAL: No NVIDIA CUDA GPU detected! This script is strictly configured for GPU training."
         )
 
     device = torch.device("cuda:0")
@@ -234,9 +234,9 @@ def train_gpu_pipeline(args: argparse.Namespace) -> None:
     )
 
     # -----------------------------------------------------------------------
-    # MODEL 3: PyTorch Deep Neural Network (MLP 100% on CUDA)
+    # MODEL 3: PyTorch Deep Neural Network (MLP on CUDA)
     # -----------------------------------------------------------------------
-    print_section("5. Training Model 3: PyTorch Deep MLP (100% on CUDA GPU)")
+    print_section("5. Training Model 3: PyTorch Deep MLP (CUDA GPU)")
     from sklearn.preprocessing import StandardScaler
 
     scaler = StandardScaler()
@@ -305,7 +305,7 @@ def train_gpu_pipeline(args: argparse.Namespace) -> None:
     # -----------------------------------------------------------------------
     # Comparison Summary & Plots
     # -----------------------------------------------------------------------
-    print_section("6. 100% GPU Comparison Summary")
+    print_section("6. GPU Comparison Summary")
     df_results = pd.DataFrame(results_table)
     print(df_results.to_string(index=False))
 
@@ -316,7 +316,7 @@ def train_gpu_pipeline(args: argparse.Namespace) -> None:
     metrics_to_plot = ["accuracy", "f1_macro", "mcc", "roc_auc"]
     plot_df = df_results.melt(id_vars=["Model"], value_vars=metrics_to_plot, var_name="Metric", value_name="Score")
     sns.barplot(data=plot_df, x="Metric", y="Score", hue="Model", palette="magma")
-    plt.title("Pure GPU Model Comparison on TON_IoT (DoS / DDoS / Normal)")
+    plt.title("GPU Model Comparison on TON_IoT (DoS / DDoS / Normal)")
     plt.ylim(0.95, 1.005)
     plt.tight_layout()
     comp_plot_path = FIGURES_DIR / "pure_gpu_comparison.png"
@@ -345,7 +345,7 @@ def train_gpu_pipeline(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="100% Pure GPU Training Pipeline for TON_IoT.")
+    parser = argparse.ArgumentParser(description="GPU Training Pipeline for TON_IoT.")
     parser.add_argument("--dataset", type=Path, default=ROOT / "data" / "dataset.csv")
     parser.add_argument("--sample-size", type=int, default=None, help="Sample size (None for full 300,000 dataset)")
     parser.add_argument("--test-size", type=float, default=0.2)

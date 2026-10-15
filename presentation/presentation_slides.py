@@ -273,12 +273,12 @@ class TonIoTPresentation(Slide):
         self.next_slide()  # Advance to Slide 4
 
         # ======================================================================
-        # SLIDE 4: 100% NVIDIA GPU Acceleration Architecture
+        # SLIDE 4: NVIDIA GPU Acceleration Architecture
         # ======================================================================
         slide3_content = Group(slide3_title, slide3_accent, slide3_row)
-        content_header, stripe = build_header(r"HARDWARE ACCELERATION", r"100\% NVIDIA GPU PIPELINE")
+        content_header, stripe = build_header(r"HARDWARE ACCELERATION", r"NVIDIA GPU PIPELINE")
 
-        slide4_title = Tex(r"\textbf{100\% GPU Architecture: Zero CPU Model Training}", font_size=32, color=TEXT_MAIN)
+        slide4_title = Tex(r"\textbf{GPU Architecture: Accelerated Model Training}", font_size=32, color=TEXT_MAIN)
         slide4_title.next_to(stripe, DOWN, buff=0.28)
         slide4_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide4_title, DOWN, buff=0.12)
 
@@ -344,7 +344,7 @@ class TonIoTPresentation(Slide):
         # SLIDE 5: Experimental Performance & Results Matrix
         # ======================================================================
         slide4_content = Group(slide4_title, slide4_accent, hw_banner, gpu_engines_row)
-        content_header, stripe = build_header(r"EXPERIMENTAL RESULTS", r"100\% GPU PERFORMANCE BENCHMARK")
+        content_header, stripe = build_header(r"EXPERIMENTAL RESULTS", r"GPU PERFORMANCE BENCHMARK")
 
         slide5_title = Tex(r"\textbf{Experimental Results: Model Accuracy \& Latency Matrix}", font_size=32, color=TEXT_MAIN)
         slide5_title.next_to(stripe, DOWN, buff=0.28)

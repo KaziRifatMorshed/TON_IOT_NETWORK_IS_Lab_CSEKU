@@ -7,7 +7,7 @@
 
 ---
 
-Random Forest based intrusion detection workflow for the TON_IoT network dataset, with full 100% pure GPU acceleration for Deep Learning (PyTorch MLP), Classical ML (XGBoost CUDA), and ensemble learning.
+Random Forest based intrusion detection workflow for the TON_IoT network dataset, with full GPU acceleration for Deep Learning (PyTorch MLP), Classical ML (XGBoost CUDA), and ensemble learning.
 
 The primary workflow classifies network traffic into:
 
@@ -83,7 +83,7 @@ This repository is optimized and tested for:
 |   |-- data_loader.py
 |   |-- preprocessing.py
 |   |-- random_forest_workflow.py # primary workflow (GPU & CPU)
-|   |-- train_gpu.py             # 100% Pure GPU unified pipeline
+|   |-- train_gpu.py             # Unified GPU training pipeline
 |   |-- train_ml.py              # ML experiments (with XGBoost GPU)
 |   |-- train_dl.py              # PyTorch MLP (with CUDA GPU)
 |   |-- evaluate.py
@@ -211,7 +211,7 @@ Expected output:
 
 ## Running the Workflows
 
-### 1. 100% Pure GPU Unified Pipeline (Recommended)
+### 1. Unified GPU Training Pipeline (Recommended)
 
 Trains and evaluates **GPU Random Forest**, **GPU XGBoost**, and **PyTorch Deep MLP** entirely on your NVIDIA CUDA GPU (RTX 3060 / RTX 5070 Ti) with zero CPU model training:
 

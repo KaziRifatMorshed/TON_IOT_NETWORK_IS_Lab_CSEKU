@@ -628,7 +628,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--device",
         choices=["auto", "cuda", "cpu"],
         default="auto",
-        help="Device to use for model training: cuda (pure NVIDIA GPU), cpu, or auto (default: auto)",
+        help="Device to use for model training: cuda (NVIDIA GPU), cpu, or auto (default: auto)",
     )
     return parser
 
