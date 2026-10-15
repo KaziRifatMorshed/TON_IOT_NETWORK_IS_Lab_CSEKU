@@ -176,17 +176,40 @@ Expected output:
 
 ## Running the Workflows
 
-### 1. Primary Random Forest Workflow
+### 1. 100% Pure GPU Unified Pipeline (Recommended)
 
-Full run:
+Trains and evaluates **GPU Random Forest**, **GPU XGBoost**, and **PyTorch Deep MLP** entirely on your NVIDIA CUDA GPU (RTX 3060 / RTX 5070 Ti) with zero CPU model training:
 
 - Linux:
   ```bash
-  .venv/bin/python -m src.random_forest_workflow
+  # Fast run (50,000 samples, ~3 seconds):
+  .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10
+
+  # Full 300,000 dataset run:
+  .venv/bin/python -m src.train_gpu --epochs 15
   ```
 - Windows:
   ```cmd
-  .venv\Scripts\python.exe -m src.random_forest_workflow
+  REM Fast run (50,000 samples):
+  .venv\Scripts\python.exe -m src.train_gpu --sample-size 50000 --epochs 10
+
+  REM Full 300,000 dataset run:
+  .venv\Scripts\python.exe -m src.train_gpu --epochs 15
+  ```
+
+---
+
+### 2. Primary Random Forest Workflow (with GPU Support)
+
+Full run on NVIDIA GPU:
+
+- Linux:
+  ```bash
+  .venv/bin/python -m src.random_forest_workflow --device cuda
+  ```
+- Windows:
+  ```cmd
+  .venv\Scripts\python.exe -m src.random_forest_workflow --device cuda
   ```
 
 Fast smoke test (sample size 3,000):

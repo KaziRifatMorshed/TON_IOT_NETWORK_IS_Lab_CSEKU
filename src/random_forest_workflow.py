@@ -244,7 +244,39 @@ def preprocess_dataset(
     return X, y, metadata
 
 
-def build_random_forest(args: argparse.Namespace) -> RandomForestClassifier:
+def build_random_forest(args: argparse.Namespace) -> Any:
+    device = getattr(args, "device", "auto")
+    use_cuda = False
+    if device == "cuda":
+        use_cuda = True
+    elif device == "auto":
+        try:
+            import torch
+
+            use_cuda = torch.cuda.is_available()
+        except ImportError:
+            pass
+
+    if use_cuda:
+        try:
+            from xgboost import XGBClassifier
+
+            print(
+                f"NVIDIA GPU Acceleration Enabled: Building GPU Random Forest ({args.n_estimators} parallel trees on CUDA)..."
+            )
+            return XGBClassifier(
+                n_estimators=1,
+                num_parallel_tree=args.n_estimators,
+                subsample=0.8,
+                colsample_bynode=0.8,
+                learning_rate=1.0,
+                tree_method="hist",
+                device="cuda",
+                random_state=args.random_state,
+            )
+        except Exception as exc:
+            print(f"GPU Random Forest initialization failed ({exc}). Falling back to CPU.")
+
     return RandomForestClassifier(
         n_estimators=args.n_estimators,
         criterion=args.criterion,
@@ -592,6 +624,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--n-jobs", type=int, default=-1)
     parser.add_argument("--top-features", type=int, default=25)
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cuda", "cpu"],
+        default="auto",
+        help="Device to use for model training: cuda (pure NVIDIA GPU), cpu, or auto (default: auto)",
+    )
     return parser
 
 
