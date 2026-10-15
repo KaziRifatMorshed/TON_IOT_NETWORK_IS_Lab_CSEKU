@@ -536,7 +536,7 @@ class TonIoTPresentation(Slide):
 
         thanks_bg = RoundedRectangle(corner_radius=0.08, width=12.2, height=0.68, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0)
         thanks_text = Tex(
-            r"\textbf{Thank you! We welcome any questions from Dr. Anupam Kumar Bairagi.}",
+            r"\textbf{Thank you! We welcome any questions.}",
             font_size=18,
             color=WHITE_COLOR
         ).move_to(thanks_bg.get_center())
