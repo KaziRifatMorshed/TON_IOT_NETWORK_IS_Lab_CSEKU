@@ -30,3 +30,4 @@ outputs/reports/*
 Thumbs.db
 .vscode/
 .idea/
+data/dataset_cleaned.csv
