@@ -336,18 +336,18 @@ class TonIoTPresentation(Slide):
             r"\textbf{Dataset Attributes}", font_size=17, color=WHITE_COLOR
         ).move_to(attr_bar.get_center())
         attr_table = Tex(
-            r"\renewcommand{\arraystretch}{1.35}"
-            r"\begin{tabular}{ll}"
-            r"\hline"
-            r"\textbf{Attribute} & \textbf{Value} \\"
-            r"\hline"
-            r"Dataset        & TON\_IoT Network Traffic \\"
-            r"Total Records  & 300,000 rows \\"
-            r"After Dedup.   & 249,733 rows \\"
-            r"Target Column  & \texttt{type} \\"
-            r"Selected Classes & normal, dos, ddos \\"
-            r"Final Features & 45 columns \\"
-            r"\hline"
+            r"\renewcommand{\arraystretch}{1.35}" "\n"
+            r"\begin{tabular}{ll}" "\n"
+            r"\hline" "\n"
+            r"\textbf{Attribute} & \textbf{Value} \\" "\n"
+            r"\hline" "\n"
+            r"Dataset        & TON\_IoT Network Traffic \\" "\n"
+            r"Total Records  & 300,000 rows \\" "\n"
+            r"After Dedup.   & 249,733 rows \\" "\n"
+            r"Target Column  & \texttt{type} \\" "\n"
+            r"Selected Classes & normal, dos, ddos \\" "\n"
+            r"Final Features & 45 columns \\" "\n"
+            r"\hline" "\n"
             r"\end{tabular}",
             font_size=17, color=TEXT_MAIN
         ).next_to(attr_bar, DOWN, buff=0.25).set(width=4.9)
@@ -416,8 +416,8 @@ class TonIoTPresentation(Slide):
         binary_label = Tex(r"\textbf{Binary Distribution}", font_size=16, color=NVIDIA_DARK_GREEN)
         multi_label  = Tex(r"\textbf{Multiclass Distribution}", font_size=16, color=NVIDIA_DARK_GREEN)
 
-        binary_col = VGroup(binary_label, binary_img).arrange(DOWN, buff=0.14)
-        multi_col  = VGroup(multi_label, multi_img).arrange(DOWN, buff=0.14)
+        binary_col = Group(binary_label, binary_img).arrange(DOWN, buff=0.14)
+        multi_col  = Group(multi_label, multi_img).arrange(DOWN, buff=0.14)
 
         s5_row = Group(binary_col, multi_col).arrange(RIGHT, buff=0.55)
         s5_row.next_to(s5_accent, DOWN, buff=0.22)
@@ -680,22 +680,22 @@ class TonIoTPresentation(Slide):
             r"\textbf{MODEL PARAMETERS}", font_size=17, color=WHITE_COLOR
         ).move_to(right_bar.get_center())
         param_table = Tex(
-            r"\renewcommand{\arraystretch}{1.22}"
-            r"\begin{tabular}{lll}"
-            r"\hline"
-            r"\textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\"
-            r"\hline"
-            r"n\_estimators   & 200        & Number of trees \\    "
-            r"criterion       & gini       & Split quality \\       "
-            r"max\_depth      & None       & Grow until pure \\     "
-            r"max\_features   & sqrt       & Subset per split \\    "
-            r"min\_split      & 2          & Minimum split size \\  "
-            r"min\_leaf       & 1          & Minimum leaf size \\   "
-            r"bootstrap       & True       & Sample rows per tree \\"
-            r"class\_weight   & balanced   & Handle imbalance \\    "
-            r"n\_jobs         & -1         & Use all CPU cores \\   "
-            r"random\_state   & 42         & Reproducible run \\    "
-            r"\hline"
+            r"\renewcommand{\arraystretch}{1.22}" "\n"
+            r"\begin{tabular}{lll}" "\n"
+            r"\hline" "\n"
+            r"\textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\" "\n"
+            r"\hline" "\n"
+            r"n\_estimators   & 200        & Number of trees \\" "\n"
+            r"criterion       & gini       & Split quality \\" "\n"
+            r"max\_depth      & None       & Grow until pure \\" "\n"
+            r"max\_features   & sqrt       & Subset per split \\" "\n"
+            r"min\_split      & 2          & Minimum split size \\" "\n"
+            r"min\_leaf       & 1          & Minimum leaf size \\" "\n"
+            r"bootstrap       & True       & Sample rows per tree \\" "\n"
+            r"class\_weight   & balanced   & Handle imbalance \\" "\n"
+            r"n\_jobs         & -1         & Use all CPU cores \\" "\n"
+            r"random\_state   & 42         & Reproducible run \\" "\n"
+            r"\hline" "\n"
             r"\end{tabular}",
             font_size=15, color=TEXT_MAIN
         ).next_to(right_bar, DOWN, buff=0.22).set(width=5.6)
@@ -761,18 +761,18 @@ class TonIoTPresentation(Slide):
             r"\textbf{Classification Report Summary}", font_size=17, color=WHITE_COLOR
         ).move_to(report_bar.get_center())
         report_table = Tex(
-            r"\renewcommand{\arraystretch}{1.25}"
-            r"\begin{tabular}{lcccc}"
-            r"\hline"
+            r"\renewcommand{\arraystretch}{1.25}" "\n"
+            r"\begin{tabular}{lcccc}" "\n"
+            r"\hline" "\n"
             r"\textbf{Class} & \textbf{Precision} & \textbf{Recall} & "
-            r"\textbf{F1-Score} & \textbf{Meaning} \\"
-            r"\hline"
-            r"Normal    & 100.00\% & 100.00\% & 100.00\% & Benign flow detection \\"
-            r"DoS       & 100.00\% & 99.98\%  & 99.99\%  & Single-source attack \\"
-            r"DDoS      & 99.99\%  & 100.00\% & 99.99\%  & Distributed attack \\"
+            r"\textbf{F1-Score} & \textbf{Meaning} \\" "\n"
+            r"\hline" "\n"
+            r"Normal    & 100.00\% & 100.00\% & 100.00\% & Benign flow detection \\" "\n"
+            r"DoS       & 100.00\% & 99.98\%  & 99.99\%  & Single-source attack \\" "\n"
+            r"DDoS      & 99.99\%  & 100.00\% & 99.99\%  & Distributed attack \\" "\n"
             r"Macro Avg & \textbf{99.99\%}  & \textbf{99.99\%}  & "
-            r"\textbf{99.99\%}  & Balanced across classes \\"
-            r"\hline"
+            r"\textbf{99.99\%}  & Balanced across classes \\" "\n"
+            r"\hline" "\n"
             r"\end{tabular}",
             font_size=16, color=TEXT_MAIN
         ).next_to(report_bar, DOWN, buff=0.22)
@@ -890,8 +890,8 @@ class TonIoTPresentation(Slide):
             font_size=12, color=TEXT_MUTED
         )
 
-        roc_col = VGroup(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
-        fi_col  = VGroup(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
+        roc_col = Group(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
+        fi_col  = Group(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
         s11_row = Group(roc_col, fi_col).arrange(RIGHT, buff=0.45)
         s11_row.next_to(s11_accent, DOWN, buff=0.20)
 
