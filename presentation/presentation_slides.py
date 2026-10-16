@@ -135,8 +135,6 @@ class TonIoTPresentation(Slide):
                 LEFT * 2.0, RIGHT * 2.0,
                 color=NVIDIA_GREEN, stroke_width=2.5
             ).next_to(title, DOWN, buff=0.10)
-            title.add_to_scene(self)
-            accent.add_to_scene(self)
             return VGroup(title, accent)
 
         # ===========================================================
