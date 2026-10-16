@@ -35,7 +35,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from config import FIGURES_DIR, MODELS_DIR, RANDOM_STATE, REPORTS_DIR
+from config import (
+    FIGURES_DIR,
+    MODELS_DIR,
+    RANDOM_STATE,
+    REPORTS_DIR,
+    TEST_DATA_FILE,
+    TRAIN_DATA_FILE,
+)
 from src.utils import ensure_project_dirs, print_section
 
 
@@ -93,6 +100,29 @@ def load_network_dataset(
     sample_size: int | None,
     random_state: int,
 ) -> pd.DataFrame:
+    file_size_mb = path.stat().st_size / (1024 * 1024)
+
+    if sample_size and sample_size > 0 and file_size_mb > 100:
+        # Uniform reservoir sampling across large CSV file to preserve all classes
+        import random
+        rng = random.Random(random_state)
+        sample_lines: list[str] = []
+        with path.open("r", encoding="utf-8") as f:
+            header = f.readline()
+            for idx, line in enumerate(f):
+                if idx < sample_size:
+                    sample_lines.append(line)
+                else:
+                    j = rng.randint(0, idx)
+                    if j < sample_size:
+                        sample_lines[j] = line
+
+        import io
+        buffer = io.StringIO(header + "".join(sample_lines))
+        df = pd.read_csv(buffer, low_memory=False)
+        df.columns = df.columns.str.strip()
+        return df
+
     df = pd.read_csv(path, low_memory=False)
     df.columns = df.columns.str.strip()
 
@@ -242,6 +272,55 @@ def preprocess_dataset(
     }
 
     return X, y, metadata
+
+
+def preprocess_train_test(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    target_column: str = TARGET_COLUMN,
+) -> tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, dict[str, Any]]:
+    """Preprocess pre-split train and test datasets, fitting encoders only on train."""
+    X_train, y_train, metadata = preprocess_dataset(train_df, target_column=target_column)
+
+    # Process test set using train metadata
+    test_clean = test_df.drop_duplicates().reset_index(drop=True)
+    test_clean[target_column] = test_clean[target_column].map(normalize_target)
+    target_mapping = metadata["target_mapping"]
+    y_test = test_clean[target_column].map(target_mapping).to_numpy(dtype=np.int64)
+
+    drop_cols = metadata["dropped_columns"]
+    X_test = test_clean.drop(columns=[target_column], errors="ignore").copy()
+    X_test = X_test.drop(columns=drop_cols, errors="ignore")
+
+    for column in metadata["ip_columns"]:
+        if column in test_clean.columns:
+            parts = test_clean[column].map(ip_to_integer_parts)
+            X_test[f"{column}_high"] = parts.map(lambda value: value[0]).astype(np.float64)
+            X_test[f"{column}_low"] = parts.map(lambda value: value[1]).astype(np.float64)
+            X_test = X_test.drop(columns=[column], errors="ignore")
+
+    for column, encoder in metadata["label_encoders"].items():
+        if column in X_test.columns:
+            vals = X_test[column].fillna("missing").astype(str)
+            known_classes = set(encoder.classes_)
+            # Map unseen categories to the first known class or most frequent
+            fallback = encoder.classes_[0]
+            vals = vals.map(lambda x: x if x in known_classes else fallback)
+            X_test[column] = encoder.transform(vals)
+
+    for column in X_test.columns:
+        if not pd.api.types.is_numeric_dtype(X_test[column]):
+            X_test[column] = pd.to_numeric(X_test[column], errors="coerce")
+
+    X_test = X_test.replace([np.inf, -np.inf], np.nan).fillna(-1)
+
+    # Ensure identical column alignment
+    for col in metadata["feature_columns"]:
+        if col not in X_test.columns:
+            X_test[col] = -1
+    X_test = X_test[metadata["feature_columns"]]
+
+    return X_train, y_train, X_test, y_test, metadata
 
 
 def build_random_forest(args: argparse.Namespace) -> Any:
@@ -456,42 +535,75 @@ def save_json_report(data: dict[str, Any], path: Path) -> None:
 def run_workflow(args: argparse.Namespace) -> None:
     ensure_project_dirs()
 
-    print_section("Step 1: Load Dataset")
-    df = load_network_dataset(args.dataset, args.sample_size, args.random_state)
-    print(f"Rows: {len(df):,}")
-    print(f"Columns: {len(df.columns):,}")
-    distributions = compute_distribution_counts(df)
-    if "binary" in distributions:
-        save_distribution_plot(
-            distributions["binary"],
-            "Binary Class Distribution",
-            FIGURES_DIR / "rf_workflow_binary_class_distribution.png",
-        )
-    if "multiclass" in distributions:
-        save_distribution_plot(
-            distributions["multiclass"],
-            "Multiclass Distribution: Normal, DoS, DDoS",
-            FIGURES_DIR / "rf_workflow_multiclass_distribution.png",
-        )
+    if args.train_dataset and args.test_dataset:
+        print_section("Step 1: Load Dedicated Train & Test Datasets")
+        train_df = load_network_dataset(args.train_dataset, args.sample_size, args.random_state)
+        test_df = load_network_dataset(args.test_dataset, args.sample_size, args.random_state)
+        print(f"Train Rows: {len(train_df):,}")
+        print(f"Test Rows:  {len(test_df):,}")
+        print(f"Columns:    {len(train_df.columns):,}")
 
-    print_section("Step 2: Preprocess Data")
-    X, y, metadata = preprocess_dataset(df, args.target)
-    print(f"Removed duplicate rows: {metadata['duplicate_rows_removed']:,}")
-    print(f"Converted IP columns: {', '.join(metadata['ip_columns']) or 'none'}")
-    print(f"Label encoded columns: {len(metadata['categorical_columns'])}")
-    print(f"Removed constant columns: {len(metadata['constant_columns'])}")
-    print(f"Final feature count: {X.shape[1]:,}")
+        distributions = compute_distribution_counts(train_df)
+        if "binary" in distributions:
+            save_distribution_plot(
+                distributions["binary"],
+                "Binary Class Distribution (Train)",
+                FIGURES_DIR / "rf_workflow_binary_class_distribution.png",
+            )
+        if "multiclass" in distributions:
+            save_distribution_plot(
+                distributions["multiclass"],
+                "Multiclass Distribution: Normal, DoS, DDoS (Train)",
+                FIGURES_DIR / "rf_workflow_multiclass_distribution.png",
+            )
 
-    print_section("Step 3: Train-Test Split")
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=args.test_size,
-        random_state=args.random_state,
-        stratify=y,
-    )
-    print(f"Training rows: {len(X_train):,}")
-    print(f"Testing rows: {len(X_test):,}")
+        print_section("Step 2 & 3: Preprocess Train and Test Datasets")
+        X_train, y_train, X_test, y_test, metadata = preprocess_train_test(
+            train_df, test_df, target_column=args.target
+        )
+        print(f"Converted IP columns: {', '.join(metadata['ip_columns']) or 'none'}")
+        print(f"Label encoded columns: {len(metadata['categorical_columns'])}")
+        print(f"Removed constant columns: {len(metadata['constant_columns'])}")
+        print(f"Final feature count: {X_train.shape[1]:,}")
+        print(f"Training rows: {len(X_train):,}")
+        print(f"Testing rows:  {len(X_test):,}")
+    else:
+        print_section("Step 1: Load Dataset")
+        df = load_network_dataset(args.dataset, args.sample_size, args.random_state)
+        print(f"Rows: {len(df):,}")
+        print(f"Columns: {len(df.columns):,}")
+        distributions = compute_distribution_counts(df)
+        if "binary" in distributions:
+            save_distribution_plot(
+                distributions["binary"],
+                "Binary Class Distribution",
+                FIGURES_DIR / "rf_workflow_binary_class_distribution.png",
+            )
+        if "multiclass" in distributions:
+            save_distribution_plot(
+                distributions["multiclass"],
+                "Multiclass Distribution: Normal, DoS, DDoS",
+                FIGURES_DIR / "rf_workflow_multiclass_distribution.png",
+            )
+
+        print_section("Step 2: Preprocess Data")
+        X, y, metadata = preprocess_dataset(df, args.target)
+        print(f"Removed duplicate rows: {metadata['duplicate_rows_removed']:,}")
+        print(f"Converted IP columns: {', '.join(metadata['ip_columns']) or 'none'}")
+        print(f"Label encoded columns: {len(metadata['categorical_columns'])}")
+        print(f"Removed constant columns: {len(metadata['constant_columns'])}")
+        print(f"Final feature count: {X.shape[1]:,}")
+
+        print_section("Step 3: Train-Test Split")
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=args.test_size,
+            random_state=args.random_state,
+            stratify=y,
+        )
+        print(f"Training rows: {len(X_train):,}")
+        print(f"Testing rows: {len(X_test):,}")
 
     print_section("Step 4: Train Random Forest")
     model = build_random_forest(args)
@@ -543,13 +655,15 @@ def run_workflow(args: argparse.Namespace) -> None:
     report_path.write_text(report_text, encoding="utf-8")
 
     run_config = {
-        "dataset_path": str(args.dataset),
+        "dataset_path": str(args.train_dataset or args.dataset),
+        "train_dataset_path": str(args.train_dataset) if args.train_dataset else None,
+        "test_dataset_path": str(args.test_dataset) if args.test_dataset else None,
         "random_state": args.random_state,
         "test_size": args.test_size,
         "sample_size": args.sample_size,
         "class_names": CLASS_ORDER,
         "target_mapping": metadata["target_mapping"],
-        "feature_count": X.shape[1],
+        "feature_count": X_train.shape[1],
         "feature_columns": metadata["feature_columns"],
         "ip_columns": metadata["ip_columns"],
         "categorical_columns": metadata["categorical_columns"],
@@ -602,6 +716,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
         description="Classify Normal, DoS, and DDoS network traffic with the final Random Forest workflow."
     )
     parser.add_argument("--dataset", type=Path, default=ROOT / "data" / "dataset.csv")
+    parser.add_argument("--train-dataset", type=Path, default=None, help="Path to dedicated training CSV (e.g. data/train_normal_dos_ddos.csv)")
+    parser.add_argument("--test-dataset", type=Path, default=None, help="Path to dedicated testing CSV (e.g. data/test_normal_dos_ddos.csv)")
     parser.add_argument("--target", default=TARGET_COLUMN)
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--random-state", type=int, default=RANDOM_STATE)

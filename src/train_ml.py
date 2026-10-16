@@ -16,7 +16,12 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 from config import FIGURES_DIR, MODELS_DIR, RANDOM_STATE, REPORTS_DIR
-from src.data_loader import load_dataset, print_dataset_summary, sample_dataframe
+from src.data_loader import (
+    load_dataset,
+    load_train_test_datasets,
+    print_dataset_summary,
+    sample_dataframe,
+)
 from src.evaluate import (
     get_prediction_scores,
     plot_class_distribution,
@@ -25,7 +30,12 @@ from src.evaluate import (
     plot_model_comparison,
     save_evaluation_outputs,
 )
-from src.preprocessing import fit_transform_features, prepare_train_test_data, transform_features
+from src.preprocessing import (
+    fit_transform_features,
+    prepare_split_datasets,
+    prepare_train_test_data,
+    transform_features,
+)
 from src.utils import ensure_project_dirs, parse_model_list, print_section, save_joblib, save_json
 
 
@@ -112,22 +122,36 @@ def maybe_apply_smote(X_train: np.ndarray, y_train: np.ndarray) -> tuple[np.ndar
 def train_and_evaluate(args: argparse.Namespace) -> None:
     ensure_project_dirs()
 
-    print_section("Loading Dataset")
-    df = sample_dataframe(load_dataset(), args.sample_size, RANDOM_STATE)
-    print_dataset_summary(df)
+    if getattr(args, "train_dataset", None) and getattr(args, "test_dataset", None):
+        print_section("Loading Dedicated Train & Test Datasets")
+        train_df, test_df = load_train_test_datasets(
+            train_path=args.train_dataset,
+            test_path=args.test_dataset,
+            train_sample_size=args.sample_size,
+            test_sample_size=int(args.sample_size * 0.25) if args.sample_size else None,
+            random_state=RANDOM_STATE,
+        )
+        print_dataset_summary(train_df)
+        prepared = prepare_split_datasets(train_df, test_df, task=args.task)
+        df_for_plotting = train_df
+    else:
+        print_section("Loading Dataset")
+        df = sample_dataframe(load_dataset(), args.sample_size, RANDOM_STATE)
+        print_dataset_summary(df)
+        prepared = prepare_train_test_data(df, task=args.task, test_size=args.test_size)
+        df_for_plotting = df
 
-    prepared = prepare_train_test_data(df, task=args.task, test_size=args.test_size)
     target_col = prepared["target_col"]
     class_names = prepared["class_names"]
 
     print_section("Class Distribution")
-    print(df[target_col].astype(str).value_counts())
+    print(df_for_plotting[target_col].astype(str).value_counts())
     plot_class_distribution(
-        df,
+        df_for_plotting,
         target_col,
         FIGURES_DIR / f"{args.task}_class_distribution.png",
     )
-    plot_correlation_heatmap(df, FIGURES_DIR / f"{args.task}_correlation_heatmap.png")
+    plot_correlation_heatmap(df_for_plotting, FIGURES_DIR / f"{args.task}_correlation_heatmap.png")
 
     print_section("Preprocessing")
     print("Dropped columns:")
@@ -213,6 +237,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train classical ML models for TON_IoT.")
     parser.add_argument("--task", choices=["binary", "multiclass"], required=True)
     parser.add_argument("--models", default="all", help="all or comma list: logistic,random_forest,xgboost,svm")
+    parser.add_argument("--dataset", type=Path, default=None, help="Path to single dataset CSV")
+    parser.add_argument("--train-dataset", type=Path, default=None, help="Path to dedicated training CSV")
+    parser.add_argument("--test-dataset", type=Path, default=None, help="Path to dedicated testing CSV")
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--sample-size", type=int, default=None)
     parser.add_argument("--use-smote", action="store_true")

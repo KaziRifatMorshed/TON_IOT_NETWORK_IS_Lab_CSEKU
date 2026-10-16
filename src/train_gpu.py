@@ -47,7 +47,12 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 from config import FIGURES_DIR, MODELS_DIR, RANDOM_STATE, REPORTS_DIR
-from src.random_forest_workflow import CLASS_ORDER, preprocess_dataset
+from src.random_forest_workflow import (
+    CLASS_ORDER,
+    load_network_dataset,
+    preprocess_dataset,
+    preprocess_train_test,
+)
 from src.utils import ensure_project_dirs, print_section, save_json, save_text
 
 
@@ -126,30 +131,40 @@ def train_gpu_pipeline(args: argparse.Namespace) -> None:
     device = setup_gpu()
 
     # 1. Load Data
-    print_section("1. Loading Dataset for GPU Pipeline")
-    csv_path = args.dataset
-    if not csv_path.exists():
-        raise FileNotFoundError(f"Dataset not found at {csv_path}")
+    if getattr(args, "train_dataset", None) and getattr(args, "test_dataset", None):
+        print_section("1. Loading Dedicated Train & Test Datasets for GPU Pipeline")
+        train_df = load_network_dataset(args.train_dataset, args.sample_size, RANDOM_STATE)
+        test_df = load_network_dataset(args.test_dataset, args.sample_size, RANDOM_STATE)
+        print(f"Train Dataset: {args.train_dataset} ({len(train_df):,} rows)")
+        print(f"Test Dataset:  {args.test_dataset} ({len(test_df):,} rows)")
 
-    print(f"Reading dataset: {csv_path}...")
-    df = pd.read_csv(csv_path, low_memory=False)
-    df.columns = df.columns.str.strip()
+        print_section("2. Data Preprocessing & Leakage Removal")
+        X_train_df, y_train, X_test_df, y_test, metadata = preprocess_train_test(train_df, test_df)
+        print(f"Engineered Features: {X_train_df.shape[1]}")
+    else:
+        print_section("1. Loading Dataset for GPU Pipeline")
+        csv_path = args.dataset
+        if not csv_path.exists():
+            raise FileNotFoundError(f"Dataset not found at {csv_path}")
 
-    if args.sample_size and 0 < args.sample_size < len(df):
-        print(f"Sampling {args.sample_size:,} records for experiment...")
-        df = df.sample(n=args.sample_size, random_state=RANDOM_STATE).reset_index(drop=True)
+        print(f"Reading dataset: {csv_path}...")
+        df = pd.read_csv(csv_path, low_memory=False)
+        df.columns = df.columns.str.strip()
 
-    print(f"Dataset Shape: {df.shape[0]:,} rows x {df.shape[1]} columns")
+        if args.sample_size and 0 < args.sample_size < len(df):
+            print(f"Sampling {args.sample_size:,} records for experiment...")
+            df = df.sample(n=args.sample_size, random_state=RANDOM_STATE).reset_index(drop=True)
 
-    # 2. Preprocess Data
-    print_section("2. Data Preprocessing & Leakage Removal")
-    X, y, metadata = preprocess_dataset(df)
-    print(f"Removed duplicates: {metadata['duplicate_rows_removed']:,}")
-    print(f"Engineered Features: {X.shape[1]}")
+        print(f"Dataset Shape: {df.shape[0]:,} rows x {df.shape[1]} columns")
 
-    X_train_df, X_test_df, y_train, y_test = train_test_split(
-        X, y, test_size=args.test_size, random_state=RANDOM_STATE, stratify=y
-    )
+        print_section("2. Data Preprocessing & Leakage Removal")
+        X, y, metadata = preprocess_dataset(df)
+        print(f"Removed duplicates: {metadata['duplicate_rows_removed']:,}")
+        print(f"Engineered Features: {X.shape[1]}")
+
+        X_train_df, X_test_df, y_train, y_test = train_test_split(
+            X, y, test_size=args.test_size, random_state=RANDOM_STATE, stratify=y
+        )
 
     X_train_np = np.ascontiguousarray(X_train_df.to_numpy(), dtype=np.float32)
     X_test_np = np.ascontiguousarray(X_test_df.to_numpy(), dtype=np.float32)
@@ -347,7 +362,9 @@ def train_gpu_pipeline(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="GPU Training Pipeline for TON_IoT.")
     parser.add_argument("--dataset", type=Path, default=ROOT / "data" / "dataset.csv")
-    parser.add_argument("--sample-size", type=int, default=None, help="Sample size (None for full 300,000 dataset)")
+    parser.add_argument("--train-dataset", type=Path, default=None, help="Path to dedicated training CSV")
+    parser.add_argument("--test-dataset", type=Path, default=None, help="Path to dedicated testing CSV")
+    parser.add_argument("--sample-size", type=int, default=None, help="Sample size (None for full dataset)")
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--n-estimators", type=int, default=200)
     parser.add_argument("--epochs", type=int, default=15)

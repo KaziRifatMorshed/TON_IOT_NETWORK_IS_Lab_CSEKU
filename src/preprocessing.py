@@ -156,6 +156,45 @@ def prepare_train_test_data(
     }
 
 
+def prepare_split_datasets(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    task: str,
+    drop_columns: list[str] | None = None,
+) -> dict[str, Any]:
+    """Prepare pre-split train and test datasets with a shared preprocessor and label encoder."""
+    target_col = validate_target_columns(train_df, task)
+    inferred_drop_columns = infer_columns_to_drop(train_df, target_col, drop_columns)
+
+    working_train = train_df.drop(columns=inferred_drop_columns, errors="ignore").dropna(subset=[target_col]).copy()
+    working_test = test_df.drop(columns=inferred_drop_columns, errors="ignore").dropna(subset=[target_col]).copy()
+
+    X_train = working_train.drop(columns=[target_col])
+    y_train_raw = working_train[target_col].astype(str)
+
+    X_test = working_test.drop(columns=[target_col])
+    y_test_raw = working_test[target_col].astype(str)
+
+    label_encoder = LabelEncoder()
+    y_train = label_encoder.fit_transform(y_train_raw)
+    y_test = label_encoder.transform(y_test_raw)
+
+    preprocessor = build_preprocessor(X_train)
+
+    return {
+        "X_train_raw": X_train,
+        "X_test_raw": X_test,
+        "y_train": y_train,
+        "y_test": y_test,
+        "label_encoder": label_encoder,
+        "preprocessor": preprocessor,
+        "target_col": target_col,
+        "dropped_columns": inferred_drop_columns,
+        "feature_columns": X_train.columns.tolist(),
+        "class_names": label_encoder.classes_.tolist(),
+    }
+
+
 def transform_features(preprocessor: ColumnTransformer, X: pd.DataFrame) -> np.ndarray:
     """Transform features and always return a dense float32 array."""
     X_transformed = preprocessor.transform(X)

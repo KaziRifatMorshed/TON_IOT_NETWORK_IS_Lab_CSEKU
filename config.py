@@ -5,6 +5,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 
 DATA_DIR = PROJECT_ROOT / "data"
 DATA_FILE = DATA_DIR / "dataset.csv"
+TRAIN_DATA_FILE = DATA_DIR / "train_normal_dos_ddos.csv"
+TEST_DATA_FILE = DATA_DIR / "test_normal_dos_ddos.csv"
+NORMAL_DOS_DDOS_FILE = DATA_DIR / "dataset_normal_dos_ddos.csv"
 
 LOCAL_CLASS_FILES = {
     "ddos": PROJECT_ROOT / "DDOS.csv",
