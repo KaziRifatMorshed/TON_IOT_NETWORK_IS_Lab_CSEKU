@@ -127,13 +127,17 @@ class TonIoTPresentation(Slide):
         # HELPER: Slide title + green accent line
         # ===========================================================
         def slide_title(text, stripe, font=29):
+            """Build the slide title and green accent line as a single Group,
+            and add them to the slide so they are properly cleared on exit."""
             title = Tex(rf"\textbf{{{text}}}", font_size=font, color=TEXT_MAIN)
             title.next_to(stripe, DOWN, buff=0.26)
             accent = Line(
                 LEFT * 2.0, RIGHT * 2.0,
                 color=NVIDIA_GREEN, stroke_width=2.5
             ).next_to(title, DOWN, buff=0.10)
-            return title, accent
+            title.add_to_scene(self)
+            accent.add_to_scene(self)
+            return VGroup(title, accent)
 
         # ===========================================================
         # SLIDE 1 — Title / Cover
@@ -182,7 +186,7 @@ class TonIoTPresentation(Slide):
         footer = build_footer(2)
         header, stripe = build_header(r"PRESENTERS", r"INFORMATION SECURITY LAB \#7")
 
-        s2_title, s2_accent = slide_title(
+        s2_title = slide_title(
             r"Presented By \hspace{0.4cm} / \hspace{0.4cm} Presented To", stripe, font=26
         )
 
@@ -258,12 +262,12 @@ class TonIoTPresentation(Slide):
         to_card = VGroup(to_bg2, to_header, to_body)
 
         both_cards = VGroup(by_card, to_card).arrange(RIGHT, buff=0.5)
-        both_cards.next_to(s2_accent, DOWN, buff=0.3)
+        both_cards.next_to(s2_title, DOWN, buff=0.3)
 
         self.play(
             FadeOut(s1_content), FadeOut(lab_strip),
             FadeIn(header), FadeIn(footer),
-            Write(s2_title), Create(s2_accent)
+            FadeIn(s2_title)
         )
         self.play(FadeIn(both_cards))
         self.wait(0.2)
@@ -272,11 +276,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 3 — Problem & Objective
         # ===========================================================
-        prev_content = Group(s2_title, s2_accent, both_cards)
+        prev_content = Group(s2_title, both_cards)
         new_footer = build_footer(3)
         header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
 
-        s3_title, s3_accent = slide_title(
+        s3_title = slide_title(
             r"Problem and Objective", stripe
         )
 
@@ -300,7 +304,7 @@ class TonIoTPresentation(Slide):
             card_width=5.8, card_height=3.6
         )
         s3_row = VGroup(prob_card, obj_card).arrange(RIGHT, buff=0.45)
-        s3_row.next_to(s3_accent, DOWN, buff=0.28)
+        s3_row.next_to(s3_title, DOWN, buff=0.28)
 
         self.play(
             FadeOut(prev_content),
@@ -308,7 +312,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
-        self.play(FadeIn(header), Write(s3_title), Create(s3_accent))
+        self.play(FadeIn(header), FadeIn(s3_title))
         self.play(FadeIn(s3_row))
         self.wait(0.2)
         self.next_slide()
@@ -316,11 +320,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 4 — Dataset Overview
         # ===========================================================
-        prev_content = Group(s3_title, s3_accent, s3_row)
+        prev_content = Group(s3_title, s3_row)
         new_footer = build_footer(4)
         header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
 
-        s4_title, s4_accent = slide_title(r"Dataset Overview", stripe)
+        s4_title = slide_title(r"Dataset Overview", stripe)
 
         # Left: attribute table card
         attr_card_bg = RoundedRectangle(
@@ -382,7 +386,7 @@ class TonIoTPresentation(Slide):
         feat_card = VGroup(feat_card_bg, feat_bar, feat_badge, feat_body, feat_note)
 
         s4_row = VGroup(attr_card, feat_card).arrange(RIGHT, buff=0.45)
-        s4_row.next_to(s4_accent, DOWN, buff=0.28)
+        s4_row.next_to(s4_title, DOWN, buff=0.28)
 
         self.play(
             FadeOut(prev_content),
@@ -390,7 +394,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
-        self.play(FadeIn(header), Write(s4_title), Create(s4_accent))
+        self.play(FadeIn(header), FadeIn(s4_title))
         self.play(FadeIn(s4_row))
         self.wait(0.2)
         self.next_slide()
@@ -398,11 +402,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 5 — Class Distribution (embedded figures)
         # ===========================================================
-        prev_content = Group(s4_title, s4_accent, s4_row)
+        prev_content = Group(s4_title, s4_row)
         new_footer = build_footer(5)
         header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
 
-        s5_title, s5_accent = slide_title(r"Class Distribution", stripe)
+        s5_title = slide_title(r"Class Distribution", stripe)
 
         binary_img = (
             ImageMobject("../outputs/figures/rf_workflow_binary_class_distribution.png")
@@ -420,7 +424,7 @@ class TonIoTPresentation(Slide):
         multi_col  = Group(multi_label, multi_img).arrange(DOWN, buff=0.14)
 
         s5_row = Group(binary_col, multi_col).arrange(RIGHT, buff=0.55)
-        s5_row.next_to(s5_accent, DOWN, buff=0.22)
+        s5_row.next_to(s5_title, DOWN, buff=0.22)
 
         caption = Tex(
             r"\textit{The dataset provides enough samples for each selected class, "
@@ -434,7 +438,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
-        self.play(FadeIn(header), Write(s5_title), Create(s5_accent))
+        self.play(FadeIn(header), FadeIn(s5_title))
         self.play(FadeIn(s5_row), FadeIn(caption))
         self.wait(0.2)
         self.next_slide()
@@ -442,12 +446,12 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 6 — Data Preprocessing Steps (6-step cards)
         # ===========================================================
-        prev_content = Group(s5_title, s5_accent, caption)
+        prev_content = Group(s5_title, caption)
         prev_imgs = Group(s5_row)
         new_footer = build_footer(6)
         header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
 
-        s6_title, s6_accent = slide_title(r"Data Preprocessing Steps", stripe)
+        s6_title = slide_title(r"Data Preprocessing Steps", stripe)
 
         def make_step_card(num_str, step_title_str, step_body_str):
             bg = RoundedRectangle(
@@ -498,7 +502,7 @@ class TonIoTPresentation(Slide):
         col_left  = VGroup(step1, step3, step5).arrange(DOWN, buff=0.14)
         col_right = VGroup(step2, step4, step6).arrange(DOWN, buff=0.14)
         s6_grid = VGroup(col_left, col_right).arrange(RIGHT, buff=0.30)
-        s6_grid.next_to(s6_accent, DOWN, buff=0.20)
+        s6_grid.next_to(s6_title, DOWN, buff=0.20)
 
         result_banner_bg = RoundedRectangle(
             corner_radius=0.06, width=12.0, height=0.46,
@@ -519,7 +523,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
-        self.play(FadeIn(header), Write(s6_title), Create(s6_accent))
+        self.play(FadeIn(header), FadeIn(s6_title))
         self.play(FadeIn(s6_grid), FadeIn(result_banner))
         self.wait(0.2)
         self.next_slide()
@@ -527,11 +531,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 7 — Machine Learning Pipeline (horizontal flowchart)
         # ===========================================================
-        prev_content = Group(s6_title, s6_accent, s6_grid, result_banner)
+        prev_content = Group(s6_title, s6_grid, result_banner)
         new_footer = build_footer(7)
         header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
 
-        s7_title, s7_accent = slide_title(r"Machine Learning Pipeline", stripe)
+        s7_title = slide_title(r"Machine Learning Pipeline", stripe)
 
         # Eight pipeline stages
         stage_labels = [
@@ -580,7 +584,7 @@ class TonIoTPresentation(Slide):
             arrows.add(arr)
 
         pipeline_flow = Group(stage_boxes, arrows)
-        pipeline_flow.next_to(s7_accent, DOWN, buff=0.38)
+        pipeline_flow.next_to(s7_title, DOWN, buff=0.38)
 
         # Phase labels below
         phase_data = [
@@ -634,7 +638,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
-        self.play(FadeIn(header), Write(s7_title), Create(s7_accent))
+        self.play(FadeIn(header), FadeIn(s7_title))
         self.play(FadeIn(stage_boxes), FadeIn(arrows))
         self.play(FadeIn(phase_group), FadeIn(pipeline_caption))
         self.play(FadeIn(gpu_img), FadeIn(gpu_label))
@@ -644,12 +648,12 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 8 — Random Forest Model
         # ===========================================================
-        prev_content = Group(s7_title, s7_accent, phase_group, pipeline_caption, gpu_label)
+        prev_content = Group(s7_title, stage_boxes, arrows, phase_group, pipeline_caption, gpu_label)
         prev_imgs = Group(gpu_img)
         new_footer = build_footer(8)
         header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
 
-        s8_title, s8_accent = slide_title(r"Random Forest Model", stripe)
+        s8_title = slide_title(r"Random Forest Model", stripe)
 
         # Left explanation card
         left_card = make_card(
@@ -706,7 +710,7 @@ class TonIoTPresentation(Slide):
         right_card = VGroup(right_card_bg, right_bar, right_badge, param_table, param_note)
 
         s8_row = VGroup(left_card, right_card).arrange(RIGHT, buff=0.45)
-        s8_row.next_to(s8_accent, DOWN, buff=0.28)
+        s8_row.next_to(s8_title, DOWN, buff=0.28)
 
         self.play(
             FadeOut(prev_content), FadeOut(prev_imgs),
@@ -714,7 +718,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
-        self.play(FadeIn(header), Write(s8_title), Create(s8_accent))
+        self.play(FadeIn(header), FadeIn(s8_title))
         self.play(FadeIn(s8_row))
         self.wait(0.2)
         self.next_slide()
@@ -722,11 +726,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 9 — Results & Performance
         # ===========================================================
-        prev_content = Group(s8_title, s8_accent, s8_row)
+        prev_content = Group(s8_title, s8_row)
         new_footer = build_footer(9)
         header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
 
-        s9_title, s9_accent = slide_title(r"Results \& Performance", stripe)
+        s9_title = slide_title(r"Results \& Performance", stripe)
 
         # Top stat boxes
         def make_stat_box(value_str, label_str, color=NVIDIA_DARK_GREEN):
@@ -745,7 +749,7 @@ class TonIoTPresentation(Slide):
         sb3 = make_stat_box(r"99.99\%",  "Recall",     NVIDIA_DARK_GREEN)
         sb4 = make_stat_box(r"1.000",    "ROC-AUC",    "#1565C0")
         stats_row = VGroup(sb1, sb2, sb3, sb4).arrange(RIGHT, buff=0.30)
-        stats_row.next_to(s9_accent, DOWN, buff=0.26)
+        stats_row.next_to(s9_title, DOWN, buff=0.26)
 
         # Classification report table
         report_card_bg = RoundedRectangle(
@@ -791,7 +795,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
-        self.play(FadeIn(header), Write(s9_title), Create(s9_accent))
+        self.play(FadeIn(header), FadeIn(s9_title))
         self.play(FadeIn(stats_row))
         self.play(FadeIn(report_card), FadeIn(report_note))
         self.wait(0.2)
@@ -800,11 +804,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 10 — Confusion Matrix
         # ===========================================================
-        prev_content = Group(s9_title, s9_accent, stats_row, report_card, report_note)
+        prev_content = Group(s9_title, stats_row, report_card, report_note)
         new_footer = build_footer(10)
         header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
 
-        s10_title, s10_accent = slide_title(r"Confusion Matrix", stripe)
+        s10_title = slide_title(r"Confusion Matrix", stripe)
 
         cm_img = (
             ImageMobject("../outputs/figures/rf_workflow_confusion_matrix.png")
@@ -839,7 +843,7 @@ class TonIoTPresentation(Slide):
         reading_card = VGroup(reading_card_bg, reading_bar, reading_badge, reading_body)
 
         s10_row = Group(cm_img, reading_card).arrange(RIGHT, buff=0.45)
-        s10_row.next_to(s10_accent, DOWN, buff=0.26)
+        s10_row.next_to(s10_title, DOWN, buff=0.26)
 
         self.play(
             FadeOut(prev_content),
@@ -847,7 +851,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
-        self.play(FadeIn(header), Write(s10_title), Create(s10_accent))
+        self.play(FadeIn(header), FadeIn(s10_title))
         self.play(FadeIn(s10_row))
         self.wait(0.2)
         self.next_slide()
@@ -855,12 +859,12 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 11 — ROC Curves & Feature Importance
         # ===========================================================
-        prev_content = Group(s10_title, s10_accent)
+        prev_content = Group(s10_title)
         prev_imgs = Group(s10_row)
         new_footer = build_footer(11)
         header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
 
-        s11_title, s11_accent = slide_title(
+        s11_title = slide_title(
             r"ROC Curves and Feature Importance", stripe, font=27
         )
 
@@ -893,7 +897,7 @@ class TonIoTPresentation(Slide):
         roc_col = Group(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
         fi_col  = Group(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
         s11_row = Group(roc_col, fi_col).arrange(RIGHT, buff=0.45)
-        s11_row.next_to(s11_accent, DOWN, buff=0.20)
+        s11_row.next_to(s11_title, DOWN, buff=0.20)
 
         self.play(
             FadeOut(prev_content), FadeOut(prev_imgs),
@@ -901,7 +905,7 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
-        self.play(FadeIn(header), Write(s11_title), Create(s11_accent))
+        self.play(FadeIn(header), FadeIn(s11_title))
         self.play(FadeIn(s11_row))
         self.wait(0.2)
         self.next_slide()
@@ -909,7 +913,7 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 12 — Thank You / Q&A
         # ===========================================================
-        prev_content = Group(s11_title, s11_accent)
+        prev_content = Group(s11_title)
         prev_imgs = Group(s11_row)
         new_footer = build_footer(12)
         header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
