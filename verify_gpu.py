@@ -26,7 +26,10 @@ def check_system_info() -> dict[str, str]:
         "Platform": platform.platform(),
         "Python Version": platform.python_version(),
         "Python Executable": sys.executable,
-        "In Virtual Environment": str(hasattr(sys, "real_prefix") or (hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix)),
+        "In Virtual Environment": str(
+            hasattr(sys, "real_prefix")
+            or (hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix)
+        ),
     }
     for k, v in info.items():
         print(f"  {k:<25}: {v}")
@@ -37,7 +40,11 @@ def check_nvidia_smi() -> bool:
     print_header("2. NVIDIA Driver Check (nvidia-smi)")
     try:
         result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader"],
+            [
+                "nvidia-smi",
+                "--query-gpu=name,driver_version,memory.total",
+                "--format=csv,noheader",
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -54,23 +61,33 @@ def check_nvidia_smi() -> bool:
 
             # Specific advice for RTX 50-series (Blackwell) vs RTX 30-series (Ampere)
             if "5070" in gpu_name or "5080" in gpu_name or "5090" in gpu_name:
-                print(f"  Architecture Detected    : NVIDIA Blackwell (SM 12.0 / RTX 50-series)")
+                print(
+                    f"  Architecture Detected    : NVIDIA Blackwell (SM 12.0 / RTX 50-series)"
+                )
                 try:
                     major_ver = int(driver_ver.split(".")[0])
                     if major_ver < 570:
-                        print("  [WARNING] RTX 50-series GPUs require NVIDIA driver >= 570.xx.")
+                        print(
+                            "  [WARNING] RTX 50-series GPUs require NVIDIA driver >= 570.xx."
+                        )
                     else:
-                        print("  [OK] NVIDIA driver version supports RTX 50-series Blackwell architecture.")
+                        print(
+                            "  [OK] NVIDIA driver version supports RTX 50-series Blackwell architecture."
+                        )
                 except ValueError:
                     pass
             elif "3060" in gpu_name or "30" in gpu_name:
-                print(f"  Architecture Detected    : NVIDIA Ampere (SM 8.6 / RTX 30-series)")
+                print(
+                    f"  Architecture Detected    : NVIDIA Ampere (SM 8.6 / RTX 30-series)"
+                )
                 print("  [OK] RTX 30-series Ampere GPU fully supported.")
 
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("  [WARNING] 'nvidia-smi' command not found or failed.")
-        print("            Ensure NVIDIA proprietary drivers are installed on this system.")
+        print(
+            "            Ensure NVIDIA proprietary drivers are installed on this system."
+        )
         return False
 
 
@@ -90,7 +107,9 @@ def check_pytorch_cuda() -> bool:
 
     if not cuda_ok:
         print("  [FAIL] PyTorch cannot access CUDA GPU.")
-        print("         If using RTX 5070 Ti, ensure PyTorch with CUDA 12.8+ / Blackwell support is installed.")
+        print(
+            "         If using RTX 5070 Ti, ensure PyTorch with CUDA 12.8+ / Blackwell support is installed."
+        )
         return False
 
     count = torch.cuda.device_count()
@@ -106,18 +125,24 @@ def check_pytorch_cuda() -> bool:
         # TensorFloat-32 Check for Ampere (sm_86) and Blackwell (sm_120)
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
-        print(f"    TensorFloat-32 (TF32)  : Enabled (accelerates matmul on Ampere/Blackwell)")
+        print(
+            f"    TensorFloat-32 (TF32)  : Enabled (accelerates matmul on Ampere/Blackwell)"
+        )
 
         # Run real GPU tensor calculation test
         try:
             x = torch.randn(2048, 2048, device=f"cuda:{idx}", dtype=torch.float32)
             y = torch.matmul(x, x)
             torch.cuda.synchronize(idx)
-            print(f"    CUDA Matmul Test (2048x2048): PASSED (result shape {list(y.shape)})")
+            print(
+                f"    CUDA Matmul Test (2048x2048): PASSED (result shape {list(y.shape)})"
+            )
         except Exception as exc:
             print(f"    [FAIL] CUDA kernel execution failed: {exc}")
             if cap[0] >= 12 or (cap[0] == 10 and cap[1] == 0):
-                print("           Note: For RTX 50-series Blackwell GPUs, PyTorch with CUDA 12.8+ (sm_120) is required.")
+                print(
+                    "           Note: For RTX 50-series Blackwell GPUs, PyTorch with CUDA 12.8+ (sm_120) is required."
+                )
             return False
 
     print("  [OK] PyTorch CUDA verification passed.")
@@ -148,11 +173,15 @@ def check_xgboost_gpu() -> bool:
         )
         clf.fit(X_dummy, y_dummy)
         preds = clf.predict(X_dummy)
-        print("  XGBoost device='cuda' Fit : PASSED (GPU histogram tree building active)")
+        print(
+            "  XGBoost device='cuda' Fit : PASSED (GPU histogram tree building active)"
+        )
         print("  [OK] XGBoost GPU verification passed.")
         return True
     except Exception as exc:
-        print(f"  [INFO] XGBoost GPU acceleration test failed or not supported by current wheel: {exc}")
+        print(
+            f"  [INFO] XGBoost GPU acceleration test failed or not supported by current wheel: {exc}"
+        )
         print("         XGBoost will fall back to CPU multi-threading automatically.")
         return False
 
@@ -183,10 +212,14 @@ def main() -> int:
 
     print_header("Verification Summary")
     if torch_ok:
-        print("  [SUCCESS] GPU acceleration is fully active and validated for this environment!")
+        print(
+            "  [SUCCESS] GPU acceleration is fully active and validated for this environment!"
+        )
         print("            - Deep Learning (PyTorch MLP): GPU Accelerated")
         if xgb_ok:
-            print("            - Classical ML (XGBoost): GPU Accelerated (device='cuda')")
+            print(
+                "            - Classical ML (XGBoost): GPU Accelerated (device='cuda')"
+            )
         print("            - Random Forest: Multi-threaded CPU (n_jobs=-1)")
         print("\n  You can now run any workflow:")
         print("    python -m src.random_forest_workflow")
@@ -194,7 +227,9 @@ def main() -> int:
         print("    python -m src.train_ml --task binary --models xgboost --device cuda")
         return 0
     else:
-        print("  [NOTICE] GPU acceleration was not confirmed. Please see troubleshooting in README.md.")
+        print(
+            "  [NOTICE] GPU acceleration was not confirmed. Please see troubleshooting in README.md."
+        )
         return 1
 
 
