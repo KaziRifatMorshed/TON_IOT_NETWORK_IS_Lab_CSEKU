@@ -176,6 +176,21 @@ These prove your models actually trained and can make predictions:
 ## 4. Understanding the Problem & Dataset
 
 ### Dataset Specifications
+
+This project accommodates two dataset configurations:
+
+#### Option A: Dedicated 8.2M / 2.0M Pre-Split Datasets (Recommended for Rigorous Evaluation)
+- Extracted directly from the full TON_IoT network capture (`dataset_cleaned.csv`):
+  - **Total 3-Class Records**: `10,336,716` network flows
+  - **Train Set (80%)**: `data/train_normal_dos_ddos.csv` (**8,271,593 rows**, ~1.2 GB)
+  - **Test Set (20%)**: `data/test_normal_dos_ddos.csv` (**2,065,123 rows**, ~293 MB)
+  - **Combined 3-Class Source**: `data/dataset_normal_dos_ddos.csv` (10,336,716 rows, ~1.5 GB)
+  - **Class Counts**:
+    - `ddos`: 6,165,008 samples
+    - `dos`: 3,375,328 samples
+    - `normal`: 796,380 samples
+
+#### Option B: Standard Benchmark Subset
 - **File**: `data/dataset.csv`
 - **Total Records**: `300,000` network flows
 - **Feature Count**: `46` raw attributes (collected via Zeek/Bro Network Security Monitor)
@@ -226,7 +241,13 @@ Run the verification utility to guarantee GPU acceleration is ready:
 Because both you and your project mate have dedicated NVIDIA GPUs (RTX 3060 12GB & RTX 5070 Ti 16GB), you can run the entire workflow on the GPU:
 
 ```bash
-# Run GPU training on 50,000 samples (takes under 4 seconds total!):
+# Option A: Run using dedicated 8.2M Train & 2M Test datasets (Sampled or Full):
+.venv/bin/python -m src.train_gpu \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --sample-size 100000 --epochs 10
+
+# Option B: Run GPU training on standard dataset (50,000 samples, ~3s):
 .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10
 
 # Or run GPU training on the entire 300,000 dataset:
@@ -246,7 +267,13 @@ Because both you and your project mate have dedicated NVIDIA GPUs (RTX 3060 12GB
 For the detailed Random Forest analysis with ROC curves and feature importance:
 
 ```bash
-# GPU Random Forest on 50,000 samples:
+# Dedicated 8.2M train / 2M test sets (Sampled 100,000 records on CUDA):
+.venv/bin/python -m src.random_forest_workflow \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --sample-size 100000 --device cuda
+
+# GPU Random Forest on 50,000 samples (standard dataset):
 .venv/bin/python -m src.random_forest_workflow --sample-size 50000 --device cuda
 
 # GPU Random Forest on full 300,000 dataset:
@@ -527,16 +554,28 @@ Be prepared to answer these technical questions:
 
 ### 2. Run the Unified GPU Training Pipeline (Recommended)
 ```bash
-# Fast run (50,000 samples - takes ~3 seconds):
+# Option A: Dedicated 8.2M Train & 2.0M Test datasets (Sampled or Full):
+.venv/bin/python -m src.train_gpu \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --sample-size 100000 --epochs 10
+
+# Option B: Standard 300,000 dataset (Fast 50,000 samples on CUDA):
 .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10
 
-# Full run on all 300,000 samples:
+# Full run on standard 300,000 samples:
 .venv/bin/python -m src.train_gpu --epochs 15
 ```
 
 ### 3. Run GPU-Accelerated Random Forest (200 Parallel Trees on CUDA)
 ```bash
-# 50,000 samples on GPU:
+# Dedicated 8.2M Train & 2.0M Test datasets:
+.venv/bin/python -m src.random_forest_workflow \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --sample-size 100000 --device cuda
+
+# Standard dataset (50,000 samples on GPU):
 .venv/bin/python -m src.random_forest_workflow --sample-size 50000 --device cuda
 
 # Full 300,000 dataset on GPU:
@@ -545,11 +584,25 @@ Be prepared to answer these technical questions:
 
 ### 4. Run PyTorch Deep MLP on GPU
 ```bash
+# Dedicated 8.2M train / 2M test sets:
+.venv/bin/python -m src.train_dl --task multiclass \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --device cuda --epochs 20 --batch-size 1024
+
+# Standard dataset:
 .venv/bin/python -m src.train_dl --task multiclass --device cuda --epochs 20 --batch-size 1024
 ```
 
 ### 5. Run XGBoost on GPU
 ```bash
+# Dedicated 8.2M train / 2M test sets:
+.venv/bin/python -m src.train_ml --task multiclass --models xgboost \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --device cuda
+
+# Standard dataset:
 .venv/bin/python -m src.train_ml --task multiclass --models xgboost --device cuda
 ```
 
