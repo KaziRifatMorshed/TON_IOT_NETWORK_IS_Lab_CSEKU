@@ -100,19 +100,25 @@ This repository is optimized and tested for:
 
 ## Dataset
 
-Expected dataset path:
+This repository supports both standard and large-scale experimental configurations:
 
-```text
-data/dataset.csv
-```
+### 1. Dedicated Large-Scale Pre-Split Datasets (80/20)
+Formed by extracting all `normal`, `dos`, and `ddos` records (10,336,716 total records, ~1.5 GB) from the full TON_IoT network capture (`dataset_cleaned.csv`), and partitioned with zero overlap:
 
-The CSV must contain the TON_IoT network records and a `type` column with the three classes used by this workflow: `normal`, `dos`, and `ddos`.
+- **Training Dataset (80%)**: [`data/train_normal_dos_ddos.csv`](file:///home/noobcod3r-rtx/Documents/GitHub/TON_IOT_NETWORK_IS_Lab_CSEKU/data/train_normal_dos_ddos.csv)
+  - **Size**: ~1.2 GB
+  - **Record Count**: **8,271,593 rows**
+- **Testing Dataset (20%)**: [`data/test_normal_dos_ddos.csv`](file:///home/noobcod3r-rtx/Documents/GitHub/TON_IOT_NETWORK_IS_Lab_CSEKU/data/test_normal_dos_ddos.csv)
+  - **Size**: ~293 MB
+  - **Record Count**: **2,065,123 rows**
+- **Full Combined 3-Class Dataset**: [`data/dataset_normal_dos_ddos.csv`](file:///home/noobcod3r-rtx/Documents/GitHub/TON_IOT_NETWORK_IS_Lab_CSEKU/data/dataset_normal_dos_ddos.csv)
+  - **Size**: ~1.5 GB
+  - **Record Count**: **10,336,716 rows** (`ddos`: 6,165,008 | `dos`: 3,375,328 | `normal`: 796,380)
 
-If `data/dataset.csv` is missing, `src/data_loader.py` can also combine local root-level class files named:
-
-- `DDOS.csv`
-- `DOS.csv`
-- `Normal.csv`
+### 2. Standard Benchmark Dataset
+- **Path**: [`data/dataset.csv`](file:///home/noobcod3r-rtx/Documents/GitHub/TON_IOT_NETWORK_IS_Lab_CSEKU/data/dataset.csv)
+  - **Size**: ~43 MB (300,000 rows — 100k DDoS, 100k DoS, 100k Normal)
+  - If `data/dataset.csv` is missing, `src/data_loader.py` can fall back to local root-level class files: `DDOS.csv`, `DOS.csv`, `Normal.csv`.
 
 ---
 
@@ -215,22 +221,38 @@ Expected output:
 
 Trains and evaluates **GPU Random Forest**, **GPU XGBoost**, and **PyTorch Deep MLP** entirely on your NVIDIA CUDA GPU (RTX 3060 / RTX 5070 Ti) with zero CPU model training:
 
-- Linux:
+- **Using Dedicated 8.2M Train / 2M Test Datasets**:
   ```bash
-  # Fast run (50,000 samples, ~3 seconds):
-  .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10
+  # Fast GPU benchmark (e.g. 100,000 samples on CUDA):
+  .venv/bin/python -m src.train_gpu \
+    --train-dataset data/train_normal_dos_ddos.csv \
+    --test-dataset data/test_normal_dos_ddos.csv \
+    --sample-size 100000 --epochs 10
 
-  # Full 300,000 dataset run:
-  .venv/bin/python -m src.train_gpu --epochs 15
+  # Full dataset execution:
+  .venv/bin/python -m src.train_gpu \
+    --train-dataset data/train_normal_dos_ddos.csv \
+    --test-dataset data/test_normal_dos_ddos.csv \
+    --epochs 15
   ```
-- Windows:
-  ```cmd
-  REM Fast run (50,000 samples):
-  .venv\Scripts\python.exe -m src.train_gpu --sample-size 50000 --epochs 10
 
-  REM Full 300,000 dataset run:
-  .venv\Scripts\python.exe -m src.train_gpu --epochs 15
-  ```
+- **Using Standard 300,000 Dataset**:
+  - Linux:
+    ```bash
+    # Fast run (50,000 samples, ~3 seconds):
+    .venv/bin/python -m src.train_gpu --sample-size 50000 --epochs 10
+
+    # Full 300,000 dataset run:
+    .venv/bin/python -m src.train_gpu --epochs 15
+    ```
+  - Windows:
+    ```cmd
+    REM Fast run (50,000 samples):
+    .venv\Scripts\python.exe -m src.train_gpu --sample-size 50000 --epochs 10
+
+    REM Full 300,000 dataset run:
+    .venv\Scripts\python.exe -m src.train_gpu --epochs 15
+    ```
 
 ---
 
@@ -238,14 +260,24 @@ Trains and evaluates **GPU Random Forest**, **GPU XGBoost**, and **PyTorch Deep 
 
 Full run on NVIDIA GPU:
 
-- Linux:
+- **Using Dedicated Train & Test Sets**:
   ```bash
-  .venv/bin/python -m src.random_forest_workflow --device cuda
+  .venv/bin/python -m src.random_forest_workflow \
+    --train-dataset data/train_normal_dos_ddos.csv \
+    --test-dataset data/test_normal_dos_ddos.csv \
+    --sample-size 100000 \
+    --device cuda
   ```
-- Windows:
-  ```cmd
-  .venv\Scripts\python.exe -m src.random_forest_workflow --device cuda
-  ```
+
+- **Using Standard Benchmark Dataset**:
+  - Linux:
+    ```bash
+    .venv/bin/python -m src.random_forest_workflow --device cuda
+    ```
+  - Windows:
+    ```cmd
+    .venv\Scripts\python.exe -m src.random_forest_workflow --device cuda
+    ```
 
 Fast smoke test (sample size 3,000):
 
