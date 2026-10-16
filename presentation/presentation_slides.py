@@ -382,7 +382,7 @@ class TonIoTPresentation(Slide):
             r"\textit{The dataset provides network-flow level information suitable for}\\[0.02cm]"
             r"\textit{supervised intrusion detection using Random Forest.}",
             font_size=18, color=TEXT_MUTED
-        ).next_to(feat_body, DOWN, buff=0.22)
+        ).next_to(feat_body, DOWN, buff=0.22).set(width=5.7)
         feat_card = VGroup(feat_card_bg, feat_bar, feat_badge, feat_body, feat_note)
 
         s4_row = VGroup(attr_card, feat_card).arrange(RIGHT, buff=0.45)
@@ -430,7 +430,7 @@ class TonIoTPresentation(Slide):
             r"\textit{The dataset provides enough samples for each selected class, "
             r"supporting stable model training and evaluation.}",
             font_size=18, color=TEXT_MUTED
-        ).next_to(s5_row, DOWN, buff=0.16)
+        ).next_to(s5_row, DOWN, buff=0.16).set(width=12.2)
 
         self.play(
             FadeOut(prev_content),
@@ -513,7 +513,7 @@ class TonIoTPresentation(Slide):
             r"\textit{Result: a clean numeric feature matrix ready for Random Forest "
             r"training and evaluation.}",
             font_size=18, color=NVIDIA_DARK_GREEN
-        ).move_to(result_banner_bg.get_center())
+        ).set(width=11.5).move_to(result_banner_bg.get_center())
         result_banner = VGroup(result_banner_bg, result_banner_tx)
         result_banner.next_to(s6_grid, DOWN, buff=0.16)
 
@@ -617,7 +617,7 @@ class TonIoTPresentation(Slide):
             r"\textit{Model saved as joblib for reuse | Metrics, reports, figures, "
             r"and run configuration are saved automatically.}",
             font_size=18, color=NVIDIA_DARK_GREEN
-        ).move_to(pipeline_caption_bg.get_center())
+        ).set(width=11.5).move_to(pipeline_caption_bg.get_center())
         pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
         pipeline_caption.next_to(phase_group, DOWN, buff=0.24)
 
@@ -630,7 +630,7 @@ class TonIoTPresentation(Slide):
         gpu_label = Tex(
             r"\textbf{GPU Model Comparison} (Random Forest vs XGBoost vs Deep MLP)",
             font_size=18, color=TEXT_MUTED
-        ).next_to(gpu_img, DOWN, buff=0.08)
+        ).next_to(gpu_img, DOWN, buff=0.08).set(width=11.5)
 
         self.play(
             FadeOut(prev_content),
@@ -706,7 +706,7 @@ class TonIoTPresentation(Slide):
         param_note = Tex(
             r"\textit{Configured for stable, reproducible multi-class traffic classification.}",
             font_size=18, color=TEXT_MUTED
-        ).next_to(param_table, DOWN, buff=0.14)
+        ).next_to(param_table, DOWN, buff=0.14).set(width=5.6)
         right_card = VGroup(right_card_bg, right_bar, right_badge, param_table, param_note)
 
         s8_row = VGroup(left_card, right_card).arrange(RIGHT, buff=0.45)
@@ -787,7 +787,7 @@ class TonIoTPresentation(Slide):
             r"\textit{Interpretation: high precision limits false alarms, high recall "
             r"catches attacks, and macro F1 confirms balanced Normal/DoS/DDoS performance.}",
             font_size=18, color=TEXT_MUTED
-        ).next_to(report_card, DOWN, buff=0.14)
+        ).next_to(report_card, DOWN, buff=0.14).set(width=11.5)
 
         self.play(
             FadeOut(prev_content),
@@ -887,12 +887,12 @@ class TonIoTPresentation(Slide):
             r"\textit{Curves close to the top-left corner and AUC near 1.000}\\[0.02cm]"
             r"\textit{indicate excellent separation between all three classes.}",
             font_size=19, color=TEXT_MUTED
-        )
+        ).set(width=5.8)
         fi_note = Tex(
             r"\textit{Top-ranked traffic fields contribute most to model}\\[0.02cm]"
             r"\textit{decisions, making the classifier easier to explain.}",
             font_size=19, color=TEXT_MUTED
-        )
+        ).set(width=5.8)
 
         roc_col = Group(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
         fi_col  = Group(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
@@ -936,7 +936,7 @@ class TonIoTPresentation(Slide):
             r"\textbf{Repository:}\hspace{0.3cm}"
             r"\texttt{https://github.com/KaziRifatMorshed/TON\_IOT\_NETWORK\_IS\_Lab\_CSEKU}",
             font_size=18, color=NVIDIA_DARK_GREEN
-        ).move_to(repo_bg.get_center())
+        ).set(width=8.5).move_to(repo_bg.get_center())
         repo_card = VGroup(repo_bg, repo_tex)
 
         ty_group = VGroup(ty_main, ty_accent, ty_sub).arrange(DOWN, buff=0.22)
