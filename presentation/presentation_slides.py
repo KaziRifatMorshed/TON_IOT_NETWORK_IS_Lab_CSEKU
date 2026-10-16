@@ -116,7 +116,7 @@ class TonIoTPresentation(Slide):
                 fill_color=header_color, fill_opacity=1.0, stroke_width=0
             ).align_to(bg, UP)
             badge = Tex(
-                rf"\textbf{{{header_text}}}", font_size=17, color=WHITE_COLOR
+                rf"\textbf{{{header_text}}}", font_size=18, color=WHITE_COLOR
             ).move_to(top_bar.get_center())
             body = Tex(body_tex_str, font_size=body_font, color=TEXT_MAIN).next_to(
                 top_bar, DOWN, buff=0.20
@@ -169,7 +169,7 @@ class TonIoTPresentation(Slide):
         lab_strip_text = Tex(
             r"\textbf{Information Security Laboratory \hspace{0.3cm} | \hspace{0.3cm} "
             r"Khulna University, Khulna}",
-            font_size=17, color=WHITE_COLOR
+            font_size=18, color=WHITE_COLOR
         ).move_to(lab_strip_bg.get_center())
         lab_strip = Group(lab_strip_bg, lab_strip_text)
 
@@ -196,20 +196,20 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
         )
         by_header_text = Tex(
-            r"\textbf{PRESENTED BY}", font_size=17, color=WHITE_COLOR
+            r"\textbf{PRESENTED BY}", font_size=18, color=WHITE_COLOR
         ).move_to(by_header_bg.get_center())
         by_header = VGroup(by_header_bg, by_header_text)
 
         s1_name = Tex(r"\textbf{Md Siam Ahmed}", font_size=22, color=TEXT_MAIN)
-        s1_id   = Tex(r"Student ID: 230202", font_size=17, color=TEXT_MUTED)
+        s1_id   = Tex(r"Student ID: 230202", font_size=18, color=TEXT_MUTED)
         s2_name = Tex(r"\textbf{Kazi Rifat Morshed}", font_size=22, color=TEXT_MAIN)
-        s2_id   = Tex(r"Student ID: 230220", font_size=17, color=TEXT_MUTED)
+        s2_id   = Tex(r"Student ID: 230220", font_size=18, color=TEXT_MUTED)
         div_line = Line(LEFT * 2.4, RIGHT * 2.4, color=CARD_BORDER, stroke_width=1.0)
         dept_by  = Tex(
             r"Computer Science \& Engineering Discipline\\[0.04cm]Khulna University, Khulna",
-            font_size=16, color=TEXT_MUTED
+            font_size=19, color=TEXT_MUTED
         )
-        sem_info = Tex(r"\textit{4th Year, 1st Semester}", font_size=15, color=NVIDIA_ACCENT_GREEN)
+        sem_info = Tex(r"\textit{4th Year, 1st Semester}", font_size=18, color=NVIDIA_ACCENT_GREEN)
 
         by_body = VGroup(
             VGroup(s1_name, s1_id).arrange(DOWN, buff=0.05),
@@ -232,20 +232,20 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
         )
         to_header_text = Tex(
-            r"\textbf{PRESENTED TO}", font_size=17, color=WHITE_COLOR
+            r"\textbf{PRESENTED TO}", font_size=18, color=WHITE_COLOR
         ).move_to(to_header_bg.get_center())
         to_header = VGroup(to_header_bg, to_header_text)
 
         sup_name  = Tex(r"\textbf{Dr. Anupam Kumar Bairagi}", font_size=22, color=TEXT_MAIN)
-        sup_desig = Tex(r"Professor", font_size=17, color=TEXT_MUTED)
+        sup_desig = Tex(r"Professor", font_size=18, color=TEXT_MUTED)
         div_line2 = Line(LEFT * 2.4, RIGHT * 2.4, color=CARD_BORDER, stroke_width=1.0)
         sup_dept  = Tex(
             r"Computer Science \& Engineering Discipline\\[0.04cm]Khulna University, Khulna",
-            font_size=16, color=TEXT_MUTED
+            font_size=19, color=TEXT_MUTED
         )
         course_tag = Tex(
             r"\textit{Course: Information Security Laboratory}",
-            font_size=15, color=NVIDIA_ACCENT_GREEN
+            font_size=18, color=NVIDIA_ACCENT_GREEN
         )
         to_body = VGroup(
             VGroup(sup_name, sup_desig).arrange(DOWN, buff=0.05),
@@ -337,7 +337,7 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
         ).align_to(attr_card_bg, UP)
         attr_badge = Tex(
-            r"\textbf{Dataset Attributes}", font_size=17, color=WHITE_COLOR
+            r"\textbf{Dataset Attributes}", font_size=18, color=WHITE_COLOR
         ).move_to(attr_bar.get_center())
         attr_table = Tex(
             r"\renewcommand{\arraystretch}{1.35}" "\n"
@@ -353,7 +353,7 @@ class TonIoTPresentation(Slide):
             r"Final Features & 45 columns \\" "\n"
             r"\hline" "\n"
             r"\end{tabular}",
-            font_size=17, color=TEXT_MAIN
+            font_size=18, color=TEXT_MAIN
         ).next_to(attr_bar, DOWN, buff=0.25).set(width=4.9)
         attr_card = VGroup(attr_card_bg, attr_bar, attr_badge, attr_table)
 
@@ -368,7 +368,7 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
         ).align_to(feat_card_bg, UP)
         feat_badge = Tex(
-            r"\textbf{Feature Groups}", font_size=17, color=WHITE_COLOR
+            r"\textbf{Feature Groups}", font_size=18, color=WHITE_COLOR
         ).move_to(feat_bar.get_center())
         feat_body = Tex(
             r"\textbf{Network Identity:}\hspace{0.3cm} IP addresses, ports\\[0.14cm]"
@@ -376,12 +376,12 @@ class TonIoTPresentation(Slide):
             r"\textbf{Traffic Volume:}\hspace{0.35cm} packet counts, byte counts\\[0.14cm]"
             r"\textbf{Timing Features:}\hspace{0.3cm} duration and flow timing\\[0.14cm]"
             r"\textbf{Application Fields:}\hspace{0.1cm} HTTP, DNS, SSL indicators",
-            font_size=16, color=TEXT_MAIN
+            font_size=19, color=TEXT_MAIN
         ).next_to(feat_bar, DOWN, buff=0.30).set(width=5.75)
         feat_note = Tex(
             r"\textit{The dataset provides network-flow level information suitable for}\\[0.02cm]"
             r"\textit{supervised intrusion detection using Random Forest.}",
-            font_size=13, color=TEXT_MUTED
+            font_size=18, color=TEXT_MUTED
         ).next_to(feat_body, DOWN, buff=0.22)
         feat_card = VGroup(feat_card_bg, feat_bar, feat_badge, feat_body, feat_note)
 
@@ -410,15 +410,15 @@ class TonIoTPresentation(Slide):
 
         binary_img = (
             ImageMobject("../outputs/figures/rf_workflow_binary_class_distribution.png")
-            .set(height=3.6)
+            .set(height=3.9)
         )
         multi_img = (
             ImageMobject("../outputs/figures/rf_workflow_multiclass_distribution.png")
-            .set(height=3.6)
+            .set(height=3.9)
         )
 
-        binary_label = Tex(r"\textbf{Binary Distribution}", font_size=16, color=NVIDIA_DARK_GREEN)
-        multi_label  = Tex(r"\textbf{Multiclass Distribution}", font_size=16, color=NVIDIA_DARK_GREEN)
+        binary_label = Tex(r"\textbf{Binary Distribution}", font_size=19, color=NVIDIA_DARK_GREEN)
+        multi_label  = Tex(r"\textbf{Multiclass Distribution}", font_size=19, color=NVIDIA_DARK_GREEN)
 
         binary_col = Group(binary_label, binary_img).arrange(DOWN, buff=0.14)
         multi_col  = Group(multi_label, multi_img).arrange(DOWN, buff=0.14)
@@ -429,7 +429,7 @@ class TonIoTPresentation(Slide):
         caption = Tex(
             r"\textit{The dataset provides enough samples for each selected class, "
             r"supporting stable model training and evaluation.}",
-            font_size=14, color=TEXT_MUTED
+            font_size=18, color=TEXT_MUTED
         ).next_to(s5_row, DOWN, buff=0.16)
 
         self.play(
@@ -464,13 +464,13 @@ class TonIoTPresentation(Slide):
                 fill_opacity=1.0, stroke_width=0
             ).align_to(bg, LEFT).shift(RIGHT * 0.34).align_to(bg, UP).shift(DOWN * 0.38)
             num_tex = Tex(
-                rf"\textbf{{{num_str}}}", font_size=16, color=WHITE_COLOR
+                rf"\textbf{{{num_str}}}", font_size=19, color=WHITE_COLOR
             ).move_to(num_circle.get_center())
             title_tex = Tex(
-                rf"\textbf{{{step_title_str}}}", font_size=16, color=NVIDIA_DARK_GREEN
+                rf"\textbf{{{step_title_str}}}", font_size=19, color=NVIDIA_DARK_GREEN
             ).next_to(num_circle, RIGHT, buff=0.18).align_to(num_circle, UP)
             body_tex = Tex(
-                step_body_str, font_size=14, color=TEXT_MAIN
+                step_body_str, font_size=16, color=TEXT_MAIN
             ).next_to(title_tex, DOWN, buff=0.10).align_to(title_tex, LEFT).set(width=4.8)
             return VGroup(bg, num_circle, num_tex, title_tex, body_tex)
 
@@ -512,7 +512,7 @@ class TonIoTPresentation(Slide):
         result_banner_tx = Tex(
             r"\textit{Result: a clean numeric feature matrix ready for Random Forest "
             r"training and evaluation.}",
-            font_size=14, color=NVIDIA_DARK_GREEN
+            font_size=18, color=NVIDIA_DARK_GREEN
         ).move_to(result_banner_bg.get_center())
         result_banner = VGroup(result_banner_bg, result_banner_tx)
         result_banner.next_to(s6_grid, DOWN, buff=0.16)
@@ -566,8 +566,8 @@ class TonIoTPresentation(Slide):
                 fill_color=WHITE_COLOR, fill_opacity=1.0,
                 stroke_color=NVIDIA_GREEN, stroke_width=1.8
             )
-            lbl = Tex(label, font_size=11, color=NVIDIA_DARK_GREEN)
-            sub_tex = Tex(sub, font_size=10, color=TEXT_MUTED)
+            lbl = Tex(label, font_size=13, color=NVIDIA_DARK_GREEN)
+            sub_tex = Tex(sub, font_size=12, color=TEXT_MUTED)
             content = VGroup(lbl, sub_tex).arrange(DOWN, buff=0.06).move_to(box_bg.get_center())
             stage_boxes.add(VGroup(box_bg, content))
 
@@ -604,7 +604,7 @@ class TonIoTPresentation(Slide):
                 color=color, stroke_width=2.0
             )
             ph_tex = Tex(
-                rf"\textbf{{\textsf{{{label}}}}}", font_size=11, color=color
+                rf"\textbf{{\textsf{{{label}}}}}", font_size=14, color=color
             ).move_to([x_mid, y_pos - 0.14, 0])
             phase_group.add(VGroup(ph_line, ph_tex))
 
@@ -616,7 +616,7 @@ class TonIoTPresentation(Slide):
         pipeline_caption_tx = Tex(
             r"\textit{Model saved as joblib for reuse | Metrics, reports, figures, "
             r"and run configuration are saved automatically.}",
-            font_size=13, color=NVIDIA_DARK_GREEN
+            font_size=18, color=NVIDIA_DARK_GREEN
         ).move_to(pipeline_caption_bg.get_center())
         pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
         pipeline_caption.next_to(phase_group, DOWN, buff=0.24)
@@ -624,12 +624,12 @@ class TonIoTPresentation(Slide):
         # GPU comparison chart below caption
         gpu_img = (
             ImageMobject("../outputs/figures/pure_gpu_comparison.png")
-            .set(height=2.0)
+            .set(height=2.25)
         )
         gpu_img.next_to(pipeline_caption, DOWN, buff=0.18)
         gpu_label = Tex(
             r"\textbf{GPU Model Comparison} (Random Forest vs XGBoost vs Deep MLP)",
-            font_size=13, color=TEXT_MUTED
+            font_size=18, color=TEXT_MUTED
         ).next_to(gpu_img, DOWN, buff=0.08)
 
         self.play(
@@ -681,7 +681,7 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
         ).align_to(right_card_bg, UP)
         right_badge = Tex(
-            r"\textbf{MODEL PARAMETERS}", font_size=17, color=WHITE_COLOR
+            r"\textbf{MODEL PARAMETERS}", font_size=18, color=WHITE_COLOR
         ).move_to(right_bar.get_center())
         param_table = Tex(
             r"\renewcommand{\arraystretch}{1.22}" "\n"
@@ -701,11 +701,11 @@ class TonIoTPresentation(Slide):
             r"random\_state   & 42         & Reproducible run \\" "\n"
             r"\hline" "\n"
             r"\end{tabular}",
-            font_size=15, color=TEXT_MAIN
+            font_size=18, color=TEXT_MAIN
         ).next_to(right_bar, DOWN, buff=0.22).set(width=5.6)
         param_note = Tex(
             r"\textit{Configured for stable, reproducible multi-class traffic classification.}",
-            font_size=13, color=TEXT_MUTED
+            font_size=18, color=TEXT_MUTED
         ).next_to(param_table, DOWN, buff=0.14)
         right_card = VGroup(right_card_bg, right_bar, right_badge, param_table, param_note)
 
@@ -740,7 +740,7 @@ class TonIoTPresentation(Slide):
                 stroke_color=color, stroke_width=2.0
             )
             val = Tex(rf"\textbf{{{value_str}}}", font_size=24, color=color)
-            lbl = Tex(label_str, font_size=13, color=TEXT_MUTED)
+            lbl = Tex(label_str, font_size=18, color=TEXT_MUTED)
             VGroup(val, lbl).arrange(DOWN, buff=0.06).move_to(bg.get_center())
             return VGroup(bg, val, lbl)
 
@@ -762,7 +762,7 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
         ).align_to(report_card_bg, UP)
         report_badge = Tex(
-            r"\textbf{Classification Report Summary}", font_size=17, color=WHITE_COLOR
+            r"\textbf{Classification Report Summary}", font_size=18, color=WHITE_COLOR
         ).move_to(report_bar.get_center())
         report_table = Tex(
             r"\renewcommand{\arraystretch}{1.25}" "\n"
@@ -778,7 +778,7 @@ class TonIoTPresentation(Slide):
             r"\textbf{99.99\%}  & Balanced across classes \\" "\n"
             r"\hline" "\n"
             r"\end{tabular}",
-            font_size=16, color=TEXT_MAIN
+            font_size=19, color=TEXT_MAIN
         ).next_to(report_bar, DOWN, buff=0.22)
         report_card = VGroup(report_card_bg, report_bar, report_badge, report_table)
         report_card.next_to(stats_row, DOWN, buff=0.22)
@@ -786,7 +786,7 @@ class TonIoTPresentation(Slide):
         report_note = Tex(
             r"\textit{Interpretation: high precision limits false alarms, high recall "
             r"catches attacks, and macro F1 confirms balanced Normal/DoS/DDoS performance.}",
-            font_size=13, color=TEXT_MUTED
+            font_size=18, color=TEXT_MUTED
         ).next_to(report_card, DOWN, buff=0.14)
 
         self.play(
@@ -812,7 +812,7 @@ class TonIoTPresentation(Slide):
 
         cm_img = (
             ImageMobject("../outputs/figures/rf_workflow_confusion_matrix.png")
-            .set(height=3.8)
+            .set(height=4.0)
         )
 
         # Reading panel on the right
@@ -826,7 +826,7 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
         ).align_to(reading_card_bg, UP)
         reading_badge = Tex(
-            r"\textbf{Reading the Matrix}", font_size=17, color=WHITE_COLOR
+            r"\textbf{Reading the Matrix}", font_size=18, color=WHITE_COLOR
         ).move_to(reading_bar.get_center())
         reading_body = Tex(
             r"\textbf{Rows:} Actual traffic class\\[0.12cm]"
@@ -838,7 +838,7 @@ class TonIoTPresentation(Slide):
             r"very high accuracy.\\[0.12cm]"
             r"Minimal off-diagonal errors indicate little "
             r"class confusion.",
-            font_size=14, color=TEXT_MAIN
+            font_size=18, color=TEXT_MAIN
         ).next_to(reading_bar, DOWN, buff=0.22).set(width=4.75)
         reading_card = VGroup(reading_card_bg, reading_bar, reading_badge, reading_body)
 
@@ -870,28 +870,28 @@ class TonIoTPresentation(Slide):
 
         roc_img = (
             ImageMobject("../outputs/figures/rf_workflow_roc_curves.png")
-            .set(height=3.5)
+            .set(height=3.8)
         )
         fi_img = (
             ImageMobject("../outputs/figures/rf_workflow_feature_importance.png")
-            .set(height=3.5)
+            .set(height=3.8)
         )
 
         roc_label = Tex(
-            r"\textbf{ROC Curves (One-vs-Rest)}", font_size=15, color=NVIDIA_DARK_GREEN
+            r"\textbf{ROC Curves (One-vs-Rest)}", font_size=18, color=NVIDIA_DARK_GREEN
         )
         fi_label = Tex(
-            r"\textbf{Feature Importance (Top Features)}", font_size=15, color=NVIDIA_DARK_GREEN
+            r"\textbf{Feature Importance (Top Features)}", font_size=18, color=NVIDIA_DARK_GREEN
         )
         roc_note = Tex(
             r"\textit{Curves close to the top-left corner and AUC near 1.000}\\[0.02cm]"
             r"\textit{indicate excellent separation between all three classes.}",
-            font_size=12, color=TEXT_MUTED
+            font_size=19, color=TEXT_MUTED
         )
         fi_note = Tex(
             r"\textit{Top-ranked traffic fields contribute most to model}\\[0.02cm]"
             r"\textit{decisions, making the classifier easier to explain.}",
-            font_size=12, color=TEXT_MUTED
+            font_size=19, color=TEXT_MUTED
         )
 
         roc_col = Group(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
@@ -935,7 +935,7 @@ class TonIoTPresentation(Slide):
         repo_tex = Tex(
             r"\textbf{Repository:}\hspace{0.3cm}"
             r"\texttt{https://github.com/KaziRifatMorshed/TON\_IOT\_NETWORK\_IS\_Lab\_CSEKU}",
-            font_size=14, color=NVIDIA_DARK_GREEN
+            font_size=18, color=NVIDIA_DARK_GREEN
         ).move_to(repo_bg.get_center())
         repo_card = VGroup(repo_bg, repo_tex)
 
