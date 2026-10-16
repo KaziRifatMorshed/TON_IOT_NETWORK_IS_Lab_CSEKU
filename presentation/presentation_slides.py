@@ -9,27 +9,29 @@ from datetime import datetime
 from manim import *
 from manim_slides import Slide
 
-# Compile-time dynamic Month Year (e.g., "October 2026")
+# Dynamic Month Year (e.g., "October 2026")
 CURRENT_MONTH_YEAR = datetime.now().strftime("%B %Y")
 
 # ==============================================================================
 # NVIDIA Brand Color Theme (Light Academic Defense)
 # ==============================================================================
-NVIDIA_GREEN        = "#76B900"  # Signature NVIDIA Green
-NVIDIA_DARK_GREEN   = "#265200"  # High-contrast accessible green (WCAG AAA)
-NVIDIA_ACCENT_GREEN = "#3B7500"  # Structural border accent green
-TEXT_MAIN           = "#1A1A1A"  # Deep charcoal for academic typography & LaTeX
-TEXT_MUTED          = "#525B64"  # Slate gray for captions, subtitles, and notes
-CARD_BG             = "#F8FAFC"  # Base canvas and container surface
-CARD_BORDER         = "#E2E8F0"  # Subtle hairline boundary stroke
-WHITE_COLOR         = "#FFFFFF"  # Pure white card surface
-BLOCK_INACTIVE_FILL = "#F1F5F9"  # Hardware slate neutral tile fill
-BLOCK_INACTIVE_STROKE = "#94A3B8"# Hardware neutral stroke border
+NVIDIA_GREEN        = "#76B900"   # Signature NVIDIA Green
+NVIDIA_DARK_GREEN   = "#265200"   # High-contrast accessible green (WCAG AAA)
+NVIDIA_ACCENT_GREEN = "#3B7500"   # Structural border accent green
+TEXT_MAIN           = "#1A1A1A"   # Deep charcoal for academic typography & LaTeX
+TEXT_MUTED          = "#525B64"   # Slate gray for captions, subtitles, and notes
+CARD_BG             = "#F8FAFC"   # Base canvas and container surface
+CARD_BORDER         = "#E2E8F0"   # Subtle hairline boundary stroke
+WHITE_COLOR         = "#FFFFFF"   # Pure white card surface
+BLOCK_INACTIVE_FILL   = "#F1F5F9" # Hardware slate neutral tile fill
+BLOCK_INACTIVE_STROKE = "#94A3B8" # Hardware neutral stroke border
 
 # Configure base light canvas defaults
 config.background_color = ManimColor(CARD_BG)
 Tex.set_default(color=TEXT_MAIN)
 MathTex.set_default(color=TEXT_MAIN)
+
+TOTAL_SLIDES = 12
 
 
 class TonIoTPresentation(Slide):
@@ -37,10 +39,10 @@ class TonIoTPresentation(Slide):
         # Enforce exact canvas background color for Manim-Slides
         self.camera.background_color = ManimColor(CARD_BG)
 
-        # ----------------------------------------------------------------------
-        # Global Footer Builder (Persistent across all slides)
-        # ----------------------------------------------------------------------
-        def build_footer(slide_num, total_slides):
+        # ===========================================================
+        # HELPER: Global Footer (Persistent across all content slides)
+        # ===========================================================
+        def build_footer(slide_num):
             footer_bar = Rectangle(
                 width=config.frame_width + 1.0,
                 height=0.42,
@@ -50,25 +52,24 @@ class TonIoTPresentation(Slide):
             ).to_edge(DOWN, buff=-0.01)
 
             page_info = Tex(
-                rf"\textbf{{Slide {slide_num}/{total_slides}}} \hspace{{0.2cm}} \textbar \hspace{{0.2cm}} "
-                r"\textsf{TON\_IoT Network Intrusion Detection (100\% GPU)}",
+                rf"\textbf{{Slide {slide_num}/{TOTAL_SLIDES}}} \hspace{{0.2cm}} \textbar \hspace{{0.2cm}} "
+                r"\textsf{TON\_IoT Network Intrusion Detection}",
                 font_size=15,
                 color=CARD_BG
             ).to_edge(LEFT, buff=0.4).match_y(footer_bar)
 
             presenter_info = Tex(
                 r"\textsf{Md Siam Ahmed (230202), Kazi Rifat Morshed (230220) \hspace{0.2cm} \textbar \hspace{0.2cm} "
-                + CURRENT_MONTH_YEAR
-                + r"}",
+                + CURRENT_MONTH_YEAR + r"}",
                 font_size=14,
                 color=CARD_BG
             ).to_edge(RIGHT, buff=0.4).match_y(footer_bar)
 
             return VGroup(footer_bar, page_info, presenter_info)
 
-        # ----------------------------------------------------------------------
-        # Persistent Content Header Builder
-        # ----------------------------------------------------------------------
+        # ===========================================================
+        # HELPER: Persistent Content Header
+        # ===========================================================
         def build_header(category_tex_str, section_tex_str):
             header_bar = Rectangle(
                 width=config.frame_width + 1.0,
@@ -92,463 +93,859 @@ class TonIoTPresentation(Slide):
                 color=NVIDIA_DARK_GREEN
             ).to_edge(LEFT, buff=0.4).match_y(header_bar)
 
-            header_logo = ImageMobject("kucse_full_logo.png").set(height=0.42).to_edge(RIGHT, buff=0.4).match_y(header_bar)
+            header_logo = (
+                ImageMobject("kucse_full_logo.png")
+                .set(height=0.42)
+                .to_edge(RIGHT, buff=0.4)
+                .match_y(header_bar)
+            )
             return Group(header_bar, header_stripe, header_tracker, header_logo), header_stripe
 
-        TOTAL_SLIDES = 8
+        # ===========================================================
+        # HELPER: Rounded card with coloured header bar
+        # ===========================================================
+        def make_card(header_text, header_color, body_tex_str, body_font=15,
+                      card_width=5.8, card_height=3.5):
+            bg = RoundedRectangle(
+                corner_radius=0.10, width=card_width, height=card_height,
+                fill_color=WHITE_COLOR, fill_opacity=1.0,
+                stroke_color=CARD_BORDER, stroke_width=1.5
+            )
+            top_bar = RoundedRectangle(
+                corner_radius=0.06, width=card_width, height=0.42,
+                fill_color=header_color, fill_opacity=1.0, stroke_width=0
+            ).align_to(bg, UP)
+            badge = Tex(
+                rf"\textbf{{{header_text}}}", font_size=17, color=WHITE_COLOR
+            ).move_to(top_bar.get_center())
+            body = Tex(body_tex_str, font_size=body_font, color=TEXT_MAIN).next_to(
+                top_bar, DOWN, buff=0.20
+            ).set(width=card_width - 0.45)
+            return VGroup(bg, top_bar, badge, body)
 
-        # ======================================================================
-        # SLIDE 1: Cover / Defense Title Slide
-        # ======================================================================
+        # ===========================================================
+        # HELPER: Slide title + green accent line
+        # ===========================================================
+        def slide_title(text, stripe, font=29):
+            title = Tex(rf"\textbf{{{text}}}", font_size=font, color=TEXT_MAIN)
+            title.next_to(stripe, DOWN, buff=0.26)
+            accent = Line(
+                LEFT * 2.0, RIGHT * 2.0,
+                color=NVIDIA_GREEN, stroke_width=2.5
+            ).next_to(title, DOWN, buff=0.10)
+            return title, accent
+
+        # ===========================================================
+        # SLIDE 1 — Title / Cover
+        # ===========================================================
         discipline_info = Tex(
-            r"\textbf{Computer Science and Engineering Discipline}\\[0.06cm]\textbf{Khulna University}",
-            font_size=22,
-            color=NVIDIA_DARK_GREEN
+            r"\textbf{Computer Science and Engineering Discipline}\\[0.04cm]\textbf{Khulna University}",
+            font_size=22, color=NVIDIA_DARK_GREEN
         )
-        univ_logo = ImageMobject("ku_emblem_clean.png").set(height=0.82)
+        univ_logo = ImageMobject("ku_emblem_clean.png").set(height=0.86)
         title_slide_header = Group(discipline_info, univ_logo).arrange(RIGHT, buff=0.35)
-        title_slide_header.to_edge(UP, buff=0.45)
+        title_slide_header.to_edge(UP, buff=0.44)
 
-        # Main Title Group
-        main_title = Tex(r"\textbf{TON\_IoT Network Intrusion Detection}", font_size=38, color=TEXT_MAIN)
-        title_accent = Line(LEFT * 2.3, RIGHT * 2.3, color=NVIDIA_GREEN, stroke_width=3.5)
+        main_title = Tex(
+            r"\textbf{TON\_IoT Network Traffic Classification}\\[0.04cm]\textbf{Using Random Forest}",
+            font_size=36, color=TEXT_MAIN
+        )
+        title_accent = Line(LEFT * 2.5, RIGHT * 2.5, color=NVIDIA_GREEN, stroke_width=3.5)
         main_subtitle = Tex(
-            r"\textit{Classifying DoS, DDoS, and Normal Traffic with 100\% NVIDIA GPU Acceleration}",
-            font_size=21,
-            color=TEXT_MUTED
+            r"\textit{Intrusion Detection Workflow}",
+            font_size=22, color=TEXT_MUTED
         )
         title_block = VGroup(main_title, title_accent, main_subtitle).arrange(DOWN, buff=0.18)
-        title_block.next_to(title_slide_header, DOWN, buff=0.42)
+        title_block.next_to(title_slide_header, DOWN, buff=0.36)
 
-        # Presenters (Two Students)
-        s1 = VGroup(
-            Tex(r"\textbf{Md Siam Ahmed}", font_size=22, color=TEXT_MAIN),
-            Tex(r"Student ID: 230202", font_size=18, color=TEXT_MUTED)
-        ).arrange(DOWN, buff=0.06)
+        lab_strip_bg = Rectangle(
+            width=config.frame_width + 1.0, height=0.52,
+            fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
+        ).to_edge(DOWN, buff=-0.01)
+        lab_strip_text = Tex(
+            r"\textbf{Information Security Laboratory \hspace{0.3cm} | \hspace{0.3cm} "
+            r"Khulna University, Khulna}",
+            font_size=17, color=WHITE_COLOR
+        ).move_to(lab_strip_bg.get_center())
+        lab_strip = Group(lab_strip_bg, lab_strip_text)
 
-        s2 = VGroup(
-            Tex(r"\textbf{Kazi Rifat Morshed}", font_size=22, color=TEXT_MAIN),
-            Tex(r"Student ID: 230220", font_size=18, color=TEXT_MUTED)
-        ).arrange(DOWN, buff=0.06)
-
-        students_row = VGroup(s1, s2).arrange(RIGHT, buff=1.6)
-        presented_by = Tex(r"\textbf{\textsf{\footnotesize PRESENTED BY}}", font_size=15, color=NVIDIA_DARK_GREEN)
-        students_group = VGroup(presented_by, students_row).arrange(DOWN, buff=0.12)
-
-        # Supervisor / Course Teacher Information
-        supervisor_header = Tex(r"\textbf{\textsf{\footnotesize COURSE INSTRUCTOR \& SUPERVISOR}}", font_size=15, color=NVIDIA_DARK_GREEN)
-        sup_name = Tex(r"\textbf{Dr. Anupam Kumar Bairagi}", font_size=22, color=TEXT_MAIN)
-        sup_desig = Tex(r"Professor, Computer Science and Engineering Discipline", font_size=18, color=TEXT_MUTED)
-        sup_dept = Tex(r"Khulna University, Khulna-9208, Bangladesh", font_size=18, color=TEXT_MUTED)
-        supervisor_group = VGroup(supervisor_header, sup_name, sup_desig, sup_dept).arrange(DOWN, buff=0.06)
-
-        lab_badge = Tex(r"\textbf{Information Security Lab (Lab \#7)}", font_size=18, color=NVIDIA_ACCENT_GREEN)
-
-        defense_info = VGroup(students_group, supervisor_group, lab_badge).arrange(DOWN, buff=0.25)
-        defense_info.next_to(title_block, DOWN, buff=0.35)
-
-        current_footer = build_footer(1, TOTAL_SLIDES)
-
-        self.play(FadeIn(title_slide_header), FadeIn(current_footer))
+        self.play(FadeIn(title_slide_header), FadeIn(lab_strip))
         self.play(Write(main_title), Create(title_accent))
         self.play(FadeIn(main_subtitle))
-        self.play(FadeIn(defense_info))
         self.wait(0.2)
-        self.next_slide()  # Advance to Slide 2
+        self.next_slide()
 
-        # ======================================================================
-        # SLIDE 2: Problem Formulation & Threat Model
-        # ======================================================================
-        slide1_content = Group(title_slide_header, title_block, defense_info)
-        content_header, stripe = build_header(r"PROBLEM FORMULATION", r"INFORMATION SECURITY LAB")
+        # ===========================================================
+        # SLIDE 2 — Presented By / Presented To
+        # ===========================================================
+        s1_content = Group(title_slide_header, title_block)
+        footer = build_footer(2)
+        header, stripe = build_header(r"PRESENTERS", r"INFORMATION SECURITY LAB \#7")
 
-        slide2_title = Tex(r"\textbf{IoT Threat Landscape: DoS vs DDoS vs Normal Traffic}", font_size=32, color=TEXT_MAIN)
-        slide2_title.next_to(stripe, DOWN, buff=0.28)
-        slide2_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide2_title, DOWN, buff=0.12)
-
-        def make_threat_card(title_str, badge_color, desc_lines, card_width=3.9, card_height=3.4):
-            bg = RoundedRectangle(corner_radius=0.10, width=card_width, height=card_height, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-            top_bar = RoundedRectangle(corner_radius=0.06, width=card_width, height=0.42, fill_color=badge_color, fill_opacity=1.0, stroke_width=0).align_to(bg, UP)
-            badge_text = Tex(rf"\textbf{{{title_str}}}", font_size=18, color=WHITE_COLOR).move_to(top_bar.get_center())
-            body_tex = Tex(desc_lines, font_size=15, color=TEXT_MAIN).next_to(top_bar, DOWN, buff=0.2).set(width=card_width - 0.4)
-            return VGroup(bg, top_bar, badge_text, body_tex)
-
-        card1 = make_threat_card(
-            "Normal Traffic",
-            "#2E7D32",
-            r"\textbf{Benign IoT Telemetry:}\\[0.1cm]"
-            r"$\bullet$ Legitimate sensor chatter (MQTT, Modbus, Node-RED)\\[0.1cm]"
-            r"$\bullet$ Periodic local DNS queries\\[0.1cm]"
-            r"$\bullet$ Normal completed TCP handshakes (\texttt{SF} state)\\[0.1cm]"
-            r"$\bullet$ Balanced packet ratios"
+        s2_title, s2_accent = slide_title(
+            r"Presented By \hspace{0.4cm} / \hspace{0.4cm} Presented To", stripe, font=26
         )
-        card2 = make_threat_card(
-            "DoS (Denial of Service)",
-            "#E65100",
-            r"\textbf{Single-Source Flood:}\\[0.1cm]"
-            r"$\bullet$ Originates from single attacker IP address\\[0.1cm]"
-            r"$\bullet$ Targeted TCP SYN / UDP floods\\[0.1cm]"
-            r"$\bullet$ Unanswered connection attempts (\texttt{S0} state)\\[0.1cm]"
-            r"$\bullet$ High packet volume to victim port"
-        )
-        card3 = make_threat_card(
-            "DDoS (Distributed DoS)",
-            "#C62828",
-            r"\textbf{Multi-Botnet Volumetric:}\\[0.1cm]"
-            r"$\bullet$ Coordinated flood across multiple distributed IPs\\[0.1cm]"
-            r"$\bullet$ Massive asynchronous traffic spikes\\[0.1cm]"
-            r"$\bullet$ Ephemeral port cycling\\[0.1cm]"
-            r"$\bullet$ Exhausts edge gateway bandwidth"
-        )
-        cards_row = VGroup(card1, card2, card3).arrange(RIGHT, buff=0.35).next_to(slide2_accent, DOWN, buff=0.3)
 
-        next_footer = build_footer(2, TOTAL_SLIDES)
+        # LEFT — Presented By
+        by_header_bg = RoundedRectangle(
+            corner_radius=0.08, width=5.6, height=0.46,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
+        )
+        by_header_text = Tex(
+            r"\textbf{PRESENTED BY}", font_size=17, color=WHITE_COLOR
+        ).move_to(by_header_bg.get_center())
+        by_header = VGroup(by_header_bg, by_header_text)
+
+        s1_name = Tex(r"\textbf{Md Siam Ahmed}", font_size=22, color=TEXT_MAIN)
+        s1_id   = Tex(r"Student ID: 230202", font_size=17, color=TEXT_MUTED)
+        s2_name = Tex(r"\textbf{Kazi Rifat Morshed}", font_size=22, color=TEXT_MAIN)
+        s2_id   = Tex(r"Student ID: 230220", font_size=17, color=TEXT_MUTED)
+        div_line = Line(LEFT * 2.4, RIGHT * 2.4, color=CARD_BORDER, stroke_width=1.0)
+        dept_by  = Tex(
+            r"Computer Science \& Engineering Discipline\\[0.04cm]Khulna University, Khulna",
+            font_size=16, color=TEXT_MUTED
+        )
+        sem_info = Tex(r"\textit{4th Year, 1st Semester}", font_size=15, color=NVIDIA_ACCENT_GREEN)
+
+        by_body = VGroup(
+            VGroup(s1_name, s1_id).arrange(DOWN, buff=0.05),
+            VGroup(s2_name, s2_id).arrange(DOWN, buff=0.05),
+            div_line, dept_by, sem_info
+        ).arrange(DOWN, buff=0.18)
+
+        by_bg = RoundedRectangle(
+            corner_radius=0.10, width=5.6, height=4.5,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        by_header.next_to(by_bg, UP, buff=0).align_to(by_bg, UP)
+        by_body.next_to(by_header, DOWN, buff=0.22)
+        by_card = VGroup(by_bg, by_header, by_body)
+
+        # RIGHT — Presented To
+        to_header_bg = RoundedRectangle(
+            corner_radius=0.08, width=5.6, height=0.46,
+            fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
+        )
+        to_header_text = Tex(
+            r"\textbf{PRESENTED TO}", font_size=17, color=WHITE_COLOR
+        ).move_to(to_header_bg.get_center())
+        to_header = VGroup(to_header_bg, to_header_text)
+
+        sup_name  = Tex(r"\textbf{Dr. Anupam Kumar Bairagi}", font_size=22, color=TEXT_MAIN)
+        sup_desig = Tex(r"Professor", font_size=17, color=TEXT_MUTED)
+        div_line2 = Line(LEFT * 2.4, RIGHT * 2.4, color=CARD_BORDER, stroke_width=1.0)
+        sup_dept  = Tex(
+            r"Computer Science \& Engineering Discipline\\[0.04cm]Khulna University, Khulna",
+            font_size=16, color=TEXT_MUTED
+        )
+        course_tag = Tex(
+            r"\textit{Course: Information Security Laboratory}",
+            font_size=15, color=NVIDIA_ACCENT_GREEN
+        )
+        to_body = VGroup(
+            VGroup(sup_name, sup_desig).arrange(DOWN, buff=0.05),
+            div_line2, sup_dept, course_tag
+        ).arrange(DOWN, buff=0.20)
+
+        to_bg2 = RoundedRectangle(
+            corner_radius=0.10, width=5.6, height=4.5,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        to_header.next_to(to_bg2, UP, buff=0).align_to(to_bg2, UP)
+        to_body.next_to(to_header, DOWN, buff=0.28)
+        to_card = VGroup(to_bg2, to_header, to_body)
+
+        both_cards = VGroup(by_card, to_card).arrange(RIGHT, buff=0.5)
+        both_cards.next_to(s2_accent, DOWN, buff=0.3)
+
         self.play(
-            FadeOut(slide1_content),
-            Transform(current_footer, next_footer),
-            FadeIn(content_header),
-            Write(slide2_title),
-            Create(slide2_accent),
-            FadeIn(cards_row)
+            FadeOut(s1_content), FadeOut(lab_strip),
+            FadeIn(header), FadeIn(footer),
+            Write(s2_title), Create(s2_accent)
         )
+        self.play(FadeIn(both_cards))
         self.wait(0.2)
-        self.next_slide()  # Advance to Slide 3
+        self.next_slide()
 
-        # ======================================================================
-        # SLIDE 3: TON_IoT Dataset Profile & Preprocessing
-        # ======================================================================
-        slide2_content = Group(slide2_title, slide2_accent, cards_row)
-        content_header, stripe = build_header(r"DATASET \& PIPELINE", r"UNSW CANBERRA TESTBED")
+        # ===========================================================
+        # SLIDE 3 — Problem & Objective
+        # ===========================================================
+        prev_content = Group(s2_title, s2_accent, both_cards)
+        new_footer = build_footer(3)
+        header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
 
-        slide3_title = Tex(r"\textbf{Dataset Profile \& Zero-Leakage Preprocessing}", font_size=32, color=TEXT_MAIN)
-        slide3_title.next_to(stripe, DOWN, buff=0.28)
-        slide3_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide3_title, DOWN, buff=0.12)
+        s3_title, s3_accent = slide_title(
+            r"Problem and Objective", stripe
+        )
 
-        # Left Card: Dataset Stats
-        ds_card_bg = RoundedRectangle(corner_radius=0.10, width=5.8, height=3.5, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-        ds_bar = RoundedRectangle(corner_radius=0.06, width=5.8, height=0.4, fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0).align_to(ds_card_bg, UP)
-        ds_badge = Tex(r"\textbf{TON\_IoT Network Dataset Profile}", font_size=18, color=WHITE_COLOR).move_to(ds_bar.get_center())
-        ds_body = Tex(
-            r"\textbf{Total Records}: 300,000 Zeek Network Flows\\[0.12cm]"
-            r"\textbf{Feature Count}: 46 Raw Network Telemetry Attributes\\[0.12cm]"
-            r"\textbf{Class Balance} (Perfect 1:1:1 Distribution):\\[0.08cm]"
-            r"$\bullet$ \texttt{normal} : 100,000 flows (33.33\%)\\[0.06cm]"
-            r"$\bullet$ \texttt{dos}    : 100,000 flows (33.33\%)\\[0.06cm]"
-            r"$\bullet$ \texttt{ddos}   : 100,000 flows (33.33\%)\\[0.12cm]"
-            r"\textbf{Testbed}: Heterogeneous Edge-Fog-Cloud (UNSW)",
-            font_size=16,
-            color=TEXT_MAIN
-        ).next_to(ds_bar, DOWN, buff=0.2).set(width=5.4)
-        ds_card = VGroup(ds_card_bg, ds_bar, ds_badge, ds_body)
+        prob_card = make_card(
+            "THE PROBLEM", "#B71C1C",
+            r"$\bullet$ Thousands of traffic events arrive every second in IoT/IIoT networks.\\[0.10cm]"
+            r"$\bullet$ Manual review cannot reliably separate Normal, DoS, and DDoS traffic.\\[0.10cm]"
+            r"$\bullet$ Attackers disguise malicious flows to resemble legitimate traffic.\\[0.10cm]"
+            r"$\bullet$ Detection must be fast enough to support real-time response.",
+            card_width=5.8, card_height=3.6
+        )
+        obj_card = make_card(
+            "OBJECTIVE", NVIDIA_DARK_GREEN,
+            r"Build an automated multi-class IDS that classifies each flow as:\\[0.08cm]"
+            r"\hspace{0.3cm}\textbf{Normal} \hspace{0.4cm} \textbf{DoS} \hspace{0.4cm} \textbf{DDoS}\\[0.12cm]"
+            r"Use \textbf{Random Forest} to learn attack patterns from cleaned network "
+            r"features, then save the trained model, metrics, figures, and config for "
+            r"repeatable evaluation.\\[0.12cm]"
+            r"\textit{Outcome: A fast, reproducible classifier that identifies Normal, "
+            r"DoS, and DDoS traffic with near-perfect accuracy.}",
+            card_width=5.8, card_height=3.6
+        )
+        s3_row = VGroup(prob_card, obj_card).arrange(RIGHT, buff=0.45)
+        s3_row.next_to(s3_accent, DOWN, buff=0.28)
 
-        # Right Card: Preprocessing Pipeline & Defense Focus
-        prep_card_bg = RoundedRectangle(corner_radius=0.10, width=6.2, height=3.5, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-        prep_bar = RoundedRectangle(corner_radius=0.06, width=6.2, height=0.4, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0).align_to(prep_card_bg, UP)
-        prep_badge = Tex(r"\textbf{Leakage-Free Preprocessing Pipeline}", font_size=18, color=WHITE_COLOR).move_to(prep_bar.get_center())
-        prep_body = Tex(
-            r"\textbf{1. De-duplication}: Removed redundant capture rows.\\[0.12cm]"
-            r"\textbf{2. Target Leakage Elimination}:\\ "
-            r"\textit{Explicitly dropped raw} \texttt{label} \textit{column to prevent}\\"
-            r"\textit{trivial 100\% artificial accuracy when predicting} \texttt{type}.\\[0.12cm]"
-            r"\textbf{3. IP Numerical Decomposition}:\\ "
-            r"Converted text IPs into 64-bit high/low numeric integers\\ "
-            r"(\texttt{src\_ip\_high}, \texttt{src\_ip\_low}, \texttt{dst\_ip\_high}, \texttt{dst\_ip\_low}).\\[0.12cm]"
-            r"\textbf{4. Encoding}: Categorical LabelEncoding + constant removal.",
-            font_size=15,
-            color=TEXT_MAIN
-        ).next_to(prep_bar, DOWN, buff=0.2).set(width=5.8)
-        prep_card = VGroup(prep_card_bg, prep_bar, prep_badge, prep_body)
-
-        slide3_row = VGroup(ds_card, prep_card).arrange(RIGHT, buff=0.4).next_to(slide3_accent, DOWN, buff=0.3)
-
-        next_footer = build_footer(3, TOTAL_SLIDES)
         self.play(
-            FadeOut(slide2_content),
-            Transform(current_footer, next_footer),
-            Write(slide3_title),
-            Create(slide3_accent),
-            FadeIn(slide3_row)
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
         )
+        header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
+        self.play(FadeIn(header), Write(s3_title), Create(s3_accent))
+        self.play(FadeIn(s3_row))
         self.wait(0.2)
-        self.next_slide()  # Advance to Slide 4
+        self.next_slide()
 
-        # ======================================================================
-        # SLIDE 4: NVIDIA GPU Acceleration Architecture
-        # ======================================================================
-        slide3_content = Group(slide3_title, slide3_accent, slide3_row)
-        content_header, stripe = build_header(r"HARDWARE ACCELERATION", r"NVIDIA GPU PIPELINE")
+        # ===========================================================
+        # SLIDE 4 — Dataset Overview
+        # ===========================================================
+        prev_content = Group(s3_title, s3_accent, s3_row)
+        new_footer = build_footer(4)
+        header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
 
-        slide4_title = Tex(r"\textbf{GPU Architecture: Accelerated Model Training}", font_size=32, color=TEXT_MAIN)
-        slide4_title.next_to(stripe, DOWN, buff=0.28)
-        slide4_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide4_title, DOWN, buff=0.12)
+        s4_title, s4_accent = slide_title(r"Dataset Overview", stripe)
 
-        # Hardware Badge Banner
-        hw_bg = RoundedRectangle(corner_radius=0.08, width=12.2, height=0.7, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.2)
-        hw_text = Tex(
-            r"\textbf{Dual-Lab Hardware Setup}: \hspace{0.2cm} "
-            r"\textbf{Host 1}: NVIDIA RTX 3060 12GB (Ampere SM 8.6, TF32) \hspace{0.4cm}\textbar\hspace{0.4cm} "
-            r"\textbf{Host 2}: NVIDIA RTX 5070 Ti 16GB (Blackwell SM 12.0)",
-            font_size=16,
-            color=NVIDIA_DARK_GREEN
-        ).move_to(hw_bg.get_center())
-        hw_banner = VGroup(hw_bg, hw_text).next_to(slide4_accent, DOWN, buff=0.22)
-
-        def make_gpu_engine_card(title_str, tech_str, details_str):
-            bg = RoundedRectangle(corner_radius=0.10, width=3.8, height=2.6, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-            side_stripe = RoundedRectangle(corner_radius=0.05, width=0.08, height=2.6, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0).align_to(bg, LEFT)
-            t_tex = Tex(rf"\textbf{{{title_str}}}", font_size=18, color=TEXT_MAIN)
-            tech_tex = Tex(rf"\textbf{{\textsf{{{tech_str}}}}}", font_size=14, color=NVIDIA_DARK_GREEN)
-            d_tex = Tex(details_str, font_size=14, color=TEXT_MUTED).set(width=3.4)
-            content = VGroup(t_tex, tech_tex, d_tex).arrange(DOWN, aligned_edge=LEFT, buff=0.14).move_to(bg.get_center()).shift(RIGHT * 0.1)
-            return VGroup(bg, side_stripe, content)
-
-        m1 = make_gpu_engine_card(
-            "GPU Random Forest",
-            "CUDA HISTOGRAM TREES",
-            r"$\bullet$ 200 Parallel de-correlated trees\\[0.06cm]"
-            r"$\bullet$ Exact parallel split finding\\[0.06cm]"
-            r"$\bullet$ Built directly in GPU VRAM\\[0.06cm]"
-            r"$\bullet$ Zero CPU threading overhead"
+        # Left: attribute table card
+        attr_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=5.4, height=4.2,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
         )
-        m2 = make_gpu_engine_card(
-            "GPU XGBoost",
-            "NVIDIA CUDA ACCELERATED",
-            r"$\bullet$ Gradient boosted decision trees\\[0.06cm]"
-            r"$\bullet$ \texttt{tree\_method='hist'}, \texttt{device='cuda'}\\[0.06cm]"
-            r"$\bullet$ Second-order gradient optimization\\[0.06cm]"
-            r"$\bullet$ Sub-second convergence"
-        )
-        m3 = make_gpu_engine_card(
-            "PyTorch Deep MLP",
-            "TENSOR CORES (TF32)",
-            r"$\bullet$ Deep Neural Network (256-128-64)\\[0.06cm]"
-            r"$\bullet$ Batch Normalization + Dropout\\[0.06cm]"
-            r"$\bullet$ TensorFloat-32 acceleration\\[0.06cm]"
-            r"$\bullet$ AdamW optimizer with cross-entropy"
-        )
-        gpu_engines_row = VGroup(m1, m2, m3).arrange(RIGHT, buff=0.35).next_to(hw_banner, DOWN, buff=0.25)
-
-        next_footer = build_footer(4, TOTAL_SLIDES)
-        self.play(
-            FadeOut(slide3_content),
-            Transform(current_footer, next_footer),
-            Write(slide4_title),
-            Create(slide4_accent),
-            FadeIn(hw_banner),
-            FadeIn(gpu_engines_row)
-        )
-        self.wait(0.2)
-        self.next_slide()  # Advance to Slide 5
-
-        # ======================================================================
-        # SLIDE 5: Experimental Performance & Results Matrix
-        # ======================================================================
-        slide4_content = Group(slide4_title, slide4_accent, hw_banner, gpu_engines_row)
-        content_header, stripe = build_header(r"EXPERIMENTAL RESULTS", r"GPU PERFORMANCE BENCHMARK")
-
-        slide5_title = Tex(r"\textbf{Experimental Results: Model Accuracy \& Latency Matrix}", font_size=32, color=TEXT_MAIN)
-        slide5_title.next_to(stripe, DOWN, buff=0.28)
-        slide5_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide5_title, DOWN, buff=0.12)
-
-        # Performance Table Card
-        table_card_bg = RoundedRectangle(corner_radius=0.10, width=12.2, height=2.4, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-        table_stripe = RoundedRectangle(corner_radius=0.06, width=0.08, height=2.4, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0).align_to(table_card_bg, LEFT)
-
-        table_tex = Tex(
-            r"\renewcommand{\arraystretch}{1.2}"
-            r"\begin{tabular}{lcccccccc}"
+        attr_bar = RoundedRectangle(
+            corner_radius=0.06, width=5.4, height=0.42,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(attr_card_bg, UP)
+        attr_badge = Tex(
+            r"\textbf{Dataset Attributes}", font_size=17, color=WHITE_COLOR
+        ).move_to(attr_bar.get_center())
+        attr_table = Tex(
+            r"\renewcommand{\arraystretch}{1.35}"
+            r"\begin{tabular}{ll}"
             r"\hline"
-            r"\textbf{Model} & \textbf{Hardware} & \textbf{Train Time} & \textbf{Latency} & \textbf{Accuracy} & \textbf{Macro F1} & \textbf{MCC} & \textbf{ROC-AUC} \\"
+            r"\textbf{Attribute} & \textbf{Value} \\"
             r"\hline"
-            r"\textbf{GPU Random Forest} & NVIDIA CUDA & \textbf{0.99 s} & 2.27 $\mu$s & \textbf{99.99\%} & \textbf{99.99\%} & \textbf{0.9998} & \textbf{1.0000} \\"
-            r"\textbf{GPU XGBoost}       & NVIDIA CUDA & \textbf{0.36 s} & 1.85 $\mu$s & \textbf{99.99\%} & \textbf{99.99\%} & \textbf{0.9998} & \textbf{1.0000} \\"
-            r"\textbf{PyTorch Deep MLP}  & NVIDIA CUDA & 2.41 s          & \textbf{0.94 $\mu$s} & 99.84\% & 99.83\% & 0.9976 & 0.9999 \\"
+            r"Dataset        & TON\_IoT Network Traffic \\"
+            r"Total Records  & 300,000 rows \\"
+            r"After Dedup.   & 249,733 rows \\"
+            r"Target Column  & \texttt{type} \\"
+            r"Selected Classes & normal, dos, ddos \\"
+            r"Final Features & 45 columns \\"
             r"\hline"
             r"\end{tabular}",
-            font_size=18,
-            color=TEXT_MAIN
-        ).move_to(table_card_bg.get_center()).shift(RIGHT * 0.1)
-        perf_table = VGroup(table_card_bg, table_stripe, table_tex).next_to(slide5_accent, DOWN, buff=0.25)
+            font_size=17, color=TEXT_MAIN
+        ).next_to(attr_bar, DOWN, buff=0.25).set(width=4.9)
+        attr_card = VGroup(attr_card_bg, attr_bar, attr_badge, attr_table)
 
-        def make_stat_box(metric_str, caption_str, box_color=NVIDIA_DARK_GREEN):
-            bg = RoundedRectangle(corner_radius=0.08, width=3.8, height=1.1, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.2)
-            m = Tex(rf"\textbf{{{metric_str}}}", font_size=23, color=box_color)
-            c = Tex(caption_str, font_size=15, color=TEXT_MUTED)
-            v = VGroup(m, c).arrange(DOWN, buff=0.05).move_to(bg.get_center())
-            return VGroup(bg, v)
-
-        sb1 = make_stat_box("< 1.0 Second", "GPU Tree Training Time", NVIDIA_DARK_GREEN)
-        sb2 = make_stat_box("0.94 - 2.27 us", "Ultra-Low Inference Latency", NVIDIA_DARK_GREEN)
-        sb3 = make_stat_box("> 400,000 pkt/s", "Real-Time Line-Rate Throughput", NVIDIA_DARK_GREEN)
-        stats_row = VGroup(sb1, sb2, sb3).arrange(RIGHT, buff=0.35).next_to(perf_table, DOWN, buff=0.25)
-
-        next_footer = build_footer(5, TOTAL_SLIDES)
-        self.play(
-            FadeOut(slide4_content),
-            Transform(current_footer, next_footer),
-            Write(slide5_title),
-            Create(slide5_accent),
-            FadeIn(perf_table),
-            FadeIn(stats_row)
+        # Right: feature groups card
+        feat_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=6.2, height=4.2,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
         )
+        feat_bar = RoundedRectangle(
+            corner_radius=0.06, width=6.2, height=0.42,
+            fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(feat_card_bg, UP)
+        feat_badge = Tex(
+            r"\textbf{Feature Groups}", font_size=17, color=WHITE_COLOR
+        ).move_to(feat_bar.get_center())
+        feat_body = Tex(
+            r"\textbf{Network Identity:}\hspace{0.3cm} IP addresses, ports\\[0.14cm]"
+            r"\textbf{Protocol Behavior:}\hspace{0.2cm} protocol, service, conn\_state\\[0.14cm]"
+            r"\textbf{Traffic Volume:}\hspace{0.35cm} packet counts, byte counts\\[0.14cm]"
+            r"\textbf{Timing Features:}\hspace{0.3cm} duration and flow timing\\[0.14cm]"
+            r"\textbf{Application Fields:}\hspace{0.1cm} HTTP, DNS, SSL indicators",
+            font_size=16, color=TEXT_MAIN
+        ).next_to(feat_bar, DOWN, buff=0.30).set(width=5.75)
+        feat_note = Tex(
+            r"\textit{The dataset provides network-flow level information suitable for}\\[0.02cm]"
+            r"\textit{supervised intrusion detection using Random Forest.}",
+            font_size=13, color=TEXT_MUTED
+        ).next_to(feat_body, DOWN, buff=0.22)
+        feat_card = VGroup(feat_card_bg, feat_bar, feat_badge, feat_body, feat_note)
+
+        s4_row = VGroup(attr_card, feat_card).arrange(RIGHT, buff=0.45)
+        s4_row.next_to(s4_accent, DOWN, buff=0.28)
+
+        self.play(
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
+        self.play(FadeIn(header), Write(s4_title), Create(s4_accent))
+        self.play(FadeIn(s4_row))
         self.wait(0.2)
-        self.next_slide()  # Advance to Slide 6
+        self.next_slide()
 
-        # ======================================================================
-        # SLIDE 6: Confusion Matrix & ROC-AUC Analysis
-        # ======================================================================
-        slide5_content = Group(slide5_title, slide5_accent, perf_table, stats_row)
-        content_header, stripe = build_header(r"CLASSIFICATION METRICS", r"ZERO-ERROR DISCRIMINATION")
+        # ===========================================================
+        # SLIDE 5 — Class Distribution (embedded figures)
+        # ===========================================================
+        prev_content = Group(s4_title, s4_accent, s4_row)
+        new_footer = build_footer(5)
+        header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
 
-        slide6_title = Tex(r"\textbf{Classification Accuracy: Confusion Matrix \& ROC Curves}", font_size=32, color=TEXT_MAIN)
-        slide6_title.next_to(stripe, DOWN, buff=0.28)
-        slide6_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide6_title, DOWN, buff=0.12)
+        s5_title, s5_accent = slide_title(r"Class Distribution", stripe)
 
-        # Left Card: Confusion Matrix Visual Breakdown
-        cm_card_bg = RoundedRectangle(corner_radius=0.10, width=5.8, height=3.5, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-        cm_bar = RoundedRectangle(corner_radius=0.06, width=5.8, height=0.4, fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0).align_to(cm_card_bg, UP)
-        cm_badge = Tex(r"\textbf{Per-Class Confusion Matrix (Test Set)}", font_size=18, color=WHITE_COLOR).move_to(cm_bar.get_center())
-        cm_table = Tex(
-            r"\renewcommand{\arraystretch}{1.2}"
-            r"\begin{tabular}{l|ccc|c}"
-            r"& \textbf{Pred Normal} & \textbf{Pred DoS} & \textbf{Pred DDoS} & \textbf{Recall} \\"
+        binary_img = (
+            ImageMobject("../outputs/figures/rf_workflow_binary_class_distribution.png")
+            .set(height=3.6)
+        )
+        multi_img = (
+            ImageMobject("../outputs/figures/rf_workflow_multiclass_distribution.png")
+            .set(height=3.6)
+        )
+
+        binary_label = Tex(r"\textbf{Binary Distribution}", font_size=16, color=NVIDIA_DARK_GREEN)
+        multi_label  = Tex(r"\textbf{Multiclass Distribution}", font_size=16, color=NVIDIA_DARK_GREEN)
+
+        binary_col = VGroup(binary_label, binary_img).arrange(DOWN, buff=0.14)
+        multi_col  = VGroup(multi_label, multi_img).arrange(DOWN, buff=0.14)
+
+        s5_row = Group(binary_col, multi_col).arrange(RIGHT, buff=0.55)
+        s5_row.next_to(s5_accent, DOWN, buff=0.22)
+
+        caption = Tex(
+            r"\textit{The dataset provides enough samples for each selected class, "
+            r"supporting stable model training and evaluation.}",
+            font_size=14, color=TEXT_MUTED
+        ).next_to(s5_row, DOWN, buff=0.16)
+
+        self.play(
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
+        self.play(FadeIn(header), Write(s5_title), Create(s5_accent))
+        self.play(FadeIn(s5_row), FadeIn(caption))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 6 — Data Preprocessing Steps (6-step cards)
+        # ===========================================================
+        prev_content = Group(s5_title, s5_accent, caption)
+        prev_imgs = Group(s5_row)
+        new_footer = build_footer(6)
+        header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
+
+        s6_title, s6_accent = slide_title(r"Data Preprocessing Steps", stripe)
+
+        def make_step_card(num_str, step_title_str, step_body_str):
+            bg = RoundedRectangle(
+                corner_radius=0.10, width=5.7, height=1.55,
+                fill_color=WHITE_COLOR, fill_opacity=1.0,
+                stroke_color=CARD_BORDER, stroke_width=1.4
+            )
+            num_circle = Circle(
+                radius=0.26, fill_color=NVIDIA_GREEN,
+                fill_opacity=1.0, stroke_width=0
+            ).align_to(bg, LEFT).shift(RIGHT * 0.34).align_to(bg, UP).shift(DOWN * 0.38)
+            num_tex = Tex(
+                rf"\textbf{{{num_str}}}", font_size=16, color=WHITE_COLOR
+            ).move_to(num_circle.get_center())
+            title_tex = Tex(
+                rf"\textbf{{{step_title_str}}}", font_size=16, color=NVIDIA_DARK_GREEN
+            ).next_to(num_circle, RIGHT, buff=0.18).align_to(num_circle, UP)
+            body_tex = Tex(
+                step_body_str, font_size=14, color=TEXT_MAIN
+            ).next_to(title_tex, DOWN, buff=0.10).align_to(title_tex, LEFT).set(width=4.8)
+            return VGroup(bg, num_circle, num_tex, title_tex, body_tex)
+
+        step1 = make_step_card("01", "Load Dataset",
+            r"Read \texttt{data/dataset.csv} and keep the selected target classes: "
+            r"\texttt{normal}, \texttt{dos}, and \texttt{ddos}."
+        )
+        step2 = make_step_card("02", "Remove Duplicates",
+            r"Drop repeated rows to reduce bias: 300,000 records become "
+            r"\textbf{249,733 unique flows} (50,267 removed)."
+        )
+        step3 = make_step_card("03", "Normalize Labels",
+            r"Standardize \texttt{type} labels to lowercase and separate the target "
+            r"column from model features. Drop \texttt{label} to \textbf{prevent data leakage}."
+        )
+        step4 = make_step_card("04", "Encode Fields",
+            r"Convert IP addresses into 64-bit high/low numeric parts. "
+            r"Label-encode categorical fields (protocol, service, conn\_state, etc.)."
+        )
+        step5 = make_step_card("05", "Clean Matrix",
+            r"Replace NaN/Inf with \texttt{-1}. Remove constant zero-variance columns "
+            r"(e.g., \texttt{http\_referrer}). Final: \textbf{45 features}."
+        )
+        step6 = make_step_card("06", "Train / Test Split",
+            r"Use an \textbf{80/20 stratified split} with \texttt{random\_state=42} "
+            r"to preserve class proportions across both sets."
+        )
+
+        col_left  = VGroup(step1, step3, step5).arrange(DOWN, buff=0.14)
+        col_right = VGroup(step2, step4, step6).arrange(DOWN, buff=0.14)
+        s6_grid = VGroup(col_left, col_right).arrange(RIGHT, buff=0.30)
+        s6_grid.next_to(s6_accent, DOWN, buff=0.20)
+
+        result_banner_bg = RoundedRectangle(
+            corner_radius=0.06, width=12.0, height=0.46,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=0.10,
+            stroke_color=NVIDIA_DARK_GREEN, stroke_width=1.0
+        )
+        result_banner_tx = Tex(
+            r"\textit{Result: a clean numeric feature matrix ready for Random Forest "
+            r"training and evaluation.}",
+            font_size=14, color=NVIDIA_DARK_GREEN
+        ).move_to(result_banner_bg.get_center())
+        result_banner = VGroup(result_banner_bg, result_banner_tx)
+        result_banner.next_to(s6_grid, DOWN, buff=0.16)
+
+        self.play(
+            FadeOut(prev_content), FadeOut(prev_imgs),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
+        self.play(FadeIn(header), Write(s6_title), Create(s6_accent))
+        self.play(FadeIn(s6_grid), FadeIn(result_banner))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 7 — Machine Learning Pipeline (horizontal flowchart)
+        # ===========================================================
+        prev_content = Group(s6_title, s6_accent, s6_grid, result_banner)
+        new_footer = build_footer(7)
+        header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
+
+        s7_title, s7_accent = slide_title(r"Machine Learning Pipeline", stripe)
+
+        # Eight pipeline stages
+        stage_labels = [
+            r"\textbf{Raw Data}",
+            r"\textbf{Load Data}",
+            r"\textbf{Clean Data}",
+            r"\textbf{Feature Matrix}",
+            r"\textbf{Train/Test Split}",
+            r"\textbf{Random Forest}",
+            r"\textbf{Evaluate}",
+            r"\textbf{Save Outputs}",
+        ]
+        stage_sub = [
+            r"TON\_IoT\\CSV records",
+            r"Read\\dataset.csv",
+            r"Remove\\duplicates",
+            r"Encode numeric\\inputs",
+            r"80/20\\stratified",
+            r"Train\\200 trees",
+            r"Metrics\\and plots",
+            r"Model\\and reports",
+        ]
+
+        stage_boxes = VGroup()
+        for label, sub in zip(stage_labels, stage_sub):
+            box_bg = RoundedRectangle(
+                corner_radius=0.08, width=1.38, height=1.10,
+                fill_color=WHITE_COLOR, fill_opacity=1.0,
+                stroke_color=NVIDIA_GREEN, stroke_width=1.8
+            )
+            lbl = Tex(label, font_size=11, color=NVIDIA_DARK_GREEN)
+            sub_tex = Tex(sub, font_size=10, color=TEXT_MUTED)
+            content = VGroup(lbl, sub_tex).arrange(DOWN, buff=0.06).move_to(box_bg.get_center())
+            stage_boxes.add(VGroup(box_bg, content))
+
+        stage_boxes.arrange(RIGHT, buff=0.08)
+
+        # Arrows between boxes
+        arrows = VGroup()
+        for i in range(len(stage_boxes) - 1):
+            arr = Arrow(
+                stage_boxes[i].get_right(), stage_boxes[i + 1].get_left(),
+                buff=0.05, stroke_width=2.0, color=NVIDIA_ACCENT_GREEN,
+                max_tip_length_to_length_ratio=0.25
+            )
+            arrows.add(arr)
+
+        pipeline_flow = Group(stage_boxes, arrows)
+        pipeline_flow.next_to(s7_accent, DOWN, buff=0.38)
+
+        # Phase labels below
+        phase_data = [
+            (0, 1, "DATA INGESTION", "#1565C0"),
+            (2, 3, "PREPROCESSING",  "#6A1B9A"),
+            (4, 5, "MODELING",       NVIDIA_DARK_GREEN),
+            (6, 7, "OUTPUT",         "#B71C1C"),
+        ]
+        phase_group = VGroup()
+        for start, end, label, color in phase_data:
+            x_start = stage_boxes[start].get_left()[0]
+            x_end   = stage_boxes[end].get_right()[0]
+            x_mid   = (x_start + x_end) / 2
+            y_pos   = stage_boxes[0].get_bottom()[1] - 0.30
+            ph_line = Line(
+                [x_start, y_pos + 0.08, 0], [x_end, y_pos + 0.08, 0],
+                color=color, stroke_width=2.0
+            )
+            ph_tex = Tex(
+                rf"\textbf{{\textsf{{{label}}}}}", font_size=11, color=color
+            ).move_to([x_mid, y_pos - 0.14, 0])
+            phase_group.add(VGroup(ph_line, ph_tex))
+
+        pipeline_caption_bg = RoundedRectangle(
+            corner_radius=0.06, width=12.0, height=0.46,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=0.08,
+            stroke_color=NVIDIA_DARK_GREEN, stroke_width=1.0
+        )
+        pipeline_caption_tx = Tex(
+            r"\textit{Model saved as joblib for reuse | Metrics, reports, figures, "
+            r"and run configuration are saved automatically.}",
+            font_size=13, color=NVIDIA_DARK_GREEN
+        ).move_to(pipeline_caption_bg.get_center())
+        pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
+        pipeline_caption.next_to(phase_group, DOWN, buff=0.24)
+
+        # GPU comparison chart below caption
+        gpu_img = (
+            ImageMobject("../outputs/figures/pure_gpu_comparison.png")
+            .set(height=2.0)
+        )
+        gpu_img.next_to(pipeline_caption, DOWN, buff=0.18)
+        gpu_label = Tex(
+            r"\textbf{GPU Model Comparison} (Random Forest vs XGBoost vs Deep MLP)",
+            font_size=13, color=TEXT_MUTED
+        ).next_to(gpu_img, DOWN, buff=0.08)
+
+        self.play(
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
+        self.play(FadeIn(header), Write(s7_title), Create(s7_accent))
+        self.play(FadeIn(stage_boxes), FadeIn(arrows))
+        self.play(FadeIn(phase_group), FadeIn(pipeline_caption))
+        self.play(FadeIn(gpu_img), FadeIn(gpu_label))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 8 — Random Forest Model
+        # ===========================================================
+        prev_content = Group(s7_title, s7_accent, phase_group, pipeline_caption, gpu_label)
+        prev_imgs = Group(gpu_img)
+        new_footer = build_footer(8)
+        header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
+
+        s8_title, s8_accent = slide_title(r"Random Forest Model", stripe)
+
+        # Left explanation card
+        left_card = make_card(
+            "WHAT IS RANDOM FOREST?", NVIDIA_DARK_GREEN,
+            r"\textbf{Ensemble classifier} that trains many Decision Trees and "
+            r"combines their votes for the final class.\\[0.14cm]"
+            r"\textbf{Why it fits this IDS task:}\\[0.06cm]"
+            r"$\bullet$ Works well on tabular network-flow features\\[0.06cm]"
+            r"$\bullet$ Handles numeric + encoded categorical fields\\[0.06cm]"
+            r"$\bullet$ Captures nonlinear attack patterns in traffic\\[0.06cm]"
+            r"$\bullet$ Balanced class weights reduce class-imbalance bias\\[0.06cm]"
+            r"$\bullet$ Feature importance helps explain influential fields\\[0.14cm]"
+            r"\textit{Many trees $\rightarrow$ majority vote $\rightarrow$ Normal / DoS / DDoS}",
+            card_width=5.6, card_height=4.3, body_font=14
+        )
+
+        # Right parameters card
+        right_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=6.0, height=4.3,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        right_bar = RoundedRectangle(
+            corner_radius=0.06, width=6.0, height=0.42,
+            fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(right_card_bg, UP)
+        right_badge = Tex(
+            r"\textbf{MODEL PARAMETERS}", font_size=17, color=WHITE_COLOR
+        ).move_to(right_bar.get_center())
+        param_table = Tex(
+            r"\renewcommand{\arraystretch}{1.22}"
+            r"\begin{tabular}{lll}"
             r"\hline"
-            r"\textbf{Normal} & \textbf{3,308} & 0 & 0 & 100.0\% \\"
-            r"\textbf{DoS}    & 0 & \textbf{2,703} & 1 & 99.96\% \\"
-            r"\textbf{DDoS}   & 0 & 0 & \textbf{3,327} & 100.0\% \\"
+            r"\textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\"
             r"\hline"
-            r"\textbf{Precision} & 100.0\% & 100.0\% & 99.97\% & \textbf{99.99\%} \\"
+            r"n\_estimators   & 200        & Number of trees \\    "
+            r"criterion       & gini       & Split quality \\       "
+            r"max\_depth      & None       & Grow until pure \\     "
+            r"max\_features   & sqrt       & Subset per split \\    "
+            r"min\_split      & 2          & Minimum split size \\  "
+            r"min\_leaf       & 1          & Minimum leaf size \\   "
+            r"bootstrap       & True       & Sample rows per tree \\"
+            r"class\_weight   & balanced   & Handle imbalance \\    "
+            r"n\_jobs         & -1         & Use all CPU cores \\   "
+            r"random\_state   & 42         & Reproducible run \\    "
+            r"\hline"
             r"\end{tabular}",
-            font_size=16,
-            color=TEXT_MAIN
-        ).next_to(cm_bar, DOWN, buff=0.25).set(width=5.3)
-        cm_card = VGroup(cm_card_bg, cm_bar, cm_badge, cm_table)
+            font_size=15, color=TEXT_MAIN
+        ).next_to(right_bar, DOWN, buff=0.22).set(width=5.6)
+        param_note = Tex(
+            r"\textit{Configured for stable, reproducible multi-class traffic classification.}",
+            font_size=13, color=TEXT_MUTED
+        ).next_to(param_table, DOWN, buff=0.14)
+        right_card = VGroup(right_card_bg, right_bar, right_badge, param_table, param_note)
 
-        # Right Card: Multi-Class ROC Curves Insight
-        roc_card_bg = RoundedRectangle(corner_radius=0.10, width=6.2, height=3.5, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.5)
-        roc_bar = RoundedRectangle(corner_radius=0.06, width=6.2, height=0.4, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0).align_to(roc_card_bg, UP)
-        roc_badge = Tex(r"\textbf{Multi-Class ROC-AUC (One-vs-Rest)}", font_size=18, color=WHITE_COLOR).move_to(roc_bar.get_center())
-        roc_body = Tex(
-            r"\textbf{Area Under Curve (AUC) by Class}:\\[0.1cm]"
-            r"$\bullet$ \textbf{Normal Class} (AUC = \textbf{1.000}): Ideal benign discrimination\\[0.08cm]"
-            r"$\bullet$ \textbf{DoS Class} (AUC = \textbf{1.000}): Complete single-source separation\\[0.08cm]"
-            r"$\bullet$ \textbf{DDoS Class} (AUC = \textbf{1.000}): Complete botnet flood separation\\[0.14cm]"
-            r"\textbf{Cybersecurity Implication}:\\[0.08cm]"
-            r"Zero False Positives: Benign IoT sensor telemetry is \textit{never}\\"
-            r"flagged as an intrusion, preventing false alarms and alert fatigue.",
-            font_size=15,
-            color=TEXT_MAIN
-        ).next_to(roc_bar, DOWN, buff=0.2).set(width=5.8)
-        roc_card = VGroup(roc_card_bg, roc_bar, roc_badge, roc_body)
+        s8_row = VGroup(left_card, right_card).arrange(RIGHT, buff=0.45)
+        s8_row.next_to(s8_accent, DOWN, buff=0.28)
 
-        slide6_row = VGroup(cm_card, roc_card).arrange(RIGHT, buff=0.4).next_to(slide6_accent, DOWN, buff=0.3)
-
-        next_footer = build_footer(6, TOTAL_SLIDES)
         self.play(
-            FadeOut(slide5_content),
-            Transform(current_footer, next_footer),
-            Write(slide6_title),
-            Create(slide6_accent),
-            FadeIn(slide6_row)
+            FadeOut(prev_content), FadeOut(prev_imgs),
+            Transform(footer, new_footer),
+            FadeOut(header),
         )
+        header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
+        self.play(FadeIn(header), Write(s8_title), Create(s8_accent))
+        self.play(FadeIn(s8_row))
         self.wait(0.2)
-        self.next_slide()  # Advance to Slide 7
+        self.next_slide()
 
-        # ======================================================================
-        # SLIDE 7: Feature Importance & Attack Signatures
-        # ======================================================================
-        slide6_content = Group(slide6_title, slide6_accent, slide6_row)
-        content_header, stripe = build_header(r"FEATURE IMPORTANCE", r"CYBERSECURITY ATTACK SIGNATURES")
+        # ===========================================================
+        # SLIDE 9 — Results & Performance
+        # ===========================================================
+        prev_content = Group(s8_title, s8_accent, s8_row)
+        new_footer = build_footer(9)
+        header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
 
-        slide7_title = Tex(r"\textbf{Feature Importance: What Gives Away DoS \& DDoS Attacks?}", font_size=32, color=TEXT_MAIN)
-        slide7_title.next_to(stripe, DOWN, buff=0.28)
-        slide7_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide7_title, DOWN, buff=0.12)
+        s9_title, s9_accent = slide_title(r"Results \& Performance", stripe)
 
-        def make_feature_bar(rank_str, name_str, imp_val, imp_pct, desc_str):
-            bg = RoundedRectangle(corner_radius=0.08, width=12.2, height=0.62, fill_color=WHITE_COLOR, fill_opacity=1.0, stroke_color=CARD_BORDER, stroke_width=1.0)
-            tag = Tex(rf"\textbf{{{rank_str}}}", font_size=16, color=NVIDIA_DARK_GREEN).align_to(bg, LEFT).shift(RIGHT * 0.25)
-            fname = Tex(rf"\texttt{{{name_str}}}", font_size=16, color=TEXT_MAIN).next_to(tag, RIGHT, buff=0.25)
-            bar_fill = Rectangle(width=3.2 * imp_val, height=0.22, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0).next_to(fname, RIGHT, buff=0.3)
-            pct_tex = Tex(rf"\textbf{{{imp_pct}}}", font_size=15, color=NVIDIA_ACCENT_GREEN).next_to(bar_fill, RIGHT, buff=0.15)
-            meaning = Tex(desc_str, font_size=14, color=TEXT_MUTED).align_to(bg, RIGHT).shift(LEFT * 0.25)
-            return VGroup(bg, tag, fname, bar_fill, pct_tex, meaning)
+        # Top stat boxes
+        def make_stat_box(value_str, label_str, color=NVIDIA_DARK_GREEN):
+            bg = RoundedRectangle(
+                corner_radius=0.08, width=2.8, height=1.10,
+                fill_color=WHITE_COLOR, fill_opacity=1.0,
+                stroke_color=color, stroke_width=2.0
+            )
+            val = Tex(rf"\textbf{{{value_str}}}", font_size=24, color=color)
+            lbl = Tex(label_str, font_size=13, color=TEXT_MUTED)
+            VGroup(val, lbl).arrange(DOWN, buff=0.06).move_to(bg.get_center())
+            return VGroup(bg, val, lbl)
 
-        f1 = make_feature_bar(r"\#1", "ts (Timestamp)", 0.241, r"24.1\%", r"Periodic burst timing \& packet arrival intervals")
-        f2 = make_feature_bar(r"\#2", r"src\_port", 0.124, r"12.4\%", "Ephemeral port cycling vs fixed IoT telemetry ports")
-        f3 = make_feature_bar(r"\#3", r"dst\_ip\_bytes", 0.111, r"11.1\%", "Asymmetric flood volume directed at victim server")
-        f4 = make_feature_bar(r"\#4", r"conn\_state", 0.097, r"9.7\%", "Unfinished SYN handshakes (S0/OTH) in flood attacks")
-        f5 = make_feature_bar(r"\#5", r"dst\_port", 0.091, r"9.1\%", "Victim targeted services (HTTP 80, MQTT 1883)")
+        sb1 = make_stat_box(r"99.99\%",  "Accuracy",   NVIDIA_DARK_GREEN)
+        sb2 = make_stat_box(r"99.99\%",  "Macro F1",   NVIDIA_DARK_GREEN)
+        sb3 = make_stat_box(r"99.99\%",  "Recall",     NVIDIA_DARK_GREEN)
+        sb4 = make_stat_box(r"1.000",    "ROC-AUC",    "#1565C0")
+        stats_row = VGroup(sb1, sb2, sb3, sb4).arrange(RIGHT, buff=0.30)
+        stats_row.next_to(s9_accent, DOWN, buff=0.26)
 
-        feature_bars = VGroup(f1, f2, f3, f4, f5).arrange(DOWN, buff=0.16).next_to(slide7_accent, DOWN, buff=0.3)
+        # Classification report table
+        report_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=12.0, height=2.62,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        report_bar = RoundedRectangle(
+            corner_radius=0.06, width=12.0, height=0.42,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(report_card_bg, UP)
+        report_badge = Tex(
+            r"\textbf{Classification Report Summary}", font_size=17, color=WHITE_COLOR
+        ).move_to(report_bar.get_center())
+        report_table = Tex(
+            r"\renewcommand{\arraystretch}{1.25}"
+            r"\begin{tabular}{lcccc}"
+            r"\hline"
+            r"\textbf{Class} & \textbf{Precision} & \textbf{Recall} & "
+            r"\textbf{F1-Score} & \textbf{Meaning} \\"
+            r"\hline"
+            r"Normal    & 100.00\% & 100.00\% & 100.00\% & Benign flow detection \\"
+            r"DoS       & 100.00\% & 99.98\%  & 99.99\%  & Single-source attack \\"
+            r"DDoS      & 99.99\%  & 100.00\% & 99.99\%  & Distributed attack \\"
+            r"Macro Avg & \textbf{99.99\%}  & \textbf{99.99\%}  & "
+            r"\textbf{99.99\%}  & Balanced across classes \\"
+            r"\hline"
+            r"\end{tabular}",
+            font_size=16, color=TEXT_MAIN
+        ).next_to(report_bar, DOWN, buff=0.22)
+        report_card = VGroup(report_card_bg, report_bar, report_badge, report_table)
+        report_card.next_to(stats_row, DOWN, buff=0.22)
 
-        next_footer = build_footer(7, TOTAL_SLIDES)
+        report_note = Tex(
+            r"\textit{Interpretation: high precision limits false alarms, high recall "
+            r"catches attacks, and macro F1 confirms balanced Normal/DoS/DDoS performance.}",
+            font_size=13, color=TEXT_MUTED
+        ).next_to(report_card, DOWN, buff=0.14)
+
         self.play(
-            FadeOut(slide6_content),
-            Transform(current_footer, next_footer),
-            Write(slide7_title),
-            Create(slide7_accent),
-            FadeIn(feature_bars)
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
         )
+        header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
+        self.play(FadeIn(header), Write(s9_title), Create(s9_accent))
+        self.play(FadeIn(stats_row))
+        self.play(FadeIn(report_card), FadeIn(report_note))
         self.wait(0.2)
-        self.next_slide()  # Advance to Slide 8
+        self.next_slide()
 
-        # ======================================================================
-        # SLIDE 8: Conclusion & Defense Q&A
-        # ======================================================================
-        slide7_content = Group(slide7_title, slide7_accent, feature_bars)
-        content_header, stripe = build_header(r"CONCLUSION \& DEFENSE", r"LAB \#7 WRAP-UP")
+        # ===========================================================
+        # SLIDE 10 — Confusion Matrix
+        # ===========================================================
+        prev_content = Group(s9_title, s9_accent, stats_row, report_card, report_note)
+        new_footer = build_footer(10)
+        header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
 
-        slide8_title = Tex(r"\textbf{Conclusion: 100\% GPU-Accelerated IoT Defense}", font_size=32, color=TEXT_MAIN)
-        slide8_title.next_to(stripe, DOWN, buff=0.28)
-        slide8_accent = Line(LEFT * 1.8, RIGHT * 1.8, color=NVIDIA_GREEN, stroke_width=2.5).next_to(slide8_title, DOWN, buff=0.12)
+        s10_title, s10_accent = slide_title(r"Confusion Matrix", stripe)
 
-        c1 = make_threat_card(
-            r"1. 100\% GPU Acceleration",
-            NVIDIA_DARK_GREEN,
-            r"$\bullet$ Zero CPU model training bottleneck\\[0.08cm]"
-            r"$\bullet$ GPU Random Forest + XGBoost + Deep MLP\\[0.08cm]"
-            r"$\bullet$ Sub-second training across 300K records\\[0.08cm]"
-            r"$\bullet$ Tested on RTX 3060 \& RTX 5070 Ti",
-            card_width=3.9,
-            card_height=2.8
+        cm_img = (
+            ImageMobject("../outputs/figures/rf_workflow_confusion_matrix.png")
+            .set(height=3.8)
         )
-        c2 = make_threat_card(
-            r"2. Leakage-Free Design",
-            "#1565C0",
-            r"$\bullet$ Explicitly eliminated \texttt{label} leakage\\[0.08cm]"
-            r"$\bullet$ Mathematical 64-bit IP decomposition\\[0.08cm]"
-            r"$\bullet$ Robust stratified 80/20 train-test split\\[0.08cm]"
-            r"$\bullet$ Defensible academic methodology",
-            card_width=3.9,
-            card_height=2.8
-        )
-        c3 = make_threat_card(
-            r"3. Ultra-High Reliability",
-            "#2E7D32",
-            r"$\bullet$ 99.99\% accuracy with 0.9998 MCC\\[0.08cm]"
-            r"$\bullet$ Zero false positives on benign IoT data\\[0.08cm]"
-            r"$\bullet$ Microsecond inference ($< 2.5\ \mu$s)\\[0.08cm]"
-            r"$\bullet$ Capable of 400K+ pkt/s line rate",
-            card_width=3.9,
-            card_height=2.8
-        )
-        concl_row = VGroup(c1, c2, c3).arrange(RIGHT, buff=0.35).next_to(slide8_accent, DOWN, buff=0.25)
 
-        thanks_bg = RoundedRectangle(corner_radius=0.08, width=12.2, height=0.68, fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0)
-        thanks_text = Tex(
-            r"\textbf{Thank you! We welcome any questions.}",
-            font_size=18,
-            color=WHITE_COLOR
-        ).move_to(thanks_bg.get_center())
-        thanks_banner = VGroup(thanks_bg, thanks_text).next_to(concl_row, DOWN, buff=0.22)
+        # Reading panel on the right
+        reading_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=5.2, height=3.8,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        reading_bar = RoundedRectangle(
+            corner_radius=0.06, width=5.2, height=0.42,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(reading_card_bg, UP)
+        reading_badge = Tex(
+            r"\textbf{Reading the Matrix}", font_size=17, color=WHITE_COLOR
+        ).move_to(reading_bar.get_center())
+        reading_body = Tex(
+            r"\textbf{Rows:} Actual traffic class\\[0.12cm]"
+            r"\textbf{Columns:} Predicted class\\[0.12cm]"
+            r"\textbf{Diagonal $\checkmark$:} Correct predictions\\[0.12cm]"
+            r"\textbf{Off-diagonal $\times$:} Misclassifications\\[0.20cm]"
+            r"Near-perfect diagonal values show the model "
+            r"classifies Normal, DoS, and DDoS traffic with "
+            r"very high accuracy.\\[0.12cm]"
+            r"Minimal off-diagonal errors indicate little "
+            r"class confusion.",
+            font_size=14, color=TEXT_MAIN
+        ).next_to(reading_bar, DOWN, buff=0.22).set(width=4.75)
+        reading_card = VGroup(reading_card_bg, reading_bar, reading_badge, reading_body)
 
-        next_footer = build_footer(8, TOTAL_SLIDES)
+        s10_row = Group(cm_img, reading_card).arrange(RIGHT, buff=0.45)
+        s10_row.next_to(s10_accent, DOWN, buff=0.26)
+
         self.play(
-            FadeOut(slide7_content),
-            Transform(current_footer, next_footer),
-            Write(slide8_title),
-            Create(slide8_accent),
-            FadeIn(concl_row),
-            FadeIn(thanks_banner)
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
         )
+        header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
+        self.play(FadeIn(header), Write(s10_title), Create(s10_accent))
+        self.play(FadeIn(s10_row))
         self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 11 — ROC Curves & Feature Importance
+        # ===========================================================
+        prev_content = Group(s10_title, s10_accent)
+        prev_imgs = Group(s10_row)
+        new_footer = build_footer(11)
+        header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
+
+        s11_title, s11_accent = slide_title(
+            r"ROC Curves and Feature Importance", stripe, font=27
+        )
+
+        roc_img = (
+            ImageMobject("../outputs/figures/rf_workflow_roc_curves.png")
+            .set(height=3.5)
+        )
+        fi_img = (
+            ImageMobject("../outputs/figures/rf_workflow_feature_importance.png")
+            .set(height=3.5)
+        )
+
+        roc_label = Tex(
+            r"\textbf{ROC Curves (One-vs-Rest)}", font_size=15, color=NVIDIA_DARK_GREEN
+        )
+        fi_label = Tex(
+            r"\textbf{Feature Importance (Top Features)}", font_size=15, color=NVIDIA_DARK_GREEN
+        )
+        roc_note = Tex(
+            r"\textit{Curves close to the top-left corner and AUC near 1.000}\\[0.02cm]"
+            r"\textit{indicate excellent separation between all three classes.}",
+            font_size=12, color=TEXT_MUTED
+        )
+        fi_note = Tex(
+            r"\textit{Top-ranked traffic fields contribute most to model}\\[0.02cm]"
+            r"\textit{decisions, making the classifier easier to explain.}",
+            font_size=12, color=TEXT_MUTED
+        )
+
+        roc_col = VGroup(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
+        fi_col  = VGroup(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
+        s11_row = Group(roc_col, fi_col).arrange(RIGHT, buff=0.45)
+        s11_row.next_to(s11_accent, DOWN, buff=0.20)
+
+        self.play(
+            FadeOut(prev_content), FadeOut(prev_imgs),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
+        self.play(FadeIn(header), Write(s11_title), Create(s11_accent))
+        self.play(FadeIn(s11_row))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 12 — Thank You / Q&A
+        # ===========================================================
+        prev_content = Group(s11_title, s11_accent)
+        prev_imgs = Group(s11_row)
+        new_footer = build_footer(12)
+        header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
+
+        # Large centered "Thank You"
+        ty_main = Tex(
+            r"\textbf{Thank You}", font_size=68, color=TEXT_MAIN
+        )
+        ty_accent = Line(LEFT * 2.2, RIGHT * 2.2, color=NVIDIA_GREEN, stroke_width=4.0)
+        ty_sub = Tex(
+            r"\textit{Any Questions?}", font_size=32, color=TEXT_MUTED
+        )
+
+        repo_bg = RoundedRectangle(
+            corner_radius=0.08, width=9.0, height=0.70,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.4
+        )
+        repo_tex = Tex(
+            r"\textbf{Repository:}\hspace{0.3cm}"
+            r"\texttt{https://github.com/KaziRifatMorshed/TON\_IOT\_NETWORK\_IS\_Lab\_CSEKU}",
+            font_size=14, color=NVIDIA_DARK_GREEN
+        ).move_to(repo_bg.get_center())
+        repo_card = VGroup(repo_bg, repo_tex)
+
+        ty_group = VGroup(ty_main, ty_accent, ty_sub).arrange(DOWN, buff=0.22)
+        ty_group.move_to(ORIGIN).shift(UP * 0.5)
+        repo_card.next_to(ty_group, DOWN, buff=0.50)
+
+        self.play(
+            FadeOut(prev_content), FadeOut(prev_imgs),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
+        self.play(FadeIn(header))
+        self.play(Write(ty_main), Create(ty_accent))
+        self.play(FadeIn(ty_sub), FadeIn(repo_card))
+        self.wait(0.5)
