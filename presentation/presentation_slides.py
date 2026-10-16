@@ -31,7 +31,7 @@ config.background_color = ManimColor(CARD_BG)
 Tex.set_default(color=TEXT_MAIN)
 MathTex.set_default(color=TEXT_MAIN)
 
-TOTAL_SLIDES = 12
+TOTAL_SLIDES = 13
 
 
 class TonIoTPresentation(Slide):
@@ -276,7 +276,7 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         prev_content = Group(s2_title, both_cards)
         new_footer = build_footer(3)
-        header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
+        next_header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
 
         s3_title = slide_title(
             r"Problem and Objective", stripe
@@ -284,21 +284,26 @@ class TonIoTPresentation(Slide):
 
         prob_card = make_card(
             "THE PROBLEM", "#B71C1C",
-            r"$\bullet$ Thousands of traffic events arrive every second in IoT/IIoT networks.\\[0.10cm]"
-            r"$\bullet$ Manual review cannot reliably separate Normal, DoS, and DDoS traffic.\\[0.10cm]"
-            r"$\bullet$ Attackers disguise malicious flows to resemble legitimate traffic.\\[0.10cm]"
-            r"$\bullet$ Detection must be fast enough to support real-time response.",
+            r"$\bullet$ Thousands of traffic events arrive every second in IoT/IIoT\\[0.04cm]"
+            r"networks.\\[0.10cm]"
+            r"$\bullet$ Manual review cannot reliably separate Normal, DoS,\\[0.04cm]"
+            r"and DDoS traffic.\\[0.10cm]"
+            r"$\bullet$ Attackers disguise malicious flows to resemble\\[0.04cm]"
+            r"legitimate traffic.\\[0.10cm]"
+            r"$\bullet$ Detection must be fast enough for real-time response.",
+            body_font=19,
             card_width=5.8, card_height=3.6
         )
         obj_card = make_card(
             "OBJECTIVE", NVIDIA_DARK_GREEN,
-            r"Build an automated multi-class IDS that classifies each flow as:\\[0.08cm]"
+            r"Build an automated multi-class IDS that classifies each\\[0.04cm]"
+            r"flow as:\\[0.08cm]"
             r"\hspace{0.3cm}\textbf{Normal} \hspace{0.4cm} \textbf{DoS} \hspace{0.4cm} \textbf{DDoS}\\[0.12cm]"
-            r"Use \textbf{Random Forest} to learn attack patterns from cleaned network "
-            r"features, then save the trained model, metrics, figures, and config for "
-            r"repeatable evaluation.\\[0.12cm]"
-            r"\textit{Outcome: A fast, reproducible classifier that identifies Normal, "
-            r"DoS, and DDoS traffic with near-perfect accuracy.}",
+            r"Use \textbf{Random Forest} to learn attack patterns from\\[0.04cm]"
+            r"cleaned features and save the model, metrics, and figures.\\[0.12cm]"
+            r"\textit{Outcome: A fast, reproducible classifier for\\[0.04cm]"
+            r"Normal, DoS, and DDoS traffic.}",
+            body_font=19,
             card_width=5.8, card_height=3.6
         )
         s3_row = VGroup(prob_card, obj_card).arrange(RIGHT, buff=0.45)
@@ -309,7 +314,7 @@ class TonIoTPresentation(Slide):
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"PROBLEM \& OBJECTIVE", r"MOTIVATION FOR THIS WORK")
+        header = next_header
         self.play(FadeIn(header), FadeIn(s3_title))
         self.play(FadeIn(s3_row))
         self.wait(0.2)
@@ -320,7 +325,7 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         prev_content = Group(s3_title, s3_row)
         new_footer = build_footer(4)
-        header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
+        next_header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
 
         s4_title = slide_title(r"Dataset Overview", stripe)
 
@@ -391,7 +396,7 @@ class TonIoTPresentation(Slide):
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"DATASET OVERVIEW", r"TON\_IoT NETWORK TRAFFIC RECORDS")
+        header = next_header
         self.play(FadeIn(header), FadeIn(s4_title))
         self.play(FadeIn(s4_row))
         self.wait(0.2)
@@ -402,7 +407,7 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         prev_content = Group(s4_title, s4_row)
         new_footer = build_footer(5)
-        header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
+        next_header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
 
         s5_title = slide_title(r"Class Distribution", stripe)
 
@@ -435,7 +440,7 @@ class TonIoTPresentation(Slide):
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"CLASS DISTRIBUTION", r"BALANCED 1:1:1 DATASET")
+        header = next_header
         self.play(FadeIn(header), FadeIn(s5_title))
         self.play(FadeIn(s5_row), FadeIn(caption))
         self.wait(0.2)
@@ -447,7 +452,7 @@ class TonIoTPresentation(Slide):
         prev_content = Group(s5_title, caption)
         prev_imgs = Group(s5_row)
         new_footer = build_footer(6)
-        header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
+        next_header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
 
         s6_title = slide_title(r"Data Preprocessing Steps", stripe)
 
@@ -465,36 +470,36 @@ class TonIoTPresentation(Slide):
                 rf"\textbf{{{num_str}}}", font_size=19, color=WHITE_COLOR
             ).move_to(num_circle.get_center())
             title_tex = Tex(
-                rf"\textbf{{{step_title_str}}}", font_size=19, color=NVIDIA_DARK_GREEN
+                rf"\textbf{{{step_title_str}}}", font_size=17, color=NVIDIA_DARK_GREEN
             ).next_to(num_circle, RIGHT, buff=0.18).align_to(num_circle, UP)
             body_tex = Tex(
-                step_body_str, font_size=16, color=TEXT_MAIN
-            ).next_to(title_tex, DOWN, buff=0.10).align_to(title_tex, LEFT).set(width=4.8)
+                step_body_str, font_size=15, color=TEXT_MAIN
+            ).next_to(title_tex, DOWN, buff=0.08).align_to(title_tex, LEFT).set(width=4.0)
             return VGroup(bg, num_circle, num_tex, title_tex, body_tex)
 
         step1 = make_step_card("01", "Load Dataset",
-            r"Read \texttt{data/dataset.csv} and keep the selected target classes: "
-            r"\texttt{normal}, \texttt{dos}, and \texttt{ddos}."
+            r"Read \texttt{data/dataset.csv} and keep selected\\[0.03cm]"
+            r"classes: \texttt{normal}, \texttt{dos}, and \texttt{ddos}."
         )
         step2 = make_step_card("02", "Remove Duplicates",
-            r"Drop repeated rows to reduce bias: 300,000 records become "
+            r"Drop repeated rows: 300,000 records become\\[0.03cm]"
             r"\textbf{249,733 unique flows} (50,267 removed)."
         )
         step3 = make_step_card("03", "Normalize Labels",
-            r"Standardize \texttt{type} labels to lowercase and separate the target "
-            r"column from model features. Drop \texttt{label} to \textbf{prevent data leakage}."
+            r"Standardize \texttt{type}; separate target from features.\\[0.03cm]"
+            r"Drop \texttt{label} to \textbf{prevent data leakage}."
         )
         step4 = make_step_card("04", "Encode Fields",
-            r"Convert IP addresses into 64-bit high/low numeric parts. "
-            r"Label-encode categorical fields (protocol, service, conn\_state, etc.)."
+            r"Convert IPs into 64-bit high/low numeric parts.\\[0.03cm]"
+            r"Encode protocol, service, conn\_state, and other categories."
         )
         step5 = make_step_card("05", "Clean Matrix",
-            r"Replace NaN/Inf with \texttt{-1}. Remove constant zero-variance columns "
+            r"Replace NaN/Inf with \texttt{-1}; remove constant columns\\[0.03cm]"
             r"(e.g., \texttt{http\_referrer}). Final: \textbf{45 features}."
         )
         step6 = make_step_card("06", "Train / Test Split",
-            r"Use an \textbf{80/20 stratified split} with \texttt{random\_state=42} "
-            r"to preserve class proportions across both sets."
+            r"Use an \textbf{80/20 stratified split} with\\[0.03cm]"
+            r"\texttt{random\_state=42} to preserve class proportions."
         )
 
         col_left  = VGroup(step1, step3, step5).arrange(DOWN, buff=0.14)
@@ -520,7 +525,7 @@ class TonIoTPresentation(Slide):
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE")
+        header = next_header
         self.play(FadeIn(header), FadeIn(s6_title))
         self.play(FadeIn(s6_grid), FadeIn(result_banner))
         self.wait(0.2)
@@ -531,7 +536,7 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         prev_content = Group(s6_title, s6_grid, result_banner)
         new_footer = build_footer(7)
-        header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
+        next_header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
 
         s7_title = slide_title(r"Machine Learning Pipeline", stripe)
 
@@ -612,61 +617,75 @@ class TonIoTPresentation(Slide):
             stroke_color=NVIDIA_DARK_GREEN, stroke_width=1.0
         )
         pipeline_caption_tx = Tex(
-            r"\textit{Model saved as joblib for reuse | Metrics, reports, figures, "
-            r"and run configuration are saved automatically.}",
+            r"\textit{The trained model, evaluation metrics, figures, and run config are saved for reuse.}",
             font_size=18, color=NVIDIA_DARK_GREEN
         ).set(width=11.5).move_to(pipeline_caption_bg.get_center())
         pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
         pipeline_caption.next_to(phase_group, DOWN, buff=0.24)
 
-        # GPU comparison chart below caption
         gpu_img = (
             ImageMobject("../outputs/figures/pure_gpu_comparison.png")
-            .set(height=2.25)
+            .set(height=3.8)
         )
-        gpu_img.next_to(pipeline_caption, DOWN, buff=0.18)
         gpu_label = Tex(
             r"\textbf{GPU Model Comparison} (Random Forest vs XGBoost vs Deep MLP)",
             font_size=18, color=TEXT_MUTED
-        ).next_to(gpu_img, DOWN, buff=0.08).set(width=11.5)
+        ).set(width=11.5)
 
         self.play(
             FadeOut(prev_content),
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW")
+        header = next_header
         self.play(FadeIn(header), FadeIn(s7_title))
         self.play(FadeIn(stage_boxes), FadeIn(arrows))
         self.play(FadeIn(phase_group), FadeIn(pipeline_caption))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 8 — GPU Model Comparison
+        # ===========================================================
+        prev_content = Group(s7_title, stage_boxes, arrows, phase_group, pipeline_caption)
+        new_footer = build_footer(8)
+        next_header, stripe = build_header(r"GPU MODEL COMPARISON", r"BENCHMARK CONTEXT")
+
+        s8_title = slide_title(r"GPU Model Comparison", stripe)
+        gpu_img.move_to(ORIGIN).shift(DOWN * 0.05)
+        gpu_label.next_to(gpu_img, DOWN, buff=0.16)
+
+        self.play(FadeOut(prev_content), Transform(footer, new_footer), FadeOut(header))
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s8_title))
         self.play(FadeIn(gpu_img), FadeIn(gpu_label))
         self.wait(0.2)
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 8 — Random Forest Model
+        # SLIDE 9 — Random Forest Model
         # ===========================================================
-        prev_content = Group(s7_title, stage_boxes, arrows, phase_group, pipeline_caption, gpu_label)
-        prev_imgs = Group(gpu_img)
-        new_footer = build_footer(8)
-        header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
+        prev_content = Group(s8_title, gpu_img, gpu_label)
+        new_footer = build_footer(9)
+        next_header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
 
-        s8_title = slide_title(r"Random Forest Model", stripe)
+        s9_title = slide_title(r"Random Forest Model", stripe)
 
         # Left explanation card
         left_card = make_card(
             "WHAT IS RANDOM FOREST?", NVIDIA_DARK_GREEN,
-            r"\textbf{Ensemble classifier} that trains many Decision Trees and "
-            r"combines their votes for the final class.\\[0.14cm]"
+            r"\textbf{Ensemble classifier} that trains Decision\\[0.03cm]"
+            r"Trees and combines their votes for the final class.\\[0.10cm]"
             r"\textbf{Why it fits this IDS task:}\\[0.06cm]"
-            r"$\bullet$ Works well on tabular network-flow features\\[0.06cm]"
-            r"$\bullet$ Handles numeric + encoded categorical fields\\[0.06cm]"
-            r"$\bullet$ Captures nonlinear attack patterns in traffic\\[0.06cm]"
-            r"$\bullet$ Balanced class weights reduce class-imbalance bias\\[0.06cm]"
-            r"$\bullet$ Feature importance helps explain influential fields\\[0.14cm]"
-            r"\textit{Many trees $\rightarrow$ majority vote $\rightarrow$ Normal / DoS / DDoS}",
-            card_width=5.6, card_height=4.3, body_font=14
+            r"$\bullet$ Strong on tabular network-flow features\\[0.04cm]"
+            r"$\bullet$ Handles numeric and encoded fields\\[0.04cm]"
+            r"$\bullet$ Learns nonlinear attack patterns\\[0.04cm]"
+            r"$\bullet$ Balanced weights reduce class bias\\[0.04cm]"
+            r"$\bullet$ Feature importance supports explanations\\[0.10cm]"
+            r"\textit{Many trees vote: Normal / DoS / DDoS}",
+            card_width=5.6, card_height=4.3, body_font=18
         )
+        left_card[3].align_to(left_card[0], LEFT).shift(RIGHT * 0.28)
 
         # Right parameters card
         right_card_bg = RoundedRectangle(
@@ -708,15 +727,15 @@ class TonIoTPresentation(Slide):
         right_card = VGroup(right_card_bg, right_bar, right_badge, param_table, param_note)
 
         s8_row = VGroup(left_card, right_card).arrange(RIGHT, buff=0.45)
-        s8_row.next_to(s8_title, DOWN, buff=0.28)
+        s8_row.next_to(s9_title, DOWN, buff=0.28)
 
         self.play(
-            FadeOut(prev_content), FadeOut(prev_imgs),
+            FadeOut(prev_content),
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
-        self.play(FadeIn(header), FadeIn(s8_title))
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s9_title))
         self.play(FadeIn(s8_row))
         self.wait(0.2)
         self.next_slide()
@@ -724,11 +743,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 9 — Results & Performance
         # ===========================================================
-        prev_content = Group(s8_title, s8_row)
-        new_footer = build_footer(9)
-        header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
+        prev_content = Group(s9_title, s8_row)
+        new_footer = build_footer(10)
+        next_header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
 
-        s9_title = slide_title(r"Results \& Performance", stripe)
+        s10_title = slide_title(r"Results \& Performance", stripe)
 
         # Top stat boxes
         def make_stat_box(value_str, label_str, color=NVIDIA_DARK_GREEN):
@@ -747,7 +766,7 @@ class TonIoTPresentation(Slide):
         sb3 = make_stat_box(r"99.99\%",  "Recall",     NVIDIA_DARK_GREEN)
         sb4 = make_stat_box(r"1.000",    "ROC-AUC",    "#1565C0")
         stats_row = VGroup(sb1, sb2, sb3, sb4).arrange(RIGHT, buff=0.30)
-        stats_row.next_to(s9_title, DOWN, buff=0.26)
+        stats_row.next_to(s10_title, DOWN, buff=0.26)
 
         # Classification report table
         report_card_bg = RoundedRectangle(
@@ -792,8 +811,8 @@ class TonIoTPresentation(Slide):
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
-        self.play(FadeIn(header), FadeIn(s9_title))
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s10_title))
         self.play(FadeIn(stats_row))
         self.play(FadeIn(report_card), FadeIn(report_note))
         self.wait(0.2)
@@ -802,11 +821,11 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 10 — Confusion Matrix
         # ===========================================================
-        prev_content = Group(s9_title, stats_row, report_card, report_note)
-        new_footer = build_footer(10)
-        header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
+        prev_content = Group(s10_title, stats_row, report_card, report_note)
+        new_footer = build_footer(11)
+        next_header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
 
-        s10_title = slide_title(r"Confusion Matrix", stripe)
+        s11_title = slide_title(r"Confusion Matrix", stripe)
 
         cm_img = (
             ImageMobject("../outputs/figures/rf_workflow_confusion_matrix.png")
@@ -836,20 +855,20 @@ class TonIoTPresentation(Slide):
             r"very high accuracy.\\[0.12cm]"
             r"Minimal off-diagonal errors indicate little "
             r"class confusion.",
-            font_size=18, color=TEXT_MAIN
-        ).next_to(reading_bar, DOWN, buff=0.22).set(width=4.75)
+            font_size=20, color=TEXT_MAIN
+        ).next_to(reading_bar, DOWN, buff=0.22).set(width=4.65)
         reading_card = VGroup(reading_card_bg, reading_bar, reading_badge, reading_body)
 
         s10_row = Group(cm_img, reading_card).arrange(RIGHT, buff=0.45)
-        s10_row.next_to(s10_title, DOWN, buff=0.26)
+        s10_row.next_to(s11_title, DOWN, buff=0.26)
 
         self.play(
             FadeOut(prev_content),
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
-        self.play(FadeIn(header), FadeIn(s10_title))
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s11_title))
         self.play(FadeIn(s10_row))
         self.wait(0.2)
         self.next_slide()
@@ -857,12 +876,12 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 11 — ROC Curves & Feature Importance
         # ===========================================================
-        prev_content = Group(s10_title)
+        prev_content = Group(s11_title)
         prev_imgs = Group(s10_row)
-        new_footer = build_footer(11)
-        header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
+        new_footer = build_footer(12)
+        next_header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
 
-        s11_title = slide_title(
+        s12_title = slide_title(
             r"ROC Curves and Feature Importance", stripe, font=27
         )
 
@@ -895,15 +914,15 @@ class TonIoTPresentation(Slide):
         roc_col = Group(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
         fi_col  = Group(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
         s11_row = Group(roc_col, fi_col).arrange(RIGHT, buff=0.45)
-        s11_row.next_to(s11_title, DOWN, buff=0.20)
+        s11_row.next_to(s12_title, DOWN, buff=0.20)
 
         self.play(
             FadeOut(prev_content), FadeOut(prev_imgs),
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
-        self.play(FadeIn(header), FadeIn(s11_title))
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s12_title))
         self.play(FadeIn(s11_row))
         self.wait(0.2)
         self.next_slide()
@@ -911,10 +930,10 @@ class TonIoTPresentation(Slide):
         # ===========================================================
         # SLIDE 12 — Thank You / Q&A
         # ===========================================================
-        prev_content = Group(s11_title)
+        prev_content = Group(s12_title)
         prev_imgs = Group(s11_row)
-        new_footer = build_footer(12)
-        header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
+        new_footer = build_footer(13)
+        next_header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
 
         # Large centered "Thank You"
         ty_main = Tex(
@@ -946,7 +965,7 @@ class TonIoTPresentation(Slide):
             Transform(footer, new_footer),
             FadeOut(header),
         )
-        header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
+        header = next_header
         self.play(FadeIn(header))
         self.play(Write(ty_main), Create(ty_accent))
         self.play(FadeIn(ty_sub), FadeIn(repo_card))
