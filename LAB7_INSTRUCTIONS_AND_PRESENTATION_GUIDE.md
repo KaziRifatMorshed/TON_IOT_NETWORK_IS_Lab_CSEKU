@@ -254,6 +254,26 @@ Because both you and your project mate have dedicated NVIDIA GPUs (RTX 3060 12GB
 .venv/bin/python -m src.train_gpu --epochs 15
 ```
 
+
+> [!IMPORTANT]
+> **Large-dataset execution decision (RTX 3060, 15 GB system RAM): Path 3 — GPU mini-batch streaming.**
+> A direct run on the complete 8.27M-row training set and 2.07M-row test set was terminated with `SIGKILL` during preprocessing, consistent with system-memory exhaustion. We will retain the full dataset and process it in chunks, transferring mini-batches to the GPU instead of materializing both CSVs and full preprocessing copies in RAM. The intended design is out-of-core preprocessing/training with bounded batches (starting around 8,192 rows and adjusting to available VRAM), while preserving the held-out test set and fitting any learned preprocessing only on training data.
+>
+> **Implementation status:** the separate `src.train_gpu_streaming` command below now provides chunked CUDA MLP training. The existing `src.train_gpu` comparison pipeline still loads complete datasets into RAM, so do not use it on the full dedicated split files; use `--sample-size` for a bounded comparison run.
+
+**Streaming implementation:** `src.train_gpu_streaming` reads each CSV in bounded chunks, fits its scaler incrementally, and transfers only mini-batches to CUDA. It currently trains and evaluates the PyTorch MLP; the existing XGBoost/RF comparison models need an in-memory matrix and are not part of this out-of-core command. Global duplicate removal is skipped because exact whole-file deduplication needs a disk-backed index. Categorical values are mapped with stable hashes so category dictionaries do not grow with the dataset.
+
+Run the full dedicated split datasets with conservative starting settings:
+
+```bash
+.venv/bin/python -m src.train_gpu_streaming \
+  --train-dataset data/train_normal_dos_ddos.csv \
+  --test-dataset data/test_normal_dos_ddos.csv \
+  --chunksize 50000 --batch-size 8192 --epochs 5
+```
+
+Lower `--chunksize` to reduce system RAM use; lower `--batch-size` if GPU memory is tight. The model is saved as `models/gpu_deep_mlp_streaming.pt`, preprocessing metadata as `models/gpu_deep_mlp_streaming_preprocessing.joblib`, and evaluation metrics as `outputs/reports/gpu_streaming_metrics.json`.
+
 **What this step produces:**
 | Output Type | Files Generated |
 |:------------|:----------------|
