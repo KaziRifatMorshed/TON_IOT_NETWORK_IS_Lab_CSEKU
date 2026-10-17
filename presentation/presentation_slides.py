@@ -430,9 +430,9 @@ class TonIoTPresentation(Slide):
         s5_row.next_to(s5_title, DOWN, buff=0.22)
 
         caption = Tex(
-            r"\textit{The dataset provides enough samples for each selected class, "
-            r"supporting stable model training and evaluation.}",
-            font_size=18, color=TEXT_MUTED
+            r"\textit{Training dataset (8,271,593 records): DDoS: 4,932,721 (59.6\%), DoS: 2,701,550 (32.7\%), Normal: 637,322 (7.7\%). "
+            r"Held-out test set (2,065,123 records) preserves the identical distribution.}",
+            font_size=17, color=TEXT_MUTED
         ).next_to(s5_row, DOWN, buff=0.16).set(width=12.2)
 
         self.play(
@@ -646,31 +646,13 @@ class TonIoTPresentation(Slide):
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 8 — GPU Model Comparison
+        # SLIDE 8 — Random Forest Model Architecture
         # ===========================================================
         prev_content = Group(s7_title, stage_boxes, arrows, phase_group, pipeline_caption)
         new_footer = build_footer(8)
-        next_header, stripe = build_header(r"GPU MODEL COMPARISON", r"BENCHMARK CONTEXT")
+        next_header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER ARCHITECTURE")
 
-        s8_title = slide_title(r"GPU Model Comparison", stripe)
-        gpu_img.move_to(ORIGIN).shift(DOWN * 0.05)
-        gpu_label.next_to(gpu_img, DOWN, buff=0.16)
-
-        self.play(FadeOut(prev_content), Transform(footer, new_footer), FadeOut(header))
-        header = next_header
-        self.play(FadeIn(header), FadeIn(s8_title))
-        self.play(FadeIn(gpu_img), FadeIn(gpu_label))
-        self.wait(0.2)
-        self.next_slide()
-
-        # ===========================================================
-        # SLIDE 9 — Random Forest Model
-        # ===========================================================
-        prev_content = Group(s8_title, gpu_img, gpu_label)
-        new_footer = build_footer(9)
-        next_header, stripe = build_header(r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER")
-
-        s9_title = slide_title(r"Random Forest Model", stripe)
+        s8_title = slide_title(r"Random Forest Model", stripe)
 
         # Left explanation card
         left_card = make_card(
@@ -707,15 +689,14 @@ class TonIoTPresentation(Slide):
             r"\hline" "\n"
             r"\textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\" "\n"
             r"\hline" "\n"
-            r"n\_estimators   & 200        & Number of trees \\" "\n"
+            r"n\_estimators   & 100        & Number of trees \\" "\n"
             r"criterion       & gini       & Split quality \\" "\n"
-            r"max\_depth      & None       & Grow until pure \\" "\n"
-            r"max\_features   & sqrt       & Subset per split \\" "\n"
-            r"min\_split      & 2          & Minimum split size \\" "\n"
-            r"min\_leaf       & 1          & Minimum leaf size \\" "\n"
-            r"bootstrap       & True       & Sample rows per tree \\" "\n"
-            r"class\_weight   & balanced   & Handle imbalance \\" "\n"
-            r"n\_jobs         & -1         & Use all CPU cores \\" "\n"
+            r"max\_depth      & 8          & Tree depth limit \\" "\n"
+            r"tree\_method    & hist (CUDA)& GPU acceleration \\" "\n"
+            r"subsample       & 0.8        & Row subsampling \\" "\n"
+            r"colsample       & 0.8        & Feature subsampling \\" "\n"
+            r"learning\_rate  & 1.0        & Parallel forest mode \\" "\n"
+            r"device          & cuda       & RTX 3060 acceleration \\" "\n"
             r"random\_state   & 42         & Reproducible run \\" "\n"
             r"\hline" "\n"
             r"\end{tabular}",
@@ -728,7 +709,60 @@ class TonIoTPresentation(Slide):
         right_card = VGroup(right_card_bg, right_bar, right_badge, param_table, param_note)
 
         s8_row = VGroup(left_card, right_card).arrange(RIGHT, buff=0.45)
-        s8_row.next_to(s9_title, DOWN, buff=0.28)
+        s8_row.next_to(s8_title, DOWN, buff=0.28)
+
+        self.play(
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s8_title))
+        self.play(FadeIn(s8_row))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 9 — Confusion Matrix 1: GPU Random Forest
+        # ===========================================================
+        prev_content = Group(s8_title, s8_row)
+        new_footer = build_footer(9)
+        next_header, stripe = build_header(r"CONFUSION MATRIX (1/3)", r"GPU RANDOM FOREST — 2,065,123 TEST FLOWS")
+
+        s9_title = slide_title(r"GPU Random Forest Confusion Matrix", stripe)
+
+        cm_rf_img = (
+            ImageMobject("../outputs/figures/memmap_gpu_rf_confusion_matrix.png")
+            .set(height=4.0)
+        )
+
+        rf_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=5.4, height=4.0,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        rf_bar = RoundedRectangle(
+            corner_radius=0.06, width=5.4, height=0.42,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(rf_card_bg, UP)
+        rf_badge = Tex(
+            r"\textbf{GPU Random Forest (CUDA)}", font_size=18, color=WHITE_COLOR
+        ).move_to(rf_bar.get_center())
+        rf_body = Tex(
+            r"\textbf{Architecture:}\hspace{0.2cm} 100 Parallel Trees on CUDA\\[0.08cm]"
+            r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
+            r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.57\%} (2,056,332 correct)\\[0.08cm]"
+            r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{99.05\%} \textbar\ \textbf{Recall:} 98.57\%\\[0.08cm]"
+            r"\textbf{Precision:}\hspace{0.2cm} 99.54\% \textbar\ \textbf{MCC:} 0.9920\\[0.08cm]"
+            r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9998 \textbar\ \textbf{Latency:} 0.56 $\mu$s\\[0.08cm]"
+            r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.73 s} on RTX 3060\\[0.14cm]"
+            r"\textit{Near-zero off-diagonal errors confirm high resilience against DoS/DDoS confusion.}",
+            font_size=18, color=TEXT_MAIN
+        ).next_to(rf_bar, DOWN, buff=0.20).set(width=4.9)
+        rf_card = VGroup(rf_card_bg, rf_bar, rf_badge, rf_body)
+
+        s9_row = Group(cm_rf_img, rf_card).arrange(RIGHT, buff=0.45)
+        s9_row.next_to(s9_title, DOWN, buff=0.24)
 
         self.play(
             FadeOut(prev_content),
@@ -737,73 +771,51 @@ class TonIoTPresentation(Slide):
         )
         header = next_header
         self.play(FadeIn(header), FadeIn(s9_title))
-        self.play(FadeIn(s8_row))
+        self.play(FadeIn(s9_row))
         self.wait(0.2)
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 9 — Results & Performance
+        # SLIDE 10 — Confusion Matrix 2: GPU XGBoost
         # ===========================================================
-        prev_content = Group(s9_title, s8_row)
+        prev_content = Group(s9_title, s9_row)
         new_footer = build_footer(10)
-        next_header, stripe = build_header(r"RESULTS \& PERFORMANCE", r"GPU BENCHMARK METRICS")
+        next_header, stripe = build_header(r"CONFUSION MATRIX (2/3)", r"GPU XGBOOST — 2,065,123 TEST FLOWS")
 
-        s10_title = slide_title(r"Results \& Performance", stripe)
+        s10_title = slide_title(r"GPU XGBoost Confusion Matrix", stripe)
 
-        # Top stat boxes
-        def make_stat_box(value_str, label_str, color=NVIDIA_DARK_GREEN):
-            bg = RoundedRectangle(
-                corner_radius=0.08, width=2.8, height=1.10,
-                fill_color=WHITE_COLOR, fill_opacity=1.0,
-                stroke_color=color, stroke_width=2.0
-            )
-            val = Tex(rf"\textbf{{{value_str}}}", font_size=24, color=color)
-            lbl = Tex(label_str, font_size=18, color=TEXT_MUTED)
-            VGroup(val, lbl).arrange(DOWN, buff=0.06).move_to(bg.get_center())
-            return VGroup(bg, val, lbl)
+        cm_xgb_img = (
+            ImageMobject("../outputs/figures/memmap_gpu_xgboost_confusion_matrix.png")
+            .set(height=4.0)
+        )
 
-        sb1 = make_stat_box(r"99.87\%",  "XGBoost Acc.",  NVIDIA_DARK_GREEN)
-        sb2 = make_stat_box(r"99.80\%",  "Macro F1",      NVIDIA_DARK_GREEN)
-        sb3 = make_stat_box(r"13.28\,s", "Train Time",    NVIDIA_DARK_GREEN)
-        sb4 = make_stat_box(r"0.51\,$\mu$s", "Latency / Flow", "#1565C0")
-        stats_row = VGroup(sb1, sb2, sb3, sb4).arrange(RIGHT, buff=0.30)
-        stats_row.next_to(s10_title, DOWN, buff=0.26)
-
-        # Classification report table
-        report_card_bg = RoundedRectangle(
-            corner_radius=0.10, width=12.0, height=2.62,
+        xgb_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=5.4, height=4.0,
             fill_color=WHITE_COLOR, fill_opacity=1.0,
             stroke_color=CARD_BORDER, stroke_width=1.5
         )
-        report_bar = RoundedRectangle(
-            corner_radius=0.06, width=12.0, height=0.42,
-            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
-        ).align_to(report_card_bg, UP)
-        report_badge = Tex(
-            r"\textbf{Full 3-Model GPU Benchmark Results (2,065,123 Test Flows)}", font_size=18, color=WHITE_COLOR
-        ).move_to(report_bar.get_center())
-        report_table = Tex(
-            r"\renewcommand{\arraystretch}{1.25}" "\n"
-            r"\begin{tabular}{lcccccc}" "\n"
-            r"\hline" "\n"
-            r"\textbf{Model Architecture} & \textbf{Accuracy} & \textbf{Macro F1} & "
-            r"\textbf{Precision} & \textbf{Recall} & \textbf{Train Time} & \textbf{Latency} \\" "\n"
-            r"\hline" "\n"
-            r"GPU XGBoost (CUDA)        & \textbf{99.87\%} & \textbf{99.80\%} & \textbf{99.83\%} & \textbf{99.76\%} & \textbf{13.28 s} & 0.51 $\mu$s \\" "\n"
-            r"GPU Random Forest (CUDA)  & 99.57\% & 99.05\% & 99.54\% & 98.57\% & 13.73 s & 0.56 $\mu$s \\" "\n"
-            r"PyTorch Deep MLP (TF32)   & 94.59\% & 88.87\% & 92.69\% & 86.21\% & 436.71 s & \textbf{0.15 $\mu$s} \\" "\n"
-            r"\hline" "\n"
-            r"\end{tabular}",
+        xgb_bar = RoundedRectangle(
+            corner_radius=0.06, width=5.4, height=0.42,
+            fill_color=NVIDIA_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(xgb_card_bg, UP)
+        xgb_badge = Tex(
+            r"\textbf{GPU XGBoost (Top Classifier)}", font_size=18, color=WHITE_COLOR
+        ).move_to(xgb_bar.get_center())
+        xgb_body = Tex(
+            r"\textbf{Architecture:}\hspace{0.2cm} Gradient Boosted Trees (CUDA)\\[0.08cm]"
+            r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
+            r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.87\%} (2,062,483 correct)\\[0.08cm]"
+            r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{99.80\%} \textbar\ \textbf{Recall:} 99.76\%\\[0.08cm]"
+            r"\textbf{Precision:}\hspace{0.2cm} 99.83\% \textbar\ \textbf{MCC:} 0.9976\\[0.08cm]"
+            r"\textbf{ROC-AUC:}\hspace{0.2cm} 1.0000 \textbar\ \textbf{Latency:} 0.51 $\mu$s\\[0.08cm]"
+            r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.28 s} on RTX 3060\\[0.14cm]"
+            r"\textit{Best overall performance; virtually zero false alarms on benign flows.}",
             font_size=18, color=TEXT_MAIN
-        ).next_to(report_bar, DOWN, buff=0.22)
-        report_card = VGroup(report_card_bg, report_bar, report_badge, report_table)
-        report_card.next_to(stats_row, DOWN, buff=0.22)
+        ).next_to(xgb_bar, DOWN, buff=0.20).set(width=4.9)
+        xgb_card = VGroup(xgb_card_bg, xgb_bar, xgb_badge, xgb_body)
 
-        report_note = Tex(
-            r"\textit{Trained on 8,271,593 network flows with Approach 1 memory-mapped pipeline ($<$1.5 GB RAM used). "
-            r"Tree-based models on CUDA achieve over 99.5\% accuracy in under 14 seconds.}",
-            font_size=17, color=TEXT_MUTED
-        ).next_to(report_card, DOWN, buff=0.14).set(width=11.5)
+        s10_row = Group(cm_xgb_img, xgb_card).arrange(RIGHT, buff=0.45)
+        s10_row.next_to(s10_title, DOWN, buff=0.24)
 
         self.play(
             FadeOut(prev_content),
@@ -812,54 +824,51 @@ class TonIoTPresentation(Slide):
         )
         header = next_header
         self.play(FadeIn(header), FadeIn(s10_title))
-        self.play(FadeIn(stats_row))
-        self.play(FadeIn(report_card), FadeIn(report_note))
+        self.play(FadeIn(s10_row))
         self.wait(0.2)
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 10 — Confusion Matrix
+        # SLIDE 11 — Confusion Matrix 3: PyTorch Deep MLP
         # ===========================================================
-        prev_content = Group(s10_title, stats_row, report_card, report_note)
+        prev_content = Group(s10_title, s10_row)
         new_footer = build_footer(11)
-        next_header, stripe = build_header(r"CONFUSION MATRIX", r"ACTUAL vs PREDICTED — TEST SET")
+        next_header, stripe = build_header(r"CONFUSION MATRIX (3/3)", r"PYTORCH DEEP MLP — 2,065,123 TEST FLOWS")
 
-        s11_title = slide_title(r"Confusion Matrix", stripe)
+        s11_title = slide_title(r"PyTorch Deep Neural Network Confusion Matrix", stripe)
 
-        cm_img = (
-            ImageMobject("../outputs/figures/memmap_gpu_rf_confusion_matrix.png")
+        cm_mlp_img = (
+            ImageMobject("../outputs/figures/memmap_gpu_mlp_confusion_matrix.png")
             .set(height=4.0)
         )
 
-        # Reading panel on the right
-        reading_card_bg = RoundedRectangle(
-            corner_radius=0.10, width=5.2, height=3.8,
+        mlp_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=5.4, height=4.0,
             fill_color=WHITE_COLOR, fill_opacity=1.0,
             stroke_color=CARD_BORDER, stroke_width=1.5
         )
-        reading_bar = RoundedRectangle(
-            corner_radius=0.06, width=5.2, height=0.42,
+        mlp_bar = RoundedRectangle(
+            corner_radius=0.06, width=5.4, height=0.42,
             fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
-        ).align_to(reading_card_bg, UP)
-        reading_badge = Tex(
-            r"\textbf{Reading the Matrix}", font_size=18, color=WHITE_COLOR
-        ).move_to(reading_bar.get_center())
-        reading_body = Tex(
-            r"\textbf{Model:}\hspace{0.2cm} GPU Random Forest (CUDA)\\[0.10cm]"
-            r"\textbf{Dataset:}\hspace{0.2cm} 2,065,123 Test Flows\\[0.10cm]"
-            r"\textbf{Rows:} Actual class \textbar\ \textbf{Cols:} Predicted\\[0.10cm]"
-            r"\textbf{Diagonal $\checkmark$:} Correct flow predictions\\[0.10cm]"
-            r"\textbf{Off-diagonal $\times$:} Misclassifications\\[0.18cm]"
-            r"Near-perfect diagonal counts show the model "
-            r"identifies Normal, DoS, and DDoS traffic with "
-            r"\textbf{99.57\% accuracy} and \textbf{99.05\% Macro F1}.\\[0.10cm]"
-            r"Minimal off-diagonal errors confirm clean separation.",
-            font_size=19, color=TEXT_MAIN
-        ).next_to(reading_bar, DOWN, buff=0.22).set(width=4.65)
-        reading_card = VGroup(reading_card_bg, reading_bar, reading_badge, reading_body)
+        ).align_to(mlp_card_bg, UP)
+        mlp_badge = Tex(
+            r"\textbf{PyTorch Deep MLP (TF32 CUDA)}", font_size=18, color=WHITE_COLOR
+        ).move_to(mlp_bar.get_center())
+        mlp_body = Tex(
+            r"\textbf{Architecture:}\hspace{0.2cm} 4-Layer MLP with BatchNorm\\[0.08cm]"
+            r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
+            r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{94.59\%} (1,953,506 correct)\\[0.08cm]"
+            r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{88.87\%} \textbar\ \textbf{Recall:} 86.21\%\\[0.08cm]"
+            r"\textbf{Precision:}\hspace{0.2cm} 92.69\% \textbar\ \textbf{MCC:} 0.8972\\[0.08cm]"
+            r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9722 \textbar\ \textbf{Latency:} \textbf{0.15 $\mu$s}\\[0.08cm]"
+            r"\textbf{Training Time:}\hspace{0.2cm} 436.71 s (5 Epochs)\\[0.14cm]"
+            r"\textit{Deep neural network exhibits rapid 0.15 $\mu$s inference throughput on GPU Tensor Cores.}",
+            font_size=18, color=TEXT_MAIN
+        ).next_to(mlp_bar, DOWN, buff=0.20).set(width=4.9)
+        mlp_card = VGroup(mlp_card_bg, mlp_bar, mlp_badge, mlp_body)
 
-        s10_row = Group(cm_img, reading_card).arrange(RIGHT, buff=0.45)
-        s10_row.next_to(s11_title, DOWN, buff=0.26)
+        s11_row = Group(cm_mlp_img, mlp_card).arrange(RIGHT, buff=0.45)
+        s11_row.next_to(s11_title, DOWN, buff=0.24)
 
         self.play(
             FadeOut(prev_content),
@@ -868,69 +877,94 @@ class TonIoTPresentation(Slide):
         )
         header = next_header
         self.play(FadeIn(header), FadeIn(s11_title))
-        self.play(FadeIn(s10_row))
-        self.wait(0.2)
-        self.next_slide()
-
-        # ===========================================================
-        # SLIDE 12 — Multi-Model Confusion Analysis
-        # ===========================================================
-        prev_content = Group(s11_title)
-        prev_imgs = Group(s10_row)
-        new_footer = build_footer(12)
-        next_header, stripe = build_header(r"MULTI-MODEL CONFUSION ANALYSIS", r"GPU XGBOOST vs PYTORCH DEEP MLP")
-
-        s12_title = slide_title(
-            r"Comparative Confusion Analysis (2,065,123 Test Flows)", stripe, font=25
-        )
-
-        xgb_cm_img = (
-            ImageMobject("../outputs/figures/memmap_gpu_xgboost_confusion_matrix.png")
-            .set(height=3.8)
-        )
-        mlp_cm_img = (
-            ImageMobject("../outputs/figures/memmap_gpu_mlp_confusion_matrix.png")
-            .set(height=3.8)
-        )
-
-        xgb_label = Tex(
-            r"\textbf{GPU XGBoost (Top Model: 99.87\% Accuracy)}", font_size=18, color=NVIDIA_DARK_GREEN
-        )
-        mlp_label = Tex(
-            r"\textbf{PyTorch Deep MLP (Neural Network: 94.59\% Accuracy)}", font_size=18, color=NVIDIA_DARK_GREEN
-        )
-        xgb_note = Tex(
-            r"\textit{Gradient boosted trees achieve 99.80\% Macro F1 with}\\[0.02cm]"
-            r"\textit{exceptional precision and near-zero false alarms on 2.06M flows.}",
-            font_size=18, color=TEXT_MUTED
-        ).set(width=5.8)
-        mlp_note = Tex(
-            r"\textit{Deep MLP achieves ultra-fast 0.15 $\mu$s latency with balanced}\\[0.02cm]"
-            r"\textit{multi-class convergence, illustrating neural vs tree trade-offs.}",
-            font_size=18, color=TEXT_MUTED
-        ).set(width=5.8)
-
-        xgb_col = Group(xgb_label, xgb_cm_img, xgb_note).arrange(DOWN, buff=0.10)
-        mlp_col = Group(mlp_label, mlp_cm_img, mlp_note).arrange(DOWN, buff=0.10)
-        s11_row = Group(xgb_col, mlp_col).arrange(RIGHT, buff=0.45)
-        s11_row.next_to(s12_title, DOWN, buff=0.20)
-
-        self.play(
-            FadeOut(prev_content), FadeOut(prev_imgs),
-            Transform(footer, new_footer),
-            FadeOut(header),
-        )
-        header = next_header
-        self.play(FadeIn(header), FadeIn(s12_title))
         self.play(FadeIn(s11_row))
         self.wait(0.2)
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 12 — Thank You / Q&A
+        # SLIDE 12 — Model Benchmark Comparison & Evaluation
         # ===========================================================
-        prev_content = Group(s12_title)
-        prev_imgs = Group(s11_row)
+        prev_content = Group(s11_title, s11_row)
+        new_footer = build_footer(12)
+        next_header, stripe = build_header(r"MODEL BENCHMARK COMPARISON", r"PERFORMANCE EVALUATION \& BEST MODEL")
+
+        s12_title = slide_title(
+            r"Model Comparison and Benchmark Evaluation", stripe, font=25
+        )
+
+        comp_img = (
+            ImageMobject("../outputs/figures/memmap_gpu_comparison.png")
+            .set(width=5.8)
+        )
+        comp_caption = Tex(
+            r"\textbf{Figure:} Metric Comparison on 2,065,123 Test Flows",
+            font_size=15, color=TEXT_MUTED
+        )
+        comp_col = Group(comp_img, comp_caption).arrange(DOWN, buff=0.10)
+
+        # Right table card
+        table_card_bg = RoundedRectangle(
+            corner_radius=0.10, width=6.6, height=4.3,
+            fill_color=WHITE_COLOR, fill_opacity=1.0,
+            stroke_color=CARD_BORDER, stroke_width=1.5
+        )
+        table_bar = RoundedRectangle(
+            corner_radius=0.06, width=6.6, height=0.42,
+            fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
+        ).align_to(table_card_bg, UP)
+        table_badge = Tex(
+            r"\textbf{Benchmark Results (2,065,123 Test Flows)}", font_size=17, color=WHITE_COLOR
+        ).move_to(table_bar.get_center())
+
+        bench_table = Tex(
+            r"\renewcommand{\arraystretch}{1.26}" "\n"
+            r"\begin{tabular}{lcccc}" "\n"
+            r"\hline" "\n"
+            r"\textbf{Model} & \textbf{Accuracy} & \textbf{Macro F1} & \textbf{Train Time} & \textbf{Latency} \\" "\n"
+            r"\hline" "\n"
+            r"\textbf{GPU XGBoost}    & \textbf{99.87\%} & \textbf{99.80\%} & \textbf{13.28 s} & 0.51 $\mu$s \\" "\n"
+            r"GPU Random Forest       & 99.57\%          & 99.05\%          & 13.73 s          & 0.56 $\mu$s \\" "\n"
+            r"PyTorch Deep MLP        & 94.59\%          & 88.87\%          & 436.71 s         & \textbf{0.15 $\mu$s} \\" "\n"
+            r"\hline" "\n"
+            r"\end{tabular}",
+            font_size=17, color=TEXT_MAIN
+        ).next_to(table_bar, DOWN, buff=0.16).set(width=6.2)
+
+        winner_box_bg = RoundedRectangle(
+            corner_radius=0.06, width=6.2, height=1.35,
+            fill_color=CARD_BG, fill_opacity=1.0,
+            stroke_color=NVIDIA_GREEN, stroke_width=1.5
+        )
+        winner_text = Tex(
+            r"\textbf{BEST PERFORMING MODEL: GPU XGBOOST}\\[0.05cm]"
+            r"$\bullet$ \textbf{Top Score:} 99.87\% Accuracy, 99.80\% Macro F1\\[0.03cm]"
+            r"$\bullet$ \textbf{Speed:} Trained in 13.28 s on 8.27M rows (RTX 3060)\\[0.03cm]"
+            r"$\bullet$ \textbf{Reliability:} 1.0000 ROC-AUC with near-zero false alarms",
+            font_size=16, color=NVIDIA_DARK_GREEN
+        ).set(width=5.9).move_to(winner_box_bg.get_center())
+        winner_box = VGroup(winner_box_bg, winner_text)
+        winner_box.next_to(bench_table, DOWN, buff=0.14)
+
+        table_card = VGroup(table_card_bg, table_bar, table_badge, bench_table, winner_box)
+
+        s12_row = Group(comp_col, table_card).arrange(RIGHT, buff=0.40)
+        s12_row.next_to(s12_title, DOWN, buff=0.20)
+
+        self.play(
+            FadeOut(prev_content),
+            Transform(footer, new_footer),
+            FadeOut(header),
+        )
+        header = next_header
+        self.play(FadeIn(header), FadeIn(s12_title))
+        self.play(FadeIn(s12_row))
+        self.wait(0.2)
+        self.next_slide()
+
+        # ===========================================================
+        # SLIDE 13 — Thank You / Q&A
+        # ===========================================================
+        prev_content = Group(s12_title, s12_row)
         new_footer = build_footer(13)
         next_header, stripe = build_header(r"THANK YOU", r"QUESTIONS \& DISCUSSION")
 
@@ -960,7 +994,7 @@ class TonIoTPresentation(Slide):
         repo_card.next_to(ty_group, DOWN, buff=0.50)
 
         self.play(
-            FadeOut(prev_content), FadeOut(prev_imgs),
+            FadeOut(prev_content),
             Transform(footer, new_footer),
             FadeOut(header),
         )
