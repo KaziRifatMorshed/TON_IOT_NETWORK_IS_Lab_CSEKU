@@ -15,6 +15,9 @@ env/
 # Local data and generated artifacts
 presentation_slide_content.txt
 !data/.gitkeep
+data/cache_memmap/
+*.f32
+*.i8
 models/*
 !models/.gitkeep
 outputs/figures/*
