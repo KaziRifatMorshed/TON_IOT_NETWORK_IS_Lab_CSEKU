@@ -604,37 +604,21 @@ class TonIoTPresentation(Slide):
                 stroke_color=CARD_BORDER,
                 stroke_width=1.4,
             )
-            num_circle = (
-                Circle(
-                    radius=0.26,
-                    fill_color=NVIDIA_GREEN,
-                    fill_opacity=1.0,
-                    stroke_width=0,
-                )
-                .align_to(bg, LEFT)
-                .shift(RIGHT * 0.34)
-                .align_to(bg, UP)
-                .shift(DOWN * 0.38)
+            num_tex = Tex(rf"\textbf{{{num_str}}}", font_size=14, color=NVIDIA_GREEN)
+            title_tex = Tex(
+                rf"\textbf{{{step_title_str}}}",
+                font_size=26,
+                color=NVIDIA_DARK_GREEN,
             )
-            num_tex = Tex(
-                rf"\textbf{{{num_str}}}", font_size=19, color=WHITE_COLOR
-            ).move_to(num_circle.get_center())
-            title_tex = (
-                Tex(
-                    rf"\textbf{{{step_title_str}}}",
-                    font_size=17,
-                    color=NVIDIA_DARK_GREEN,
-                )
-                .next_to(num_circle, RIGHT, buff=0.18)
-                .align_to(num_circle, UP)
+            body_tex = Tex(
+                r"\begin{flushleft}" + step_body_str + r"\end{flushleft}",
+                font_size=20,
+                color=TEXT_MAIN,
             )
-            body_tex = (
-                Tex(step_body_str, font_size=15, color=TEXT_MAIN)
-                .next_to(title_tex, DOWN, buff=0.10)
-                .align_to(title_tex, LEFT)
-                .set(width=4.0)
-            )
-            return VGroup(bg, num_circle, num_tex, title_tex, body_tex)
+            content = VGroup(num_tex, title_tex, body_tex).arrange(DOWN, buff=0.06)
+            content.move_to(bg.get_center())
+            content.align_to(bg, LEFT).shift(RIGHT * 0.34)
+            return VGroup(bg, content)
 
         step1 = make_step_card(
             "01",
@@ -689,7 +673,7 @@ class TonIoTPresentation(Slide):
         )
         result_banner_tx = (
             Tex(
-                r"\textit{Result: a clean numeric feature matrix ready for training and evaluation.}",
+                r"\textit{Result: a clean dataset ready for training and evaluation.}",
                 font_size=16,
                 color=NVIDIA_DARK_GREEN,
             )
