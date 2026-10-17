@@ -817,15 +817,15 @@ class TonIoTPresentation(Slide):
         )
         pipeline_caption_tx = (
             Tex(
-                r"\textit{The trained model, evaluation metrics, figures, and run config are saved for reuse.}",
-                font_size=12,
+                r"\textit{The trained model, evaluation metrics, figures, and run config are saved.}",
+                font_size=8,
                 color=NVIDIA_DARK_GREEN,
             )
             .set(width=9.5)
             .move_to(pipeline_caption_bg.get_center())
         )
         pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
-        pipeline_caption.next_to(phase_group, DOWN, buff=0.24)
+        pipeline_caption.next_to(phase_group, DOWN, buff=0.34)
 
         gpu_img = ImageMobject("../outputs/figures/memmap_gpu_comparison.png").set(
             height=3.8
