@@ -863,25 +863,49 @@ class TonIoTPresentation(Slide):
         s8_title = slide_title(r"Random Forest Model", stripe)
 
         # Left explanation card
-        left_card = make_card(
-            "WHAT IS RANDOM FOREST?",
-            NVIDIA_DARK_GREEN,
-            r"\begin{flushleft}"
-            r"\textbf{Ensemble classifier} that trains Decision\\[0.03cm]"
-            r"Trees and combines their votes for the final class.\\[0.10cm]"
-            r"\textbf{Why it fits this IDS task:}\\[0.06cm]"
-            r"$\bullet$ Strong on tabular network-flow features\\[0.04cm]"
-            r"$\bullet$ Handles numeric and encoded fields\\[0.04cm]"
-            r"$\bullet$ Learns nonlinear attack patterns\\[0.04cm]"
-            r"$\bullet$ Balanced weights reduce class bias\\[0.04cm]"
-            r"$\bullet$ Feature importance supports explanations\\[0.10cm]"
-            r"\textit{Many trees vote: Normal / DoS / DDoS}"
-            r"\end{flushleft}",
-            card_width=5.6,
-            card_height=4.3,
-            body_font=18,
+        left_card_bg = RoundedRectangle(
+            corner_radius=0.10,
+            width=5.6,
+            height=4.3,
+            fill_color=WHITE_COLOR,
+            fill_opacity=1.0,
+            stroke_color=CARD_BORDER,
+            stroke_width=1.5,
         )
-        left_card[3].align_to(left_card[0], LEFT).shift(RIGHT * 0.28)
+        left_bar = RoundedRectangle(
+            corner_radius=0.06,
+            width=5.6,
+            height=0.42,
+            fill_color=NVIDIA_DARK_GREEN,
+            fill_opacity=1.0,
+            stroke_width=0,
+        ).align_to(left_card_bg, UP)
+        left_badge = Tex(
+            r"\textbf{WHAT IS RANDOM FOREST?}",
+            font_size=18,
+            color=WHITE_COLOR,
+        ).move_to(left_bar.get_center())
+        left_explanation = (
+            Tex(
+                r"\begin{flushleft}"
+                r"\textbf{Ensemble classifier} that trains Decision\\[0.03cm]"
+                r"Trees and combines their votes for the final class.\\[0.10cm]"
+                r"\textbf{Why it fits this IDS task:}\\[0.06cm]"
+                r"$\bullet$ Strong on tabular network-flow features\\[0.04cm]"
+                r"$\bullet$ Handles numeric and encoded fields\\[0.04cm]"
+                r"$\bullet$ Learns nonlinear attack patterns\\[0.04cm]"
+                r"$\bullet$ Balanced weights reduce class bias\\[0.04cm]"
+                r"$\bullet$ Feature importance supports explanations\\[0.10cm]"
+                r"\textit{Many trees vote: Normal / DoS / DDoS}"
+                r"\end{flushleft}",
+                font_size=18,
+                color=TEXT_MAIN,
+            )
+            .next_to(left_bar, DOWN, buff=0.38)
+            .set(width=5.15)
+        )
+        left_explanation.align_to(left_card_bg, LEFT).shift(RIGHT * 0.28)
+        left_card = VGroup(left_card_bg, left_bar, left_badge, left_explanation)
 
         # Right parameters card
         right_card_bg = RoundedRectangle(
@@ -938,7 +962,7 @@ class TonIoTPresentation(Slide):
                 font_size=18,
                 color=TEXT_MAIN,
             )
-            .next_to(right_bar, DOWN, buff=0.28)
+            .next_to(right_bar, DOWN, buff=0.38)
             .set(width=5.6)
         )
         param_note = (
@@ -955,7 +979,7 @@ class TonIoTPresentation(Slide):
         )
 
         s8_row = VGroup(left_card, right_card).arrange(RIGHT, buff=0.45)
-        s8_row.next_to(s8_title, DOWN, buff=0.28)
+        s8_row.next_to(s8_title, DOWN, buff=0.38)
 
         self.play(
             FadeOut(prev_content),
