@@ -349,11 +349,11 @@ class TonIoTPresentation(Slide):
             r"\textbf{Attribute} & \textbf{Value} \\" "\n"
             r"\hline" "\n"
             r"Dataset        & TON\_IoT Network Traffic \\" "\n"
-            r"Total Records  & 300,000 rows \\" "\n"
-            r"After Dedup.   & 249,733 rows \\" "\n"
-            r"Target Column  & \texttt{type} \\" "\n"
-            r"Selected Classes & normal, dos, ddos \\" "\n"
-            r"Final Features & 45 columns \\" "\n"
+            r"Total Records  & 10,336,716 flows \\" "\n"
+            r"Dedicated Split & 80\% Train / 20\% Test \\" "\n"
+            r"Target Column  & \texttt{type} (Normal, DoS, DDoS) \\" "\n"
+            r"Pipeline Scale & 8.27M Train / 2.06M Test \\" "\n"
+            r"Peak RAM Usage & $<$ 1.5 GB (Memory-Mapped) \\" "\n"
             r"\hline" "\n"
             r"\end{tabular}",
             font_size=18, color=TEXT_MAIN
@@ -477,13 +477,13 @@ class TonIoTPresentation(Slide):
             ).next_to(title_tex, DOWN, buff=0.08).align_to(title_tex, LEFT).set(width=4.0)
             return VGroup(bg, num_circle, num_tex, title_tex, body_tex)
 
-        step1 = make_step_card("01", "Load Dataset",
-            r"Read \texttt{data/dataset.csv} and keep selected\\[0.03cm]"
-            r"classes: \texttt{normal}, \texttt{dos}, and \texttt{ddos}."
+        step1 = make_step_card("01", "Data Ingestion",
+            r"Process 10,336,716 flow records from\\[0.03cm]"
+            r"dedicated \texttt{train} (8.27M) and \texttt{test} (2.06M) sets."
         )
-        step2 = make_step_card("02", "Remove Duplicates",
-            r"Drop repeated rows: 300,000 records become\\[0.03cm]"
-            r"\textbf{249,733 unique flows} (50,267 removed)."
+        step2 = make_step_card("02", "Out-of-Core Cache",
+            r"Stream chunks into binary \texttt{np.memmap}\\[0.03cm]"
+            r"files, keeping RAM strictly \textbf{$<$ 1.5 GB}."
         )
         step3 = make_step_card("03", "Normalize Labels",
             r"Standardize \texttt{type}; separate target from features.\\[0.03cm]"
@@ -624,12 +624,13 @@ class TonIoTPresentation(Slide):
         pipeline_caption.next_to(phase_group, DOWN, buff=0.24)
 
         gpu_img = (
-            ImageMobject("../outputs/figures/pure_gpu_comparison.png")
+            ImageMobject("../outputs/figures/memmap_gpu_comparison.png")
             .set(height=3.8)
         )
         gpu_label = Tex(
-            r"\textbf{GPU Model Comparison} (Random Forest vs XGBoost vs Deep MLP)",
-            font_size=18, color=TEXT_MUTED
+            r"\textbf{GPU Model Benchmark Comparison (10,336,716 Records)} \hspace{0.2cm}\textbar\hspace{0.2cm} "
+            r"\textsf{Evaluated on 2,065,123 Test Flows (NVIDIA RTX 3060 CUDA)}",
+            font_size=17, color=TEXT_MUTED
         ).set(width=11.5)
 
         self.play(
@@ -761,10 +762,10 @@ class TonIoTPresentation(Slide):
             VGroup(val, lbl).arrange(DOWN, buff=0.06).move_to(bg.get_center())
             return VGroup(bg, val, lbl)
 
-        sb1 = make_stat_box(r"99.99\%",  "Accuracy",   NVIDIA_DARK_GREEN)
-        sb2 = make_stat_box(r"99.99\%",  "Macro F1",   NVIDIA_DARK_GREEN)
-        sb3 = make_stat_box(r"99.99\%",  "Recall",     NVIDIA_DARK_GREEN)
-        sb4 = make_stat_box(r"1.000",    "ROC-AUC",    "#1565C0")
+        sb1 = make_stat_box(r"99.87\%",  "XGBoost Acc.",  NVIDIA_DARK_GREEN)
+        sb2 = make_stat_box(r"99.80\%",  "Macro F1",      NVIDIA_DARK_GREEN)
+        sb3 = make_stat_box(r"13.28\,s", "Train Time",    NVIDIA_DARK_GREEN)
+        sb4 = make_stat_box(r"0.51\,$\mu$s", "Latency / Flow", "#1565C0")
         stats_row = VGroup(sb1, sb2, sb3, sb4).arrange(RIGHT, buff=0.30)
         stats_row.next_to(s10_title, DOWN, buff=0.26)
 
@@ -779,31 +780,29 @@ class TonIoTPresentation(Slide):
             fill_color=NVIDIA_DARK_GREEN, fill_opacity=1.0, stroke_width=0
         ).align_to(report_card_bg, UP)
         report_badge = Tex(
-            r"\textbf{Classification Report Summary}", font_size=18, color=WHITE_COLOR
+            r"\textbf{Full 3-Model GPU Benchmark Results (2,065,123 Test Flows)}", font_size=18, color=WHITE_COLOR
         ).move_to(report_bar.get_center())
         report_table = Tex(
             r"\renewcommand{\arraystretch}{1.25}" "\n"
-            r"\begin{tabular}{lcccc}" "\n"
+            r"\begin{tabular}{lcccccc}" "\n"
             r"\hline" "\n"
-            r"\textbf{Class} & \textbf{Precision} & \textbf{Recall} & "
-            r"\textbf{F1-Score} & \textbf{Meaning} \\" "\n"
+            r"\textbf{Model Architecture} & \textbf{Accuracy} & \textbf{Macro F1} & "
+            r"\textbf{Precision} & \textbf{Recall} & \textbf{Train Time} & \textbf{Latency} \\" "\n"
             r"\hline" "\n"
-            r"Normal    & 100.00\% & 100.00\% & 100.00\% & Benign flow detection \\" "\n"
-            r"DoS       & 100.00\% & 99.98\%  & 99.99\%  & Single-source attack \\" "\n"
-            r"DDoS      & 99.99\%  & 100.00\% & 99.99\%  & Distributed attack \\" "\n"
-            r"Macro Avg & \textbf{99.99\%}  & \textbf{99.99\%}  & "
-            r"\textbf{99.99\%}  & Balanced across classes \\" "\n"
+            r"GPU XGBoost (CUDA)        & \textbf{99.87\%} & \textbf{99.80\%} & \textbf{99.83\%} & \textbf{99.76\%} & \textbf{13.28 s} & 0.51 $\mu$s \\" "\n"
+            r"GPU Random Forest (CUDA)  & 99.57\% & 99.05\% & 99.54\% & 98.57\% & 13.73 s & 0.56 $\mu$s \\" "\n"
+            r"PyTorch Deep MLP (TF32)   & 94.59\% & 88.87\% & 92.69\% & 86.21\% & 436.71 s & \textbf{0.15 $\mu$s} \\" "\n"
             r"\hline" "\n"
             r"\end{tabular}",
-            font_size=19, color=TEXT_MAIN
+            font_size=18, color=TEXT_MAIN
         ).next_to(report_bar, DOWN, buff=0.22)
         report_card = VGroup(report_card_bg, report_bar, report_badge, report_table)
         report_card.next_to(stats_row, DOWN, buff=0.22)
 
         report_note = Tex(
-            r"\textit{Interpretation: high precision limits false alarms, high recall "
-            r"catches attacks, and macro F1 confirms balanced Normal/DoS/DDoS performance.}",
-            font_size=18, color=TEXT_MUTED
+            r"\textit{Trained on 8,271,593 network flows with Approach 1 memory-mapped pipeline ($<$1.5 GB RAM used). "
+            r"Tree-based models on CUDA achieve over 99.5\% accuracy in under 14 seconds.}",
+            font_size=17, color=TEXT_MUTED
         ).next_to(report_card, DOWN, buff=0.14).set(width=11.5)
 
         self.play(
@@ -828,7 +827,7 @@ class TonIoTPresentation(Slide):
         s11_title = slide_title(r"Confusion Matrix", stripe)
 
         cm_img = (
-            ImageMobject("../outputs/figures/rf_workflow_confusion_matrix.png")
+            ImageMobject("../outputs/figures/memmap_gpu_rf_confusion_matrix.png")
             .set(height=4.0)
         )
 
@@ -846,16 +845,16 @@ class TonIoTPresentation(Slide):
             r"\textbf{Reading the Matrix}", font_size=18, color=WHITE_COLOR
         ).move_to(reading_bar.get_center())
         reading_body = Tex(
-            r"\textbf{Rows:} Actual traffic class\\[0.12cm]"
-            r"\textbf{Columns:} Predicted class\\[0.12cm]"
-            r"\textbf{Diagonal $\checkmark$:} Correct predictions\\[0.12cm]"
-            r"\textbf{Off-diagonal $\times$:} Misclassifications\\[0.20cm]"
-            r"Near-perfect diagonal values show the model "
-            r"classifies Normal, DoS, and DDoS traffic with "
-            r"very high accuracy.\\[0.12cm]"
-            r"Minimal off-diagonal errors indicate little "
-            r"class confusion.",
-            font_size=20, color=TEXT_MAIN
+            r"\textbf{Model:}\hspace{0.2cm} GPU Random Forest (CUDA)\\[0.10cm]"
+            r"\textbf{Dataset:}\hspace{0.2cm} 2,065,123 Test Flows\\[0.10cm]"
+            r"\textbf{Rows:} Actual class \textbar\ \textbf{Cols:} Predicted\\[0.10cm]"
+            r"\textbf{Diagonal $\checkmark$:} Correct flow predictions\\[0.10cm]"
+            r"\textbf{Off-diagonal $\times$:} Misclassifications\\[0.18cm]"
+            r"Near-perfect diagonal counts show the model "
+            r"identifies Normal, DoS, and DDoS traffic with "
+            r"\textbf{99.57\% accuracy} and \textbf{99.05\% Macro F1}.\\[0.10cm]"
+            r"Minimal off-diagonal errors confirm clean separation.",
+            font_size=19, color=TEXT_MAIN
         ).next_to(reading_bar, DOWN, buff=0.22).set(width=4.65)
         reading_card = VGroup(reading_card_bg, reading_bar, reading_badge, reading_body)
 
@@ -874,46 +873,46 @@ class TonIoTPresentation(Slide):
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 11 — ROC Curves & Feature Importance
+        # SLIDE 12 — Multi-Model Confusion Analysis
         # ===========================================================
         prev_content = Group(s11_title)
         prev_imgs = Group(s10_row)
         new_footer = build_footer(12)
-        next_header, stripe = build_header(r"ROC CURVES \& FEATURE IMPORTANCE", r"MODEL EXPLAINABILITY")
+        next_header, stripe = build_header(r"MULTI-MODEL CONFUSION ANALYSIS", r"GPU XGBOOST vs PYTORCH DEEP MLP")
 
         s12_title = slide_title(
-            r"ROC Curves and Feature Importance", stripe, font=27
+            r"Comparative Confusion Analysis (2,065,123 Test Flows)", stripe, font=25
         )
 
-        roc_img = (
-            ImageMobject("../outputs/figures/rf_workflow_roc_curves.png")
+        xgb_cm_img = (
+            ImageMobject("../outputs/figures/memmap_gpu_xgboost_confusion_matrix.png")
             .set(height=3.8)
         )
-        fi_img = (
-            ImageMobject("../outputs/figures/rf_workflow_feature_importance.png")
+        mlp_cm_img = (
+            ImageMobject("../outputs/figures/memmap_gpu_mlp_confusion_matrix.png")
             .set(height=3.8)
         )
 
-        roc_label = Tex(
-            r"\textbf{ROC Curves (One-vs-Rest)}", font_size=18, color=NVIDIA_DARK_GREEN
+        xgb_label = Tex(
+            r"\textbf{GPU XGBoost (Top Model: 99.87\% Accuracy)}", font_size=18, color=NVIDIA_DARK_GREEN
         )
-        fi_label = Tex(
-            r"\textbf{Feature Importance (Top Features)}", font_size=18, color=NVIDIA_DARK_GREEN
+        mlp_label = Tex(
+            r"\textbf{PyTorch Deep MLP (Neural Network: 94.59\% Accuracy)}", font_size=18, color=NVIDIA_DARK_GREEN
         )
-        roc_note = Tex(
-            r"\textit{Curves close to the top-left corner and AUC near 1.000}\\[0.02cm]"
-            r"\textit{indicate excellent separation between all three classes.}",
-            font_size=19, color=TEXT_MUTED
+        xgb_note = Tex(
+            r"\textit{Gradient boosted trees achieve 99.80\% Macro F1 with}\\[0.02cm]"
+            r"\textit{exceptional precision and near-zero false alarms on 2.06M flows.}",
+            font_size=18, color=TEXT_MUTED
         ).set(width=5.8)
-        fi_note = Tex(
-            r"\textit{Top-ranked traffic fields contribute most to model}\\[0.02cm]"
-            r"\textit{decisions, making the classifier easier to explain.}",
-            font_size=19, color=TEXT_MUTED
+        mlp_note = Tex(
+            r"\textit{Deep MLP achieves ultra-fast 0.15 $\mu$s latency with balanced}\\[0.02cm]"
+            r"\textit{multi-class convergence, illustrating neural vs tree trade-offs.}",
+            font_size=18, color=TEXT_MUTED
         ).set(width=5.8)
 
-        roc_col = Group(roc_label, roc_img, roc_note).arrange(DOWN, buff=0.10)
-        fi_col  = Group(fi_label,  fi_img,  fi_note ).arrange(DOWN, buff=0.10)
-        s11_row = Group(roc_col, fi_col).arrange(RIGHT, buff=0.45)
+        xgb_col = Group(xgb_label, xgb_cm_img, xgb_note).arrange(DOWN, buff=0.10)
+        mlp_col = Group(mlp_label, mlp_cm_img, mlp_note).arrange(DOWN, buff=0.10)
+        s11_row = Group(xgb_col, mlp_col).arrange(RIGHT, buff=0.45)
         s11_row.next_to(s12_title, DOWN, buff=0.20)
 
         self.play(
