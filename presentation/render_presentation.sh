@@ -9,7 +9,10 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$DIR"
 
 ACTION="${1:-html}"
-QUALITY="${2:-qh}"
+# The high-quality preset creates large intermediate animations. Manim Slides
+# also builds reversed copies while assembling the deck, so keep the default
+# bounded for machines with limited RAM. Pass a quality explicitly to override.
+QUALITY="${2:-ql}"
 
 case "$ACTION" in
     render)
@@ -17,11 +20,11 @@ case "$ACTION" in
         conda run -n manim_env manim "-$QUALITY" presentation_slides.py TonIoTPresentation
         ;;
     html)
-        echo "[INFO] Rendering in Full-HD (1080p60) and converting to Reveal.js HTML..."
+        echo "[INFO] Rendering with the memory-friendly quality preset (-$QUALITY) and converting to Reveal.js HTML..."
         conda run -n manim_env manim "-$QUALITY" presentation_slides.py TonIoTPresentation
         mkdir -p ../docs
         conda run -n manim_env manim-slides convert TonIoTPresentation ../docs/index.html --one-file -c reveal_theme=white
-        echo "[SUCCESS] Generated high-definition docs/index.html (GitHub Pages)"
+        echo "[SUCCESS] Generated docs/index.html (GitHub Pages)"
         echo "Local View : file://$(cd .. && pwd)/docs/index.html"
         ;;
     present)
@@ -44,7 +47,7 @@ case "$ACTION" in
         ;;
     *)
         echo "Usage: ./render_presentation.sh [html | full-hd | 4k | present | render]"
-        echo "  html    : Render slides in 1080p60 and generate standalone docs/index.html (default)"
+        echo "  html    : Render slides at low memory use and generate docs/index.html (default; quality override: ./render_presentation.sh html qh)"
         echo "  full-hd : Explicit 1080p60 Full-HD render and export"
         echo "  4k      : Render in Ultra-HD 4K (3840x2160 @ 60FPS) for 100-inch smart boards"
         echo "  present : Launch interactive local presentation window (Space to advance)"
