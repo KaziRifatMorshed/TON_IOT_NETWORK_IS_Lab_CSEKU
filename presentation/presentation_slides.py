@@ -335,8 +335,8 @@ class TonIoTPresentation(Slide):
             FadeOut(lab_strip),
             FadeIn(header),
             FadeIn(footer),
-            FadeIn(s2_title),
         )
+        self.play(Write(s2_title[0]), Create(s2_title[1]))
         self.play(FadeIn(both_cards))
         self.wait(0.2)
         self.next_slide()
@@ -391,7 +391,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s3_title))
+        self.play(FadeIn(header))
+        self.play(Write(s3_title[0]), Create(s3_title[1]))
         self.play(FadeIn(s3_row))
         self.wait(0.2)
         self.next_slide()
@@ -524,7 +525,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s4_title))
+        self.play(FadeIn(header))
+        self.play(Write(s4_title[0]), Create(s4_title[1]))
         self.play(FadeIn(s4_row))
         self.wait(0.2)
         self.next_slide()
@@ -577,7 +579,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s5_title))
+        self.play(FadeIn(header))
+        self.play(Write(s5_title[0]), Create(s5_title[1]))
         self.play(FadeIn(s5_row), FadeIn(caption))
         self.wait(0.2)
         self.next_slide()
@@ -690,7 +693,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s6_title))
+        self.play(FadeIn(header))
+        self.play(Write(s6_title[0]), Create(s6_title[1]))
         self.play(FadeIn(s6_grid), FadeIn(result_banner))
         self.wait(0.2)
         self.next_slide()
@@ -827,7 +831,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s7_title))
+        self.play(FadeIn(header))
+        self.play(Write(s7_title[0]), Create(s7_title[1]))
         self.play(FadeIn(stage_boxes), FadeIn(arrows))
         self.play(FadeIn(phase_group), FadeIn(pipeline_caption))
         self.wait(0.2)
@@ -971,7 +976,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s8_title))
+        self.play(FadeIn(header))
+        self.play(Write(s8_title[0]), Create(s8_title[1]))
         self.play(FadeIn(s8_row))
         self.wait(0.2)
         self.next_slide()
@@ -1036,7 +1042,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s9_title))
+        self.play(FadeIn(header))
+        self.play(Write(s9_title[0]), Create(s9_title[1]))
         self.play(FadeIn(s9_row))
         self.wait(0.2)
         self.next_slide()
@@ -1101,7 +1108,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s10_title))
+        self.play(FadeIn(header))
+        self.play(Write(s10_title[0]), Create(s10_title[1]))
         self.play(FadeIn(s10_row))
         self.wait(0.2)
         self.next_slide()
@@ -1166,7 +1174,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s11_title))
+        self.play(FadeIn(header))
+        self.play(Write(s11_title[0]), Create(s11_title[1]))
         self.play(FadeIn(s11_row))
         self.wait(0.2)
         self.next_slide()
@@ -1283,7 +1292,8 @@ class TonIoTPresentation(Slide):
             FadeOut(header),
         )
         header = next_header
-        self.play(FadeIn(header), FadeIn(s12_title))
+        self.play(FadeIn(header))
+        self.play(Write(s12_title[0]), Create(s12_title[1]))
         self.play(FadeIn(s12_row))
         self.wait(0.2)
         self.next_slide()
