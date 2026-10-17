@@ -7,7 +7,7 @@
 
 from datetime import datetime
 from manim import *
-from manim_slides import Slide
+from manim_slides import Slide  # pyright: ignore[reportAttributeAccessIssue]  # manim-slides does not expose complete type information
 
 # Dynamic Month Year (e.g., "October 2026")
 CURRENT_MONTH_YEAR = datetime.now().strftime("%B %Y")
@@ -254,7 +254,7 @@ class TonIoTPresentation(Slide):
             color=TEXT_MUTED,
         )
         sem_info = Tex(
-            r"\textit{4th Year, 1st Semester}", font_size=18, color=NVIDIA_ACCENT_GREEN
+            r"\textit{4th Year, 1st Term}", font_size=18, color=NVIDIA_ACCENT_GREEN
         )
 
         by_body = VGroup(
@@ -303,7 +303,7 @@ class TonIoTPresentation(Slide):
             color=TEXT_MUTED,
         )
         course_tag = Tex(
-            r"\textit{Course: Information Security Laboratory}",
+            r"\textit{Course: Information Security Laboratory} \\ \textit{Course Code: 0714 02 CSE 4107}",
             font_size=18,
             color=NVIDIA_ACCENT_GREEN,
         )
@@ -362,7 +362,7 @@ class TonIoTPresentation(Slide):
             r"$\bullet$ Attackers disguise malicious flows to resemble\\[0.04cm]"
             r"legitimate traffic.\\[0.10cm]"
             r"$\bullet$ Detection must be fast enough for real-time response.",
-            body_font=19,
+            body_font=22,
             card_width=5.8,
             card_height=3.6,
         )
@@ -372,11 +372,11 @@ class TonIoTPresentation(Slide):
             r"Build an automated multi-class IDS that classifies each\\[0.04cm]"
             r"flow as:\\[0.08cm]"
             r"\hspace{0.3cm}\textbf{Normal} \hspace{0.4cm} \textbf{DoS} \hspace{0.4cm} \textbf{DDoS}\\[0.12cm]"
-            r"Use \textbf{Random Forest} to learn attack patterns from\\[0.04cm]"
-            r"cleaned features and save the model, metrics, and figures.\\[0.12cm]"
+            r"Using \textbf{Random Forest, XGBoost, Deep MLP} to learn attack patterns from\\[0.04cm]"
+            r"cleaned features CSV and save the model, metrics, and figures.\\[0.12cm]"
             r"\textit{Outcome: A fast, reproducible classifier for\\[0.04cm]"
             r"Normal, DoS, and DDoS traffic.}",
-            body_font=19,
+            body_font=22,
             card_width=5.8,
             card_height=3.6,
         )
@@ -789,14 +789,14 @@ class TonIoTPresentation(Slide):
             x_mid = (x_start + x_end) / 2
             y_pos = stage_boxes[0].get_bottom()[1] - 0.30
             ph_line = Line(
-                [x_start, y_pos + 0.08, 0],
-                [x_end, y_pos + 0.08, 0],
+                (x_start, y_pos + 0.08, 0),
+                (x_end, y_pos + 0.08, 0),
                 color=color,
                 stroke_width=2.0,
             )
             ph_tex = Tex(
                 rf"\textbf{{\textsf{{{label}}}}}", font_size=14, color=color
-            ).move_to([x_mid, y_pos - 0.14, 0])
+            ).move_to((x_mid, y_pos - 0.14, 0))
             phase_group.add(VGroup(ph_line, ph_tex))
 
         pipeline_caption_bg = RoundedRectangle(
