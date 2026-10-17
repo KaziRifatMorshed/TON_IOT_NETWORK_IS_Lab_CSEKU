@@ -446,7 +446,7 @@ class TonIoTPresentation(Slide):
                 "\n"
                 r"        & UNSW Canberra, Australia \\"
                 "\n"
-                r"Total Records  & 10,336,716 flows (~10.3 Million)\\"
+                r"Total Records  & 10,336,716 flows (\~10.3 Million)\\"
                 "\n"
                 r"Dataset Size & 1.2 GiB \\"
                 "\n"
@@ -500,7 +500,7 @@ class TonIoTPresentation(Slide):
                 font_size=19,
                 color=TEXT_MAIN,
             )
-            .next_to(feat_bar, DOWN, buff=0.30)
+            .next_to(feat_bar, DOWN, buff=0.50)
             .set(width=5.75)
         )
         feat_note = (
@@ -510,7 +510,7 @@ class TonIoTPresentation(Slide):
                 font_size=18,
                 color=TEXT_MUTED,
             )
-            .next_to(feat_body, DOWN, buff=0.22)
+            .next_to(feat_body, DOWN, buff=0.32)
             .set(width=5.7)
         )
         feat_card = VGroup(feat_card_bg, feat_bar, feat_badge, feat_body, feat_note)
@@ -564,11 +564,11 @@ class TonIoTPresentation(Slide):
             Tex(
                 r"\textit{Training dataset (8,271,593 records): DDoS: 4,932,721 (59.6\%), DoS: 2,701,550 (32.7\%), Normal: 637,322 (7.7\%). "
                 r"Held-out test set (2,065,123 records) preserves the identical distribution.}",
-                font_size=17,
+                font_size=14,
                 color=TEXT_MUTED,
             )
-            .next_to(s5_row, DOWN, buff=0.16)
-            .set(width=12.2)
+            .next_to(s5_row, DOWN, buff=0.40)
+            .set(width=10.2)
         )
 
         self.play(
@@ -630,7 +630,7 @@ class TonIoTPresentation(Slide):
             )
             body_tex = (
                 Tex(step_body_str, font_size=15, color=TEXT_MAIN)
-                .next_to(title_tex, DOWN, buff=0.08)
+                .next_to(title_tex, DOWN, buff=0.10)
                 .align_to(title_tex, LEFT)
                 .set(width=4.0)
             )
@@ -689,9 +689,8 @@ class TonIoTPresentation(Slide):
         )
         result_banner_tx = (
             Tex(
-                r"\textit{Result: a clean numeric feature matrix ready for Random Forest "
-                r"training and evaluation.}",
-                font_size=18,
+                r"\textit{Result: a clean numeric feature matrix ready for training and evaluation.}",
+                font_size=16,
                 color=NVIDIA_DARK_GREEN,
             )
             .set(width=11.5)
@@ -819,10 +818,10 @@ class TonIoTPresentation(Slide):
         pipeline_caption_tx = (
             Tex(
                 r"\textit{The trained model, evaluation metrics, figures, and run config are saved for reuse.}",
-                font_size=18,
+                font_size=12,
                 color=NVIDIA_DARK_GREEN,
             )
-            .set(width=11.5)
+            .set(width=9.5)
             .move_to(pipeline_caption_bg.get_center())
         )
         pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
@@ -833,7 +832,7 @@ class TonIoTPresentation(Slide):
         )
         gpu_label = Tex(
             r"\textbf{GPU Model Benchmark Comparison (10,336,716 Records)} \hspace{0.2cm}\textbar\hspace{0.2cm} "
-            r"\textsf{Evaluated on 2,065,123 Test Flows (NVIDIA RTX 3060 CUDA)}",
+            r"\textsf{Evaluated on 2,065,123 Test Flows}",
             font_size=17,
             color=TEXT_MUTED,
         ).set(width=11.5)
@@ -867,6 +866,7 @@ class TonIoTPresentation(Slide):
         left_card = make_card(
             "WHAT IS RANDOM FOREST?",
             NVIDIA_DARK_GREEN,
+            r"\begin{flushleft}"
             r"\textbf{Ensemble classifier} that trains Decision\\[0.03cm]"
             r"Trees and combines their votes for the final class.\\[0.10cm]"
             r"\textbf{Why it fits this IDS task:}\\[0.06cm]"
@@ -875,7 +875,8 @@ class TonIoTPresentation(Slide):
             r"$\bullet$ Learns nonlinear attack patterns\\[0.04cm]"
             r"$\bullet$ Balanced weights reduce class bias\\[0.04cm]"
             r"$\bullet$ Feature importance supports explanations\\[0.10cm]"
-            r"\textit{Many trees vote: Normal / DoS / DDoS}",
+            r"\textit{Many trees vote: Normal / DoS / DDoS}"
+            r"\end{flushleft}",
             card_width=5.6,
             card_height=4.3,
             body_font=18,
@@ -939,7 +940,7 @@ class TonIoTPresentation(Slide):
                 font_size=18,
                 color=TEXT_MAIN,
             )
-            .next_to(right_bar, DOWN, buff=0.22)
+            .next_to(right_bar, DOWN, buff=0.28)
             .set(width=5.6)
         )
         param_note = (
