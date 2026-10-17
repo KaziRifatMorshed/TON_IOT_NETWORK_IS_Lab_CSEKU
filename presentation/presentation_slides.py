@@ -355,13 +355,15 @@ class TonIoTPresentation(Slide):
         prob_card = make_card(
             "THE PROBLEM",
             "#B71C1C",
+            r"\begin{flushleft}"
             r"$\bullet$ Thousands of traffic events arrive every second in IoT/IIoT\\[0.04cm]"
             r"networks.\\[0.10cm]"
             r"$\bullet$ Manual review cannot reliably separate Normal, DoS,\\[0.04cm]"
             r"and DDoS traffic.\\[0.10cm]"
             r"$\bullet$ Attackers disguise malicious flows to resemble\\[0.04cm]"
             r"legitimate traffic.\\[0.10cm]"
-            r"$\bullet$ Detection must be fast enough for real-time response.",
+            r"$\bullet$ Detection must be fast enough for real-time response."
+            r"\end{flushleft}",
             body_font=22,
             card_width=5.8,
             card_height=3.6,
@@ -369,11 +371,11 @@ class TonIoTPresentation(Slide):
         obj_card = make_card(
             "OBJECTIVE",
             NVIDIA_DARK_GREEN,
-            r"Build an automated multi-class IDS that classifies each\\[0.04cm]"
+            r"Building an automated multi-class IDS that classifies each\\[0.04cm]"
             r"flow as:\\[0.08cm]"
             r"\hspace{0.3cm}\textbf{Normal} \hspace{0.4cm} \textbf{DoS} \hspace{0.4cm} \textbf{DDoS}\\[0.12cm]"
             r"Using \textbf{Random Forest, XGBoost, Deep MLP} to learn attack patterns from\\[0.04cm]"
-            r"cleaned features CSV and save the model, metrics, and figures.\\[0.12cm]"
+            r"cleaned features CSV and save the model, metrics, and figures.\\[0.32cm]"
             r"\textit{Outcome: A fast, reproducible classifier for\\[0.04cm]"
             r"Normal, DoS, and DDoS traffic.}",
             body_font=22,
@@ -440,15 +442,19 @@ class TonIoTPresentation(Slide):
                 "\n"
                 r"Dataset        & TON\_IoT Network Traffic \\"
                 "\n"
-                r"Total Records  & 10,336,716 flows \\"
+                r"Dataset Author        & Nour Moustafa, Associate Professor\\"
                 "\n"
-                r"Dedicated Split & 80\% Train / 20\% Test \\"
+                r"        & UNSW Canberra, Australia \\"
+                "\n"
+                r"Total Records  & 10,336,716 flows (~10.3 Million)\\"
+                "\n"
+                r"Dataset Size & 1.2 GiB \\"
                 "\n"
                 r"Target Column  & \texttt{type} (Normal, DoS, DDoS) \\"
                 "\n"
-                r"Pipeline Scale & 8.27M Train / 2.06M Test \\"
+                r"Dedicated Split & 80\% Train / 20\% Test \\"
                 "\n"
-                r"Peak RAM Usage & $<$ 1.5 GB (Memory-Mapped) \\"
+                r"Pipeline Scale & 8.27M Train / 2.06M Test \\"
                 "\n"
                 r"\hline"
                 "\n"
@@ -480,15 +486,17 @@ class TonIoTPresentation(Slide):
             stroke_width=0,
         ).align_to(feat_card_bg, UP)
         feat_badge = Tex(
-            r"\textbf{Feature Groups}", font_size=18, color=WHITE_COLOR
+            r"\textbf{Feature Groups}", font_size=18, color=TEXT_MAIN
         ).move_to(feat_bar.get_center())
         feat_body = (
             Tex(
+                r"\begin{flushleft}"
                 r"\textbf{Network Identity:}\hspace{0.3cm} IP addresses, ports\\[0.14cm]"
                 r"\textbf{Protocol Behavior:}\hspace{0.2cm} protocol, service, conn\_state\\[0.14cm]"
                 r"\textbf{Traffic Volume:}\hspace{0.35cm} packet counts, byte counts\\[0.14cm]"
                 r"\textbf{Timing Features:}\hspace{0.3cm} duration and flow timing\\[0.14cm]"
                 r"\textbf{Application Fields:}\hspace{0.1cm} HTTP, DNS, SSL indicators",
+                r"\end{flushleft}",
                 font_size=19,
                 color=TEXT_MAIN,
             )
