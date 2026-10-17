@@ -930,8 +930,6 @@ class TonIoTPresentation(Slide):
                 "\n"
                 r"learning\_rate  & 1.0        & Parallel forest mode \\"
                 "\n"
-                r"device          & cuda       & RTX 3060 acceleration \\"
-                "\n"
                 r"random\_state   & 42         & Reproducible run \\"
                 "\n"
                 r"\hline"
