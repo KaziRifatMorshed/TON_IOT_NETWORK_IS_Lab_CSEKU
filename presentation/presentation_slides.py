@@ -1025,10 +1025,11 @@ class TonIoTPresentation(Slide):
             stroke_width=0,
         ).align_to(rf_card_bg, UP)
         rf_badge = Tex(
-            r"\textbf{GPU Random Forest (CUDA)}", font_size=18, color=WHITE_COLOR
+            r"\textbf{Random Forest (CUDA)}", font_size=18, color=WHITE_COLOR
         ).move_to(rf_bar.get_center())
         rf_body = (
             Tex(
+                r"\begin{flushleft}"
                 r"\textbf{Architecture:}\hspace{0.2cm} 100 Parallel Trees on CUDA\\[0.08cm]"
                 r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
                 r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.57\%} (2,056,332 correct)\\[0.08cm]"
@@ -1037,7 +1038,8 @@ class TonIoTPresentation(Slide):
                 r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9998 \textbar\ \textbf{Latency:} 0.56 $\mu$s\\[0.08cm]"
                 r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.73 s} on RTX 3060\\[0.14cm]"
                 r"\textit{Near-zero off-diagonal errors confirm high resilience against DoS/DDoS confusion.}",
-                font_size=18,
+                r"\end{flushleft}",
+                font_size=25,
                 color=TEXT_MAIN,
             )
             .next_to(rf_bar, DOWN, buff=0.20)
@@ -1065,7 +1067,7 @@ class TonIoTPresentation(Slide):
         prev_content = Group(s9_title, s9_row)
         new_footer = build_footer(10)
         next_header, stripe = build_header(
-            r"CONFUSION MATRIX (2/3)", r"GPU XGBOOST — 2,065,123 TEST FLOWS"
+            r"CONFUSION MATRIX (2/3)", r"XGBOOST — 2,065,123 TEST FLOWS"
         )
 
         s10_title = slide_title(r"GPU XGBoost Confusion Matrix", stripe)
@@ -1096,6 +1098,7 @@ class TonIoTPresentation(Slide):
         ).move_to(xgb_bar.get_center())
         xgb_body = (
             Tex(
+                r"\begin{flushleft}"
                 r"\textbf{Architecture:}\hspace{0.2cm} Gradient Boosted Trees (CUDA)\\[0.08cm]"
                 r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
                 r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.87\%} (2,062,483 correct)\\[0.08cm]"
@@ -1103,8 +1106,9 @@ class TonIoTPresentation(Slide):
                 r"\textbf{Precision:}\hspace{0.2cm} 99.83\% \textbar\ \textbf{MCC:} 0.9976\\[0.08cm]"
                 r"\textbf{ROC-AUC:}\hspace{0.2cm} 1.0000 \textbar\ \textbf{Latency:} 0.51 $\mu$s\\[0.08cm]"
                 r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.28 s} on RTX 3060\\[0.14cm]"
-                r"\textit{Best overall performance; virtually zero false alarms on benign flows.}",
-                font_size=18,
+                r"\textit{Best overall performance; virtually zero false alarms on benign flows.}"
+                r"\end{flushleft}",
+                font_size=25,
                 color=TEXT_MAIN,
             )
             .next_to(xgb_bar, DOWN, buff=0.20)
@@ -1163,6 +1167,7 @@ class TonIoTPresentation(Slide):
         ).move_to(mlp_bar.get_center())
         mlp_body = (
             Tex(
+                r"\begin{flushleft}"
                 r"\textbf{Architecture:}\hspace{0.2cm} 4-Layer MLP with BatchNorm\\[0.08cm]"
                 r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
                 r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{94.59\%} (1,953,506 correct)\\[0.08cm]"
@@ -1170,8 +1175,9 @@ class TonIoTPresentation(Slide):
                 r"\textbf{Precision:}\hspace{0.2cm} 92.69\% \textbar\ \textbf{MCC:} 0.8972\\[0.08cm]"
                 r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9722 \textbar\ \textbf{Latency:} \textbf{0.15 $\mu$s}\\[0.08cm]"
                 r"\textbf{Training Time:}\hspace{0.2cm} 436.71 s (5 Epochs)\\[0.14cm]"
-                r"\textit{Deep neural network exhibits rapid 0.15 $\mu$s inference throughput on GPU Tensor Cores.}",
-                font_size=18,
+                r"\textit{Deep neural network exhibits rapid 0.15 $\mu$s inference throughput on GPU Tensor Cores.}"
+                r"\end{flushleft}",
+                font_size=25,
                 color=TEXT_MAIN,
             )
             .next_to(mlp_bar, DOWN, buff=0.20)
@@ -1252,9 +1258,9 @@ class TonIoTPresentation(Slide):
                 "\n"
                 r"\hline"
                 "\n"
-                r"\textbf{GPU XGBoost}    & \textbf{99.87\%} & \textbf{99.80\%} & \textbf{13.28 s} & 0.51 $\mu$s \\"
+                r"\textbf{XGBoost}    & \textbf{99.87\%} & \textbf{99.80\%} & \textbf{13.28 s} & 0.51 $\mu$s \\"
                 "\n"
-                r"GPU Random Forest       & 99.57\%          & 99.05\%          & 13.73 s          & 0.56 $\mu$s \\"
+                r"Random Forest       & 99.57\%          & 99.05\%          & 13.73 s          & 0.56 $\mu$s \\"
                 "\n"
                 r"PyTorch Deep MLP        & 94.59\%          & 88.87\%          & 436.71 s         & \textbf{0.15 $\mu$s} \\"
                 "\n"
@@ -1279,10 +1285,10 @@ class TonIoTPresentation(Slide):
         )
         winner_text = (
             Tex(
-                r"\textbf{BEST PERFORMING MODEL: GPU XGBOOST}\\[0.05cm]"
+                r"\textbf{BEST PERFORMING MODEL: XGBOOST}\\[0.05cm]"
                 r"$\bullet$ \textbf{Top Score:} 99.87\% Accuracy, 99.80\% Macro F1\\[0.03cm]"
-                r"$\bullet$ \textbf{Speed:} Trained in 13.28 s on 8.27M rows (RTX 3060)\\[0.03cm]"
-                r"$\bullet$ \textbf{Reliability:} 1.0000 ROC-AUC with near-zero false alarms",
+                r"$\bullet$ \textbf{Speed:} Trained in 13.28 s on 8.27M rows (RTX 3060)\\[0.03cm]",
+                # r"$\bullet$ \textbf{Reliability:} 1.0000 ROC-AUC with near-zero false alarms"
                 font_size=16,
                 color=NVIDIA_DARK_GREEN,
             )
