@@ -1027,24 +1027,20 @@ class TonIoTPresentation(Slide):
         rf_badge = Tex(
             r"\textbf{Random Forest (CUDA)}", font_size=18, color=WHITE_COLOR
         ).move_to(rf_bar.get_center())
-        rf_body = (
-            Tex(
-                r"\begin{flushleft}"
-                r"\textbf{Architecture:}\hspace{0.2cm} 100 Parallel Trees on CUDA\\[0.08cm]"
-                r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
-                r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.57\%} (2,056,332 correct)\\[0.08cm]"
-                r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{99.05\%} \textbar\ \textbf{Recall:} 98.57\%\\[0.08cm]"
-                r"\textbf{Precision:}\hspace{0.2cm} 99.54\% \textbar\ \textbf{MCC:} 0.9920\\[0.08cm]"
-                r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9998 \textbar\ \textbf{Latency:} 0.56 $\mu$s\\[0.08cm]"
-                r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.73 s} on RTX 3060\\[0.14cm]"
-                r"\textit{Near-zero off-diagonal errors confirm high resilience against DoS/DDoS confusion.}",
-                r"\end{flushleft}",
-                font_size=25,
-                color=TEXT_MAIN,
-            )
-            .next_to(rf_bar, DOWN, buff=0.20)
-            .set(width=4.9)
-        )
+        rf_body = Tex(
+            r"\begin{flushleft}"
+            r"\textbf{Architecture:}\hspace{0.2cm} 100 Parallel Trees on CUDA\\[0.08cm]"
+            r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
+            r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.57\%} (2,056,332 correct)\\[0.08cm]"
+            r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{99.05\%} \textbar\ \textbf{Recall:} 98.57\%\\[0.08cm]"
+            r"\textbf{Precision:}\hspace{0.2cm} 99.54\% \textbar\ \textbf{MCC:} 0.9920\\[0.08cm]"
+            r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9998 \textbar\ \textbf{Latency:} 0.56 $\mu$s\\[0.08cm]"
+            r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.73 s} on RTX 3060\\[0.14cm]",
+            # r"\textit{Near-zero off-diagonal errors confirm high resilience against DoS/DDoS confusion.}"
+            r"\end{flushleft}",
+            font_size=22,
+            color=TEXT_MAIN,
+        ).next_to(rf_bar, DOWN, buff=0.20)
         rf_card = VGroup(rf_card_bg, rf_bar, rf_badge, rf_body)
 
         s9_row = Group(cm_rf_img, rf_card).arrange(RIGHT, buff=0.45)
@@ -1096,24 +1092,20 @@ class TonIoTPresentation(Slide):
         xgb_badge = Tex(
             r"\textbf{GPU XGBoost (Top Classifier)}", font_size=18, color=WHITE_COLOR
         ).move_to(xgb_bar.get_center())
-        xgb_body = (
-            Tex(
-                r"\begin{flushleft}"
-                r"\textbf{Architecture:}\hspace{0.2cm} Gradient Boosted Trees (CUDA)\\[0.08cm]"
-                r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
-                r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.87\%} (2,062,483 correct)\\[0.08cm]"
-                r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{99.80\%} \textbar\ \textbf{Recall:} 99.76\%\\[0.08cm]"
-                r"\textbf{Precision:}\hspace{0.2cm} 99.83\% \textbar\ \textbf{MCC:} 0.9976\\[0.08cm]"
-                r"\textbf{ROC-AUC:}\hspace{0.2cm} 1.0000 \textbar\ \textbf{Latency:} 0.51 $\mu$s\\[0.08cm]"
-                r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.28 s} on RTX 3060\\[0.14cm]"
-                r"\textit{Best overall performance; virtually zero false alarms on benign flows.}"
-                r"\end{flushleft}",
-                font_size=25,
-                color=TEXT_MAIN,
-            )
-            .next_to(xgb_bar, DOWN, buff=0.20)
-            .set(width=4.9)
-        )
+        xgb_body = Tex(
+            r"\begin{flushleft}"
+            r"\textbf{Architecture:}\hspace{0.2cm} Gradient Boosted Trees (CUDA)\\[0.08cm]"
+            r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
+            r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{99.87\%} (2,062,483 correct)\\[0.08cm]"
+            r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{99.80\%} \textbar\ \textbf{Recall:} 99.76\%\\[0.08cm]"
+            r"\textbf{Precision:}\hspace{0.2cm} 99.83\% \textbar\ \textbf{MCC:} 0.9976\\[0.08cm]"
+            r"\textbf{ROC-AUC:}\hspace{0.2cm} 1.0000 \textbar\ \textbf{Latency:} 0.51 $\mu$s\\[0.08cm]"
+            r"\textbf{Training Time:}\hspace{0.2cm} \textbf{13.28 s} on RTX 3060\\[0.14cm]"
+            # r"\textit{Best overall performance; virtually zero false alarms on benign flows.}"
+            r"\end{flushleft}",
+            font_size=22,
+            color=TEXT_MAIN,
+        ).next_to(xgb_bar, DOWN, buff=0.20)
         xgb_card = VGroup(xgb_card_bg, xgb_bar, xgb_badge, xgb_body)
 
         s10_row = Group(cm_xgb_img, xgb_card).arrange(RIGHT, buff=0.45)
@@ -1165,24 +1157,20 @@ class TonIoTPresentation(Slide):
         mlp_badge = Tex(
             r"\textbf{PyTorch Deep MLP (TF32 CUDA)}", font_size=18, color=WHITE_COLOR
         ).move_to(mlp_bar.get_center())
-        mlp_body = (
-            Tex(
-                r"\begin{flushleft}"
-                r"\textbf{Architecture:}\hspace{0.2cm} 4-Layer MLP with BatchNorm\\[0.08cm]"
-                r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
-                r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{94.59\%} (1,953,506 correct)\\[0.08cm]"
-                r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{88.87\%} \textbar\ \textbf{Recall:} 86.21\%\\[0.08cm]"
-                r"\textbf{Precision:}\hspace{0.2cm} 92.69\% \textbar\ \textbf{MCC:} 0.8972\\[0.08cm]"
-                r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9722 \textbar\ \textbf{Latency:} \textbf{0.15 $\mu$s}\\[0.08cm]"
-                r"\textbf{Training Time:}\hspace{0.2cm} 436.71 s (5 Epochs)\\[0.14cm]"
-                r"\textit{Deep neural network exhibits rapid 0.15 $\mu$s inference throughput on GPU Tensor Cores.}"
-                r"\end{flushleft}",
-                font_size=25,
-                color=TEXT_MAIN,
-            )
-            .next_to(mlp_bar, DOWN, buff=0.20)
-            .set(width=4.9)
-        )
+        mlp_body = Tex(
+            r"\begin{flushleft}"
+            r"\textbf{Architecture:}\hspace{0.2cm} 4-Layer MLP with BatchNorm\\[0.08cm]"
+            r"\textbf{Test Scale:}\hspace{0.2cm} 2,065,123 Network Flows\\[0.08cm]"
+            r"\textbf{Accuracy:}\hspace{0.2cm} \textbf{94.59\%} (1,953,506 correct)\\[0.08cm]"
+            r"\textbf{Macro F1:}\hspace{0.2cm} \textbf{88.87\%} \textbar\ \textbf{Recall:} 86.21\%\\[0.08cm]"
+            r"\textbf{Precision:}\hspace{0.2cm} 92.69\% \textbar\ \textbf{MCC:} 0.8972\\[0.08cm]"
+            r"\textbf{ROC-AUC:}\hspace{0.2cm} 0.9722 \textbar\ \textbf{Latency:} \textbf{0.15 $\mu$s}\\[0.08cm]"
+            r"\textbf{Training Time:}\hspace{0.2cm} 436.71 s (5 Epochs)\\[0.14cm]"
+            # r"\textit{Deep neural network exhibits rapid 0.15 $\mu$s inference throughput on GPU Tensor Cores.}"
+            r"\end{flushleft}",
+            font_size=22,
+            color=TEXT_MAIN,
+        ).next_to(mlp_bar, DOWN, buff=0.20)
         mlp_card = VGroup(mlp_card_bg, mlp_bar, mlp_badge, mlp_body)
 
         s11_row = Group(cm_mlp_img, mlp_card).arrange(RIGHT, buff=0.45)
