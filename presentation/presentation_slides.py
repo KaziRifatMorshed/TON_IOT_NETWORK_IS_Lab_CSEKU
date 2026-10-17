@@ -102,7 +102,7 @@ class TonIoTPresentation(Slide):
                     font_size=15,
                     color=NVIDIA_DARK_GREEN,
                 )
-                .to_edge(LEFT, buff=0.4)
+                .to_edge(LEFT, buff=0.6)
                 .match_y(header_bar)
             )
 
