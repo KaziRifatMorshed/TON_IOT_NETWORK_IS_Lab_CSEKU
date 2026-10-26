@@ -180,7 +180,7 @@ class TonIoTPresentation(Slide):
         title_slide_header.to_edge(UP, buff=0.44)
 
         main_title = Tex(
-            r"\textbf{TON\_IoT Network Traffic Classification}\\[0.04cm]\textbf{Using Random Forest}",
+            r"\textbf{TON\_IoT Network Traffic Classification}",
             font_size=36,
             color=TEXT_MAIN,
         )
