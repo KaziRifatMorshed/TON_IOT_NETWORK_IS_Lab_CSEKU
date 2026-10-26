@@ -507,8 +507,8 @@ class TonIoTPresentation(Slide):
         feat_note = (
             Tex(
                 r"\textit{The dataset provides network-flow level information suitable for}\\[0.02cm]"
-                r"\textit{supervised intrusion detection using Random Forest\\[0.02cm].}",
-                r"\textit{XGBoost and MultiLayer Perceptron.}",
+                r"\textit{supervised intrusion detection using Random Forest\\[0.02cm]}",
+                r"\textit{XGBoost and MultiLayer Perceptron (MLP).}",
                 font_size=18,
                 color=TEXT_MUTED,
             )
@@ -658,7 +658,7 @@ class TonIoTPresentation(Slide):
             "06",
             "Write Disk-Backed Arrays",
             r"Transform CSV chunks into numeric features;\\[0.03cm]"
-            r"keep the test set for final evaluation\\[0.03cm]."
+            r"keep the test set for final evaluation\\[0.03cm]"
             r"using numpy memmap.",
         )
 
