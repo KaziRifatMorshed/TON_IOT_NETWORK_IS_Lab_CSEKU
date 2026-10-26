@@ -668,7 +668,7 @@ class TonIoTPresentation(Slide):
 
         result_banner_bg = RoundedRectangle(
             corner_radius=0.06,
-            width=12.0,
+            width=9.0,
             height=0.46,
             fill_color=NVIDIA_DARK_GREEN,
             fill_opacity=0.10,
@@ -677,11 +677,11 @@ class TonIoTPresentation(Slide):
         )
         result_banner_tx = (
             Tex(
-                r"\textit{Output: CSV files ready for train and test.}",
+                r"\textit{CSV files ready for train and test.}                ",
                 font_size=8,
                 color=NVIDIA_DARK_GREEN,
             )
-            .set(width=8)
+            .set(width=6)
             .move_to(result_banner_bg.get_center())
         )
         result_banner = VGroup(result_banner_bg, result_banner_tx)
