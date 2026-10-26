@@ -984,10 +984,10 @@ class TonIoTPresentation(Slide):
         prev_content = Group(s8_title, s8_row)
         new_footer = build_footer(9)
         next_header, stripe = build_header(
-            r"CONFUSION MATRIX (1/3)", r"GPU RANDOM FOREST — 2,065,123 TEST FLOWS"
+            r"CONFUSION MATRIX (1/3)", r"RANDOM FOREST — 2,065,123 TEST FLOWS"
         )
 
-        s9_title = slide_title(r"GPU Random Forest Confusion Matrix", stripe)
+        s9_title = slide_title(r"Random Forest Confusion Matrix", stripe)
 
         cm_rf_img = ImageMobject(
             "../outputs/figures/memmap_gpu_rf_confusion_matrix.png"
@@ -1053,7 +1053,7 @@ class TonIoTPresentation(Slide):
             r"CONFUSION MATRIX (2/3)", r"XGBOOST — 2,065,123 TEST FLOWS"
         )
 
-        s10_title = slide_title(r"GPU XGBoost Confusion Matrix", stripe)
+        s10_title = slide_title(r"XGBoost Confusion Matrix", stripe)
 
         cm_xgb_img = ImageMobject(
             "../outputs/figures/memmap_gpu_xgboost_confusion_matrix.png"
@@ -1077,7 +1077,7 @@ class TonIoTPresentation(Slide):
             stroke_width=0,
         ).align_to(xgb_card_bg, UP)
         xgb_badge = Tex(
-            r"\textbf{GPU XGBoost (Top Classifier)}", font_size=18, color=WHITE_COLOR
+            r"\textbf{XGBoost (Top Classifier)}", font_size=18, color=WHITE_COLOR
         ).move_to(xgb_bar.get_center())
         xgb_body = Tex(
             r"\begin{flushleft}"
