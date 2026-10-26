@@ -303,7 +303,7 @@ class TonIoTPresentation(Slide):
             color=TEXT_MUTED,
         )
         course_tag = Tex(
-            r"\textit{Course: Information Security Laboratory} \\ \textit{Course Code: 0714 02 CSE 4107}",
+            r"\textit{Course: Information Security Laboratory} \\ \textit{Course Code: 0714 02 CSE 4108}",
             font_size=18,
             color=NVIDIA_ACCENT_GREEN,
         )
@@ -374,7 +374,7 @@ class TonIoTPresentation(Slide):
             r"Building an automated multi-class IDS that classifies each\\[0.04cm]"
             r"flow as:\\[0.08cm]"
             r"\hspace{0.3cm}\textbf{Normal} \hspace{0.4cm} \textbf{DoS} \hspace{0.4cm} \textbf{DDoS}\\[0.12cm]"
-            r"Using \textbf{Random Forest, XGBoost, Deep MLP} to learn attack patterns from\\[0.04cm]"
+            r"Using \textbf{Random Forest, XGBoost, Deep MLP} to learn attack patterns from"
             r"cleaned features CSV and save the model, metrics, and figures.\\[0.32cm]"
             r"\textit{Outcome: A fast, reproducible classifier for\\[0.04cm]"
             r"Normal, DoS, and DDoS traffic.}",
