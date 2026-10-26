@@ -447,15 +447,15 @@ class TonIoTPresentation(Slide):
                 "\n"
                 r"        & UNSW Canberra, Australia \\"
                 "\n"
-                r"Total Records  & 10,336,716 flows (\~10.3 Million)\\"
+                r"Total Records  & 10,336,716 flows (appx. 10.3 Million)\\"
                 "\n"
                 r"Dataset Size & 1.2 GiB \\"
                 "\n"
                 r"Target Column  & \texttt{type} (Normal, DoS, DDoS) \\"
-                "\n"
-                r"Dedicated Split & 80\% Train / 20\% Test \\"
-                "\n"
-                r"Pipeline Scale & 8.27M Train / 2.06M Test \\"
+                # "\n"
+                # r"Split & 80\% Train / 20\% Test \\"
+                # "\n"
+                # r"Data Amount & 8.27M Train / 2.06M Test \\"
                 "\n"
                 r"\hline"
                 "\n"
@@ -495,8 +495,8 @@ class TonIoTPresentation(Slide):
                 r"\textbf{Network Identity:}\hspace{0.3cm} IP addresses, ports\\[0.14cm]"
                 r"\textbf{Protocol Behavior:}\hspace{0.2cm} protocol, service, conn\_state\\[0.14cm]"
                 r"\textbf{Traffic Volume:}\hspace{0.35cm} packet counts, byte counts\\[0.14cm]"
-                r"\textbf{Timing Features:}\hspace{0.3cm} duration and flow timing\\[0.14cm]"
-                r"\textbf{Application Fields:}\hspace{0.1cm} HTTP, DNS, SSL indicators",
+                r"\textbf{Timing:}\hspace{0.3cm}timestamp, duration and flow timing\\[0.14cm]"
+                # r"\textbf{Application Fields:}\hspace{0.1cm} HTTP, DNS, SSL indicators",
                 r"\end{flushleft}",
                 font_size=19,
                 color=TEXT_MAIN,
@@ -507,7 +507,8 @@ class TonIoTPresentation(Slide):
         feat_note = (
             Tex(
                 r"\textit{The dataset provides network-flow level information suitable for}\\[0.02cm]"
-                r"\textit{supervised intrusion detection using Random Forest.}",
+                r"\textit{supervised intrusion detection using Random Forest\\[0.02cm].}",
+                r"\textit{XGBoost and MultiLayer Perceptron.}",
                 font_size=18,
                 color=TEXT_MUTED,
             )
@@ -657,7 +658,8 @@ class TonIoTPresentation(Slide):
             "06",
             "Write Disk-Backed Arrays",
             r"Transform CSV chunks into numeric features;\\[0.03cm]"
-            r"keep the test set for final evaluation.",
+            r"keep the test set for final evaluation\\[0.03cm]."
+            r"using numpy memmap.",
         )
 
         row1 = VGroup(step1, step2).arrange(RIGHT, buff=0.30)
@@ -752,12 +754,12 @@ class TonIoTPresentation(Slide):
         ).move_to(model_panel_bg.get_top() + DOWN * 0.34)
         model_names = VGroup(
             Tex(
-                r"\textbf{GPU Random Forest}  \textsf{(parallel trees)}",
+                r"\textbf{Random Forest}",
                 font_size=15,
                 color=TEXT_MAIN,
             ),
             Tex(
-                r"\textbf{GPU XGBoost}  \textsf{(boosted trees)}",
+                r"\textbf{XGBoost}",
                 font_size=15,
                 color=TEXT_MAIN,
             ),
@@ -772,7 +774,7 @@ class TonIoTPresentation(Slide):
 
         eval_card = pipeline_card(
             "Evaluate",
-            r"Run batched predictions on the\\held-out test set; compare\\metrics for all three models.",
+            r"Ran batched predictions on the\\held-out test set; compare\\metrics for all three models.",
             2.35,
             accent="#6A1B9A",
         )
