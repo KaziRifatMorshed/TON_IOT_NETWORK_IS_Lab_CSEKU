@@ -586,7 +586,7 @@ class TonIoTPresentation(Slide):
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 6 — Data Preprocessing Steps (6-step cards)
+        # SLIDE 6 — Data Preparation (six-step cards)
         # ===========================================================
         prev_content = Group(s5_title, caption)
         prev_imgs = Group(s5_row)
@@ -595,7 +595,7 @@ class TonIoTPresentation(Slide):
             r"DATA PREPROCESSING", r"LEAKAGE-FREE PIPELINE"
         )
 
-        s6_title = slide_title(r"Data Preprocessing Steps", stripe)
+        s6_title = slide_title(r"From CSV Files to Model-Ready Data", stripe)
 
         def make_step_card(num_str, step_title_str, step_body_str):
             bg = RoundedRectangle(
@@ -610,12 +610,12 @@ class TonIoTPresentation(Slide):
             num_tex = Tex(rf"\textbf{{{num_str}}}", font_size=14, color=NVIDIA_GREEN)
             title_tex = Tex(
                 rf"\textbf{{{step_title_str}}}",
-                font_size=26,
+                font_size=21,
                 color=NVIDIA_DARK_GREEN,
             )
             body_tex = Tex(
                 r"\begin{flushleft}" + step_body_str + r"\end{flushleft}",
-                font_size=20,
+                font_size=16,
                 color=TEXT_MAIN,
             )
             content = VGroup(num_tex, title_tex, body_tex).arrange(DOWN, buff=0.06)
@@ -625,44 +625,45 @@ class TonIoTPresentation(Slide):
 
         step1 = make_step_card(
             "01",
-            "Data Ingestion",
-            r"Process 10,336,716 flow records from\\[0.03cm]"
-            r"dedicated \texttt{train} (8.27M) and \texttt{test} (2.06M) sets.",
+            "Download Source Data",
+            r"Start with the 3.1 GiB TON\_IoT dataset\\[0.03cm]"
+            r"from Kaggle.",
         )
         step2 = make_step_card(
             "02",
-            "Out-of-Core Cache",
-            r"Stream chunks into binary \texttt{np.memmap}\\[0.03cm]"
-            r"files, keeping RAM strictly \textbf{$<$ 1.5 GB}.",
+            "Keep Three Classes",
+            r"Filter the data to Normal, DoS, and DDoS\\[0.03cm]"
+            r"traffic; save a 1.4 GiB CSV.",
         )
         step3 = make_step_card(
             "03",
-            "Normalize Labels",
-            r"Standardize \texttt{type}; separate target from features.\\[0.03cm]"
-            r"Drop \texttt{label} to \textbf{prevent data leakage}.",
+            "Create Train/Test Split",
+            r"Split the filtered records into 80\% training\\[0.03cm]"
+            r"and 20\% held-out test data.",
         )
         step4 = make_step_card(
             "04",
-            "Encode Fields",
-            r"Convert IPs into 64-bit high/low numeric parts.\\[0.03cm]"
-            r"Encode protocol, service, conn\_state, and other categories.",
+            "Define Target and Features",
+            r"Use \texttt{type} as the target; exclude\\[0.03cm]"
+            r"\texttt{label} and identifier-like fields.",
         )
         step5 = make_step_card(
             "05",
-            "Clean Matrix",
-            r"Replace NaN/Inf with \texttt{-1}; remove constant columns\\[0.03cm]"
-            r"(e.g., \texttt{http\_referrer}). Final: \textbf{45 features}.",
+            "Encode and Clean",
+            r"Map categories from training data; unseen values\\[0.03cm]"
+            r"map to other; invalid or missing numbers map to 0.",
         )
         step6 = make_step_card(
             "06",
-            "Train / Test Split",
-            r"Use an \textbf{80/20 stratified split} with\\[0.03cm]"
-            r"\texttt{random\_state=42} to preserve class proportions.",
+            "Write Disk-Backed Arrays",
+            r"Transform CSV chunks into numeric features;\\[0.03cm]"
+            r"keep the test set for final evaluation.",
         )
 
-        col_left = VGroup(step1, step3, step5).arrange(DOWN, buff=0.14)
-        col_right = VGroup(step2, step4, step6).arrange(DOWN, buff=0.14)
-        s6_grid = VGroup(col_left, col_right).arrange(RIGHT, buff=0.30)
+        row1 = VGroup(step1, step2).arrange(RIGHT, buff=0.30)
+        row2 = VGroup(step3, step4).arrange(RIGHT, buff=0.30)
+        row3 = VGroup(step5, step6).arrange(RIGHT, buff=0.30)
+        s6_grid = VGroup(row1, row2, row3).arrange(DOWN, buff=0.14)
         s6_grid.next_to(s6_title, DOWN, buff=0.20)
 
         result_banner_bg = RoundedRectangle(
@@ -676,11 +677,11 @@ class TonIoTPresentation(Slide):
         )
         result_banner_tx = (
             Tex(
-                r"\textit{Result: a clean dataset ready for training and evaluation.}",
-                font_size=16,
+                r"\textit{Output: CSV files ready for train and test.}",
+                font_size=8,
                 color=NVIDIA_DARK_GREEN,
             )
-            .set(width=11.5)
+            .set(width=8)
             .move_to(result_banner_bg.get_center())
         )
         result_banner = VGroup(result_banner_bg, result_banner_tx)
@@ -700,99 +701,104 @@ class TonIoTPresentation(Slide):
         self.next_slide()
 
         # ===========================================================
-        # SLIDE 7 — Machine Learning Pipeline (horizontal flowchart)
+        # SLIDE 7 — Model Training and Evaluation Pipeline
         # ===========================================================
         prev_content = Group(s6_title, s6_grid, result_banner)
         new_footer = build_footer(7)
         next_header, stripe = build_header(
-            r"ML PIPELINE", r"END-TO-END TRAINING WORKFLOW"
+            r"MODEL PIPELINE", r"TRAIN \textbar\ EVALUATE \textbar\ SAVE"
         )
 
-        s7_title = slide_title(r"Machine Learning Pipeline", stripe)
+        s7_title = slide_title(r"Train Three Models on the Same Split", stripe)
 
-        # Eight pipeline stages
-        stage_labels = [
-            r"\textbf{Raw Data}",
-            r"\textbf{Load Data}",
-            r"\textbf{Clean Data}",
-            r"\textbf{Feature Matrix}",
-            r"\textbf{Train/Test Split}",
-            r"\textbf{Random Forest}",
-            r"\textbf{Evaluate}",
-            r"\textbf{Save Outputs}",
-        ]
-        stage_sub = [
-            r"TON\_IoT\\CSV records",
-            r"Read\\dataset.csv",
-            r"Remove\\duplicates",
-            r"Encode numeric\\inputs",
-            r"80/20\\stratified",
-            r"Train\\200 trees",
-            r"Metrics\\and plots",
-            r"Model\\and reports",
-        ]
-
-        stage_boxes = VGroup()
-        for label, sub in zip(stage_labels, stage_sub):
-            box_bg = RoundedRectangle(
-                corner_radius=0.08,
-                width=1.38,
-                height=1.10,
+        def pipeline_card(title, detail, width, height=2.2, accent=NVIDIA_GREEN):
+            bg = RoundedRectangle(
+                corner_radius=0.10,
+                width=width,
+                height=height,
                 fill_color=WHITE_COLOR,
                 fill_opacity=1.0,
-                stroke_color=NVIDIA_GREEN,
+                stroke_color=accent,
                 stroke_width=1.8,
             )
-            lbl = Tex(label, font_size=13, color=NVIDIA_DARK_GREEN)
-            sub_tex = Tex(sub, font_size=12, color=TEXT_MUTED)
-            content = (
-                VGroup(lbl, sub_tex)
-                .arrange(DOWN, buff=0.06)
-                .move_to(box_bg.get_center())
+            title_tex = Tex(
+                rf"\textbf{{{title}}}", font_size=19, color=NVIDIA_DARK_GREEN
             )
-            stage_boxes.add(VGroup(box_bg, content))
+            detail_tex = Tex(detail, font_size=15, color=TEXT_MUTED).set(
+                width=width - 0.35
+            )
+            content = VGroup(title_tex, detail_tex).arrange(DOWN, buff=0.16)
+            content.move_to(bg.get_center())
+            return VGroup(bg, content)
 
-        stage_boxes.arrange(RIGHT, buff=0.08)
+        input_card = pipeline_card(
+            "Training Data",
+            r"Disk-backed training\\features and labels",
+            2.35,
+            accent="#1565C0",
+        )
 
-        # Arrows between boxes
+        model_panel_bg = RoundedRectangle(
+            corner_radius=0.10,
+            width=4.45,
+            height=2.2,
+            fill_color=WHITE_COLOR,
+            fill_opacity=1.0,
+            stroke_color=NVIDIA_GREEN,
+            stroke_width=1.8,
+        )
+        model_panel_title = Tex(
+            r"\textbf{Fit on Training Data}", font_size=19, color=NVIDIA_DARK_GREEN
+        ).move_to(model_panel_bg.get_top() + DOWN * 0.34)
+        model_names = VGroup(
+            Tex(
+                r"\textbf{GPU Random Forest}  \textsf{(parallel trees)}",
+                font_size=15,
+                color=TEXT_MAIN,
+            ),
+            Tex(
+                r"\textbf{GPU XGBoost}  \textsf{(boosted trees)}",
+                font_size=15,
+                color=TEXT_MAIN,
+            ),
+            Tex(
+                r"\textbf{PyTorch Deep MLP}  \textsf{(neural network)}",
+                font_size=15,
+                color=TEXT_MAIN,
+            ),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.13)
+        model_names.next_to(model_panel_title, DOWN, buff=0.18)
+        model_panel = VGroup(model_panel_bg, model_panel_title, model_names)
+
+        eval_card = pipeline_card(
+            "Evaluate",
+            r"Run batched predictions on the\\held-out test set; compare\\metrics for all three models.",
+            2.35,
+            accent="#6A1B9A",
+        )
+        output_card = pipeline_card(
+            "Save Results",
+            r"Model files, metrics,\\confusion matrices, plots,\\and run configuration.",
+            2.35,
+            accent="#B71C1C",
+        )
+
+        pipeline_cards = VGroup(input_card, model_panel, eval_card, output_card)
+        pipeline_cards.arrange(RIGHT, buff=0.48)
+        pipeline_cards.next_to(s7_title, DOWN, buff=0.58)
+
         arrows = VGroup()
-        for i in range(len(stage_boxes) - 1):
-            arr = Arrow(
-                stage_boxes[i].get_right(),
-                stage_boxes[i + 1].get_left(),
-                buff=0.05,
-                stroke_width=2.0,
-                color=NVIDIA_ACCENT_GREEN,
-                max_tip_length_to_length_ratio=0.25,
+        for left_card, right_card in zip(pipeline_cards, list(pipeline_cards)[1:]):
+            arrows.add(
+                Arrow(
+                    left_card.get_right(),
+                    right_card.get_left(),
+                    buff=0.07,
+                    stroke_width=2.4,
+                    color=NVIDIA_ACCENT_GREEN,
+                    max_tip_length_to_length_ratio=0.24,
+                )
             )
-            arrows.add(arr)
-
-        pipeline_flow = Group(stage_boxes, arrows)
-        pipeline_flow.next_to(s7_title, DOWN, buff=0.38)
-
-        # Phase labels below
-        phase_data = [
-            (0, 1, "DATA INGESTION", "#1565C0"),
-            (2, 3, "PREPROCESSING", "#6A1B9A"),
-            (4, 5, "MODELING", NVIDIA_DARK_GREEN),
-            (6, 7, "OUTPUT", "#B71C1C"),
-        ]
-        phase_group = VGroup()
-        for start, end, label, color in phase_data:
-            x_start = stage_boxes[start].get_left()[0]
-            x_end = stage_boxes[end].get_right()[0]
-            x_mid = (x_start + x_end) / 2
-            y_pos = stage_boxes[0].get_bottom()[1] - 0.30
-            ph_line = Line(
-                (x_start, y_pos + 0.08, 0),
-                (x_end, y_pos + 0.08, 0),
-                color=color,
-                stroke_width=2.0,
-            )
-            ph_tex = Tex(
-                rf"\textbf{{\textsf{{{label}}}}}", font_size=14, color=color
-            ).move_to((x_mid, y_pos - 0.14, 0))
-            phase_group.add(VGroup(ph_line, ph_tex))
 
         pipeline_caption_bg = RoundedRectangle(
             corner_radius=0.06,
@@ -805,25 +811,15 @@ class TonIoTPresentation(Slide):
         )
         pipeline_caption_tx = (
             Tex(
-                r"\textit{The trained model, evaluation metrics, figures, and run config are saved.}",
-                font_size=8,
+                r"\textit{One fixed train/test split makes the three model results directly comparable.}",
+                font_size=16,
                 color=NVIDIA_DARK_GREEN,
             )
-            .set(width=9.5)
+            .set(width=11.5)
             .move_to(pipeline_caption_bg.get_center())
         )
         pipeline_caption = VGroup(pipeline_caption_bg, pipeline_caption_tx)
-        pipeline_caption.next_to(phase_group, DOWN, buff=0.34)
-
-        gpu_img = ImageMobject("../outputs/figures/memmap_gpu_comparison.png").set(
-            height=3.8
-        )
-        gpu_label = Tex(
-            r"\textbf{GPU Model Benchmark Comparison (10,336,716 Records)} \hspace{0.2cm}\textbar\hspace{0.2cm} "
-            r"\textsf{Evaluated on 2,065,123 Test Flows}",
-            font_size=17,
-            color=TEXT_MUTED,
-        ).set(width=11.5)
+        pipeline_caption.next_to(pipeline_cards, DOWN, buff=0.38)
 
         self.play(
             FadeOut(prev_content),
@@ -833,17 +829,15 @@ class TonIoTPresentation(Slide):
         header = next_header
         self.play(FadeIn(header))
         self.play(Write(s7_title[0]), Create(s7_title[1]))
-        self.play(FadeIn(stage_boxes), FadeIn(arrows))
-        self.play(FadeIn(phase_group), FadeIn(pipeline_caption))
+        self.play(FadeIn(pipeline_cards), FadeIn(arrows))
+        self.play(FadeIn(pipeline_caption))
         self.wait(0.2)
         self.next_slide()
 
         # ===========================================================
         # SLIDE 8 — Random Forest Model Architecture
         # ===========================================================
-        prev_content = Group(
-            s7_title, stage_boxes, arrows, phase_group, pipeline_caption
-        )
+        prev_content = Group(s7_title, pipeline_cards, arrows, pipeline_caption)
         new_footer = build_footer(8)
         next_header, stripe = build_header(
             r"RANDOM FOREST MODEL", r"ENSEMBLE CLASSIFIER ARCHITECTURE"
